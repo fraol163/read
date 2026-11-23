@@ -19,6 +19,12 @@ This trial evaluates the usability, friction, and effectiveness of the READ meth
 - Participants complete tasks sequentially with short rest intervals between tasks.
 - If a participant reaches 20 minutes on a task without passing all tests, the task is marked as timed out.
 
+## Task Completion Definition
+
+A task is defined as completed when all unit tests in the assigned task test suite pass with exit code 0 on the participant's final committed code within the 20-minute time limit.
+
+Justification: Defining completion strictly by passing the task test suite allows the trial to evaluate baseline functional correctness independently from measuring how participants interact with and remediate mutation warnings.
+
 ## Stop-or-Continue Rule
 
 1. Task-Level Progression:
@@ -35,13 +41,22 @@ This trial evaluates the usability, friction, and effectiveness of the READ meth
 - Prerequisite: Familiarity with Git, Python, and unit testing concepts.
 - Tooling background: Zero prior exposure to READ verification commands or hooks.
 
-## Enforcement Policy
+## Enforcement Policy and Mode Tamper Controls
 
 - Mode: Warning mode.
 - In warning mode, pre-commit verification gates run tests and mutation checks.
 - If test failures or surviving mutants occur, the gate prints detailed diagnostics and exits with return code 0.
 - Commits are permitted to proceed so participants are never locked out of saving work.
 - Participants are encouraged to review warning diagnostics and resolve test gaps within their 3 allowed remediation retries.
+
+### Controls Preventing Participant Mode Modification
+
+To prevent participants from tampering with enforcement mode during the trial:
+1. Filesystem Permission Control:
+   - The `.read/` directory and `.read/config.json` file in each participant workspace are set to read-only permissions (`chmod 444 .read/config.json`) and owned by the supervisor account.
+2. Automated Submission Audit Control:
+   - During automated evaluation, every participant submission is checked via `git diff <baseline> HEAD -- .read/config.json`.
+   - Any commit that modifies or stages changes to `.read/config.json` is flagged as an invalid tamper attempt and marked as escalated in `record_template.csv`.
 
 ## Data Collection
 

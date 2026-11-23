@@ -22,9 +22,9 @@ EVIDENCE_FILE="$READ_DIR/EVIDENCE.json"
 PROJECT_FILE="$READ_DIR/PROJECT.md"
 CONFIG_FILE="$READ_DIR/config.json"
 
-# Enforcement mode: "block" (default) or "warning"
+# Enforcement mode: "warning" (default) or "block"
 # Mode setting is read strictly from .read/config.json only
-ENFORCEMENT_MODE="block"
+ENFORCEMENT_MODE="warning"
 if [ -f "$CONFIG_FILE" ]; then
     CFG_MODE=$(grep -o '"enforcement_mode": *"[^"]*"' "$CONFIG_FILE" | head -n1 | cut -d'"' -f4 || true)
     if [ -n "$CFG_MODE" ]; then
