@@ -69,6 +69,8 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 14a | Outside Repo Integration Check (colorama) | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
+Suite 01 note: The 15 passed checks represent assertion lines executed within `read/tests/test_e2e.sh`. 6 of these steps (Step 6 for Python, and Steps 6c through 6g for TypeScript, Java, C#, C++, and Ruby) check counts chosen based on the mutator's output. The arithmetic checks (`eval-mutation-score $((N-1)) N`) verify only the scoring arithmetic, but they do not test real gate rejection. Real gate rejection was tested by the end-to-end run against an outside repository with an existing test suite (veloce run, Suite 14), which failed with exit code 1.
+
 ### Measured Benchmark Metrics (10 Runs Each)
 
 - Staged Diff Hashing: Mean 8.835 ms (Min 8.053 ms, Max 10.500 ms, StdDev 0.706 ms). Dominated by git process spawn overhead.
@@ -83,7 +85,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - C++: Mean 1.962 ms
   - Ruby: Mean 1.927 ms
 - 200 Functions Fixture Variance and Contention:
-  - Benchmark Location: Located strictly in test code within `read/read-core/src/ast/mod.rs` inside `#[cfg(test)] mod tests`. Zero benchmark code exists in production paths.
+  - Benchmark Location: Located strictly in test code within `read/read-core/src/ast/mod.rs` inside `#[cfg(test)] mod tests`. Zero benchmark code exists in engine runtime paths.
   - Measurement History Across Commits: Single-run release in-process extraction was 0.375 ms on commit `3ce41c4`. Across 10 repeated runs on commit `7ce0a00`, release in-process extraction on an idle host averaged 0.140 ms mean (Min 0.122 ms, Max 0.226 ms, StdDev 0.032 ms) and debug in-process averaged 1.225 ms mean.
   - Baseline Contention on Commit `ca31c10`: Executed in a separate detached clone directory (`/tmp/check_ca31c10`) with benchmark test added inside `mod tests`. Under 4-thread CPU contention (3 concurrent worker threads), baseline unoptimized extraction averaged 3.659 ms mean (Min 2.670 ms, Max 7.658 ms). The 7.658 ms spike is recorded strictly as one empirical observation showing latency variance under parallel CPU load.
   - Optimized Contention on Current Commit `a58abd7`: Under 4-thread CPU contention (3 concurrent worker threads), release profile averaged 0.144 ms mean (Min 0.134 ms, Max 0.192 ms) and debug profile averaged 1.982 ms mean (Min 1.435 ms, Max 3.524 ms). Both assertions in `test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs` strictly require under 5 ms and pass.
@@ -142,6 +144,14 @@ Key findings:
 
 ## 7. Open User Decisions
 
-1. Human Student Trial Thresholds: Propose setup under 10 minutes for at least 4 of 5 students, at least 4 of 5 finish all 20 tasks, and READ catches at least 20 percent more seeded bugs than a plain test run. Requires final confirmation before conducting trial.
-2. Target Initial Audience: Propose undergraduate students learning test-first development. Requires final confirmation.
-3. CI Gate Cloud Status: The repository has no configured git remote (`git remote -v` outputs nothing). The workflow remains labeled as UNTESTED on cloud infrastructure until a remote is configured and pushed.
+The following 5 parameters remain open draft proposals awaiting explicit user confirmation before any trial begins. Trial execution is held until the user explicitly sets each value:
+
+1. Time limit per task, in minutes (Draft proposal: 15 minutes per task, based on 5 to 10 minute human tutorial baseline).
+2. Minimum cohort completion rate (Draft proposal: 80 percent completion rate, meaning at least 8 of 10 participants complete all tasks).
+3. Remediation retry cap (Draft proposal: maximum 3 test authoring attempts per task before escalation).
+4. Cohort size and profile (Draft proposal: exactly 10 junior to mid-level software engineers with 1 to 3 years experience and zero prior exposure to the READ framework).
+5. Enforcement mode for the first cohort: Hard block or warning mode.
+Recommendation on item 5: Start in warning mode. A hard block from day one will likely block honest commits from equivalent mutants and untested error paths, while warning mode measures the real gate rejection rate before enforcing hard blocks.
+
+Additional Infrastructure Note:
+CI Gate Cloud Status: The repository has no configured git remote (`git remote -v` outputs nothing). The workflow remains labeled as UNTESTED on cloud infrastructure until a remote is configured and pushed.

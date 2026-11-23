@@ -89,22 +89,22 @@ if ! grep -q "INVERT_EQ" mutation_output.txt && ! grep -q "FLIP_BOOL_TRUE" mutat
 fi
 echo "[PASS] 6. AROP Bounded Diff Mutation generated targeted AST mutants (<4.5s)"
 
-# 6b. Test Strict 100% Mutation Gate (90% score with 9/10 killed MUST be mechanically rejected)
+# 6b. Arithmetic check of the score function with survivor (9/10 killed returns non-zero)
 set +e
 REJECT_90_OUTPUT=$("$READ" eval-mutation-score 9 10 2>&1)
 REJECT_90_CODE=$?
 set -e
 if [ $REJECT_90_CODE -eq 0 ]; then
-    echo "[FAIL] AROP Gate Failure: 90% mutation score (9/10 killed) was accepted! Must require strictly 100%." >&2
+    echo "[FAIL] Arithmetic check failed: 90% mutation score (9/10 killed) returned zero. Must return non-zero." >&2
     exit 1
 fi
 if ! echo "$REJECT_90_OUTPUT" | grep -q "below strictly required 100.0% threshold"; then
-    echo "[FAIL] Expected strict 100.0% threshold rejection error message, got: $REJECT_90_OUTPUT" >&2
+    echo "[FAIL] Expected below 100.0% threshold error message, got: $REJECT_90_OUTPUT" >&2
     exit 1
 fi
-echo "[PASS] 6b. AROP Gate strictly rejected 90% mutation score (9/10 killed, 1 survivor)"
+echo "[PASS] 6b. Arithmetic check of the score function returned non-zero for 90% score (9/10 killed, 1 survivor)"
 
-# 6c. Test TypeScript AROP Mutators and 100% Mutation Gate
+# 6c. Test TypeScript AROP Mutators and Arithmetic Score Function Check
 cat << 'EOF' > diff_ts_sample.patch
 --- a/auth_service.ts
 +++ b/auth_service.ts
@@ -138,12 +138,12 @@ set +e
 TS_REJECT_CODE=$?
 set -e
 if [ $TS_REJECT_CODE -eq 0 ]; then
-    echo "[FAIL] Expected strict gate rejection for TS survivor" >&2
+    echo "[FAIL] Expected non-zero exit for arithmetic score check with TS survivor" >&2
     exit 1
 fi
-echo "[PASS] 6c. TypeScript AST Diff Mutation generated all targeted operators (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN) and satisfied 100% gate"
+echo "[PASS] 6c. TypeScript AST Diff Mutation generated all targeted operators (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN) and arithmetic check of the score function"
 
-# 6d. Test Java AROP Mutators and 100% Mutation Gate
+# 6d. Test Java AROP Mutators and Arithmetic Score Function Check
 cat << 'EOF' > diff_java_sample.patch
 --- a/OrderService.java
 +++ b/OrderService.java
@@ -177,12 +177,12 @@ set +e
 JAVA_REJECT_CODE=$?
 set -e
 if [ $JAVA_REJECT_CODE -eq 0 ]; then
-    echo "[FAIL] Expected strict gate rejection for Java survivor" >&2
+    echo "[FAIL] Expected non-zero exit for arithmetic score check with Java survivor" >&2
     exit 1
 fi
-echo "[PASS] 6d. Java AST Diff Mutation generated all targeted operators (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
+echo "[PASS] 6d. Java AST Diff Mutation generated all targeted operators (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function"
 
-# 6e. Test C# AROP Mutators and 100% Mutation Gate
+# 6e. Test C# AROP Mutators and Arithmetic Score Function Check
 cat << 'EOF' > diff_csharp_sample.patch
 --- a/TokenService.cs
 +++ b/TokenService.cs
@@ -217,12 +217,12 @@ set +e
 CS_REJECT_CODE=$?
 set -e
 if [ $CS_REJECT_CODE -eq 0 ]; then
-    echo "[FAIL] Expected strict gate rejection for C# survivor" >&2
+    echo "[FAIL] Expected non-zero exit for arithmetic score check with C# survivor" >&2
     exit 1
 fi
-echo "[PASS] 6e. C# AST Diff Mutation generated all targeted operators (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
+echo "[PASS] 6e. C# AST Diff Mutation generated all targeted operators (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function"
 
-# 6f. Test C++ AROP Mutators and 100% Mutation Gate
+# 6f. Test C++ AROP Mutators and Arithmetic Score Function Check
 cat << 'EOF' > diff_cpp_sample.patch
 --- a/BufferPool.cpp
 +++ b/BufferPool.cpp
@@ -258,12 +258,12 @@ set +e
 CPP_REJECT_CODE=$?
 set -e
 if [ $CPP_REJECT_CODE -eq 0 ]; then
-    echo "[FAIL] Expected strict gate rejection for C++ survivor" >&2
+    echo "[FAIL] Expected non-zero exit for arithmetic score check with C++ survivor" >&2
     exit 1
 fi
-echo "[PASS] 6f. C++ AST Diff Mutation generated all targeted operators (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
+echo "[PASS] 6f. C++ AST Diff Mutation generated all targeted operators (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function"
 
-# 6g. Test Ruby AROP Mutators and 100% Mutation Gate
+# 6g. Test Ruby AROP Mutators and Arithmetic Score Function Check
 cat << 'EOF' > diff_ruby_sample.patch
 --- a/auth_service.rb
 +++ b/auth_service.rb
@@ -298,10 +298,10 @@ set +e
 RUBY_REJECT_CODE=$?
 set -e
 if [ $RUBY_REJECT_CODE -eq 0 ]; then
-    echo "[FAIL] Expected strict gate rejection for Ruby survivor" >&2
+    echo "[FAIL] Expected non-zero exit for arithmetic score check with Ruby survivor" >&2
     exit 1
 fi
-echo "[PASS] 6g. Ruby AST Diff Mutation generated all targeted operators (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL) and satisfied 100% gate"
+echo "[PASS] 6g. Ruby AST Diff Mutation generated all targeted operators (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL) and arithmetic check of the score function"
 
 # 7. Test Verification Recording
 git add auth_service.py

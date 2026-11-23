@@ -1,4 +1,4 @@
-=== [TEST] Starting READ End-to-End Test in /tmp/read-sandbox-RU9J2l ===
+=== [TEST] Starting READ End-to-End Test in /tmp/read-sandbox-8DvTkj ===
 [READ] Initialized state engine in .read/
 [READ] Initialized declarative methodology contracts in .read/
 [READ] Activated declarative zero-command pre-commit hook (core.hooksPath=.read/hooks)
@@ -10,12 +10,12 @@
 [PASS] 4. read build transitioned state to executing
 [PASS] 5. CAS State Lock mechanically blocked premature handoff
 [PASS] 6. AROP Bounded Diff Mutation generated targeted AST mutants (<4.5s)
-[PASS] 6b. AROP Gate strictly rejected 90% mutation score (9/10 killed, 1 survivor)
-[PASS] 6c. TypeScript AST Diff Mutation generated all targeted operators (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN) and satisfied 100% gate
-[PASS] 6d. Java AST Diff Mutation generated all targeted operators (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate
-[PASS] 6e. C# AST Diff Mutation generated all targeted operators (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate
-[PASS] 6f. C++ AST Diff Mutation generated all targeted operators (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate
-[PASS] 6g. Ruby AST Diff Mutation generated all targeted operators (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL) and satisfied 100% gate
+[PASS] 6b. Arithmetic check of the score function returned non-zero for 90% score (9/10 killed, 1 survivor)
+[PASS] 6c. TypeScript AST Diff Mutation generated all targeted operators (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN) and arithmetic check of the score function
+[PASS] 6d. Java AST Diff Mutation generated all targeted operators (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function
+[PASS] 6e. C# AST Diff Mutation generated all targeted operators (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function
+[PASS] 6f. C++ AST Diff Mutation generated all targeted operators (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and arithmetic check of the score function
+[PASS] 6g. Ruby AST Diff Mutation generated all targeted operators (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL) and arithmetic check of the score function
 [READ] Verification recorded. verify_hash: a3f6b6e387e742281b4039731f482fd5e53df0f072fdfa026f8ca0daea335989
 [PASS] 7. read verify recorded AROP outputs and sealed verify_hash
 [READ] CAS Handoff successful. State: HandoffComplete

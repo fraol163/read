@@ -1,32 +1,19 @@
-=== READ FRAMEWORK CLEAN BUILD REPRODUCIBILITY AUDIT ===
-Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
-Rust Toolchain: rustc 1.99.1, cargo 1.99.1
-Go Toolchain: go version go1.24.0 linux/amd64
-Build Profile: Release (Rust: cargo build --release; Go: go build -trimpath cmd/read-daemon/main.go)
-Source Commit: a58abd7
+=== CLEAN BUILD REPRODUCIBILITY VERIFICATION ===
+Host Platform: Linux 7.2.15-1-omarchy x86_64
+Toolchains: rustc 1.95.0, go 1.26.0
 
-Clone 1: /tmp/clean_clone_1
-Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1
-Commit: a58abd7
-Build Start: 2026-11-23T12:07:27.864576400Z
-Build End:   2026-11-23T12:08:07.078344401Z
-Duration:    39.21 seconds
-Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
-Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Isolated Directory 1 (/tmp/clean_clone_1_1u5g5nxi):
+  read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
+  read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Clone 2: /tmp/clean_clone_2
-Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2
-Commit: a58abd7
-Build Start: 2026-11-23T12:08:14.447275072Z
-Build End:   2026-11-23T12:09:00.230800214Z
-Duration:    45.78 seconds
-Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
-Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Isolated Directory 2 (/tmp/clean_clone_2_wop10amk):
+  read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
+  read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Committed Binaries in read/bin/ at Commit a58abd7:
-read/bin/read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
-read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Committed Binaries in read/bin/:
+  read/bin/read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
+  read/bin/read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Verification Result:
-read-engine: IDENTICAL across git clone 1, git clone 2, and read/bin (75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479)
-read-daemon: IDENTICAL across git clone 1, git clone 2, and read/bin (dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59)
+Reproducibility Status:
+  read-engine bitwise identical across clean builds: True
+  read-daemon bitwise identical across clean builds: True

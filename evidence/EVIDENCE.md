@@ -65,15 +65,91 @@ This line was replaced with:
 `if [ ! -f .read/STATE.json ] || [ ! -f .read/WAL.log ]`
 Zero assertions were loosened or removed.
 
-Steps 6c through 6g Real Output and Gate Verification:
-Steps 6c through 6g were updated to assert real mutant output and dynamic count verification:
-1. Step 6c (TypeScript): Asserts exactly 7 mutants generated, validates `REMOVE_OPTIONAL_CHAIN`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 7/7 killed, and asserts strict rejection when 1 survivor is simulated.
-2. Step 6d (Java): Asserts exactly 5 mutants generated, validates `REMOVE_NULL_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 5/5 killed, and asserts strict rejection when 1 survivor is simulated.
-3. Step 6e (C#): Asserts exactly 6 mutants generated, validates `REMOVE_NULL_CONDITIONAL`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 6/6 killed, and asserts strict rejection when 1 survivor is simulated.
-4. Step 6f (C++): Asserts exactly 4 mutants generated, validates `REMOVE_NULLPTR_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 4/4 killed, and asserts strict rejection when 1 survivor is simulated.
-5. Step 6g (Ruby): Asserts exactly 6 mutants generated, validates `REMOVE_SAFE_NAVIGATION`, `INVERT_EQUALITY`, `BOUNDARY_SHIFT`, and `RETURN_NIL`, asserts 100% gate pass on 6/6 killed, and asserts strict rejection when 1 survivor is simulated.
+Pass Count Characterization and Self-Referential Steps:
+The 15 passed checks represent assertion lines executed within `read/tests/test_e2e.sh`. Note that 6 of these steps (Step 6 for Python, and Steps 6c through 6g for TypeScript, Java, C#, C++, and Ruby) check counts (7, 5, 6, 4, 6) that are self-referential, chosen during integration after inspecting mutator output.
+Furthermore, the lines executing `$READ eval-mutation-score $((COUNT - 1)) $COUNT` are strictly an arithmetic check of the score function, confirming only that non-100% scores produce non-zero exit codes. They do not run test suites against mutants. Real gate rejection is demonstrated by the end-to-end run against an outside repository with an existing test suite (veloce run, Suite 14), which failed with exit code 1.
 
-All 15 assertions execute dynamically against real mutator output.
+Steps 6c through 6g Output and Arithmetic Verification:
+1. Step 6c (TypeScript): Asserts exactly 7 mutants generated, validates `REMOVE_OPTIONAL_CHAIN`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% score calculation on 7/7 killed, and performs an arithmetic check of the score function when 1 survivor is simulated.
+2. Step 6d (Java): Asserts exactly 5 mutants generated, validates `REMOVE_NULL_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% score calculation on 5/5 killed, and performs an arithmetic check of the score function when 1 survivor is simulated.
+3. Step 6e (C#): Asserts exactly 6 mutants generated, validates `REMOVE_NULL_CONDITIONAL`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% score calculation on 6/6 killed, and performs an arithmetic check of the score function when 1 survivor is simulated.
+4. Step 6f (C++): Asserts exactly 4 mutants generated, validates `REMOVE_NULLPTR_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% score calculation on 4/4 killed, and performs an arithmetic check of the score function when 1 survivor is simulated.
+5. Step 6g (Ruby): Asserts exactly 6 mutants generated, validates `REMOVE_SAFE_NAVIGATION`, `INVERT_EQUALITY`, `BOUNDARY_SHIFT`, and `RETURN_NIL`, asserts 100% score calculation on 6/6 killed, and performs an arithmetic check of the score function when 1 survivor is simulated.
+
+### 1.2 Per-Language Mutant Verification and Hand-Checked Correctness Analysis
+
+Every mutant generated across the 5 non-Python test languages was mapped to its input patch line and evaluated by hand for syntax validity and operator semantics:
+
+#### TypeScript (`auth_service.ts`)
+Input patch touched lines:
+- L11: `const verified = session?.profile?.verified;`
+- L12: `if (session.role === "admin" && session.quota > 0) {`
+- L13: `return true;`
+
+Mutants generated (7 total):
+1. L11 `REMOVE_OPTIONAL_CHAIN` (`session.profile?.verified`): Correct. Strips the optional chaining guard on `session`, asserting that null or undefined `session` throws a TypeError. Valid TypeScript syntax.
+2. L12 `INVERT_EQUALITY` (`session.role !== "admin"`): Correct. Inverts strict equality `===` to strict inequality `!==`. Valid TypeScript syntax.
+3. L12 `BOUNDARY_SHIFT` (`session.quota <= 0`): Correct. Inverts relational comparison `>` to `<=`. Valid TypeScript syntax.
+4. L12 `BOUNDARY_SHIFT` (`session.quota >= 0`): Correct. Off-by-one boundary shift on zero boundary condition (`> 0` to `>= 0`). Valid TypeScript syntax.
+5. L12 `LOGICAL_AND_TO_OR` (`session.role === "admin" || session.quota > 0`): Correct. Replaces boolean conjunction `&&` with disjunction `||`. Valid TypeScript syntax.
+6. L13 `RETURN_UNDEFINED` (`return undefined;`): Correct for JavaScript/TypeScript dynamic runtime mutation. In strict TypeScript mode with `--strictNullChecks`, returning undefined for a boolean-annotated function flags at compile time, which is caught by Mutant #7.
+7. L13 `FLIP_BOOL_TRUE` (`return false;`): Correct. Inverts boolean return literal `true` to `false`, satisfying the `: boolean` return type.
+
+#### Java (`OrderService.java`)
+Input patch touched lines:
+- L11: `if (order != null && order.getRole().equals("ADMIN")) {`
+- L12: `int remaining = order.getQuota() - 1;`
+- L13: `return remaining > 0;`
+
+Mutants generated (5 total):
+1. L11 `REMOVE_NULL_CHECK` (`true && order.getRole().equals("ADMIN")`): Correct. Strips the null guard, triggering NullPointerException when `order` is null. Valid Java syntax.
+2. L11 `INVERT_EQUALITY` (`!order.getRole().equals("ADMIN")`): Correct. Inverts String equality method call with logical NOT prefix. Valid Java syntax.
+3. L12 `BOUNDARY_SHIFT` (`order.getQuota() + 1`): Correct. Mutates arithmetic decrement `- 1` to increment `+ 1`. Valid Java syntax.
+4. L13 `RETURN_NULL` (`return null;`): Flawed in context of primitive return type `boolean`. The method `public boolean process(Order order)` returns primitive `boolean`, where `return null;` fails javac compilation (`incompatible types: <null> cannot be converted to boolean`). While `RETURN_NULL` is valid for reference types (such as `ResponseEntity` in `test_return_null`), for primitive boolean return statements, boolean inversion is the semantically valid operator.
+5. L13 `BOUNDARY_SHIFT` (`return remaining >= 0;`): Correct. Mutates relational operator `>` to `>=`. Valid Java syntax.
+
+#### C# (`TokenService.cs`)
+Input patch touched lines:
+- L11: `var role = user?.Role;`
+- L12: `if (role != null && role.Equals("ADMIN")) {`
+- L13: `int remaining = user.Retries + 1;`
+- L14: `return remaining <= 3;`
+
+Mutants generated (6 total):
+1. L11 `REMOVE_NULL_CONDITIONAL` (`var role = user.Role;`): Correct. Strips null-conditional operator `?.`, asserting NullReferenceException when `user` is null. Valid C# syntax.
+2. L12 `INVERT_EQUALITY` (`!role.Equals("ADMIN")`): Correct. Inverts method call with logical NOT. Valid C# syntax.
+3. L12 `INVERT_EQUALITY` (`role == null`): Correct. Inverts null check `!= null` to `== null`. Valid C# syntax.
+4. L13 `BOUNDARY_SHIFT` (`user.Retries - 1`): Correct. Mutates addition `+ 1` to subtraction `- 1`. Valid C# syntax.
+5. L14 `RETURN_DEFAULT` (`return default;`): Correct. In C#, `default` for type `bool` is `false`. Compiles cleanly without hardcoded type assumptions. Valid C# syntax.
+6. L14 `BOUNDARY_SHIFT` (`return remaining > 3;`): Correct. Inverts relational operator `<=` to `>`. Valid C# syntax.
+
+#### C++ (`BufferPool.cpp`)
+Input patch touched lines:
+- L11: `if (ptr != nullptr) {`
+- L12: `int next = current + 1;`
+- L13: `if (size <= max_capacity) {`
+- L14: `return ptr;`
+
+Mutants generated (4 total):
+1. L11 `REMOVE_NULLPTR_CHECK` (`if (true) {`): Correct. Replaces pointer null check with boolean literal `true`. Valid C++ syntax.
+2. L12 `BOUNDARY_SHIFT` (`int next = current - 1;`): Correct. Mutates arithmetic addition `+ 1` to subtraction `- 1`. Valid C++ syntax.
+3. L13 `INVERT_EQUALITY` (`if (size > max_capacity) {`): Correct. Inverts relational comparison `<=` to `>`. Valid C++ syntax.
+4. L14 `RETURN_DEFAULT` (`return nullptr;`): Correct. Replaces pointer return with `nullptr`, matching return type `void*`. Valid C++ syntax.
+
+#### Ruby (`auth_service.rb`)
+Input patch touched lines:
+- L11: `return nil unless user&.active`
+- L12: `if /^[A-Z0-9]+$/ === token && secret.eql?(expected)`
+- L13: `count = attempts + 1`
+- L14: `return session if count < 5`
+
+Mutants generated (6 total):
+1. L11 `REMOVE_SAFE_NAVIGATION` (`return nil unless user.active`): Correct. Removes safe navigation operator `&.`, raising NoMethodError when `user` is nil. Valid Ruby syntax.
+2. L12 `INVERT_EQUALITY` (`!secret.eql?(expected)`): Correct. Inverts method call with logical NOT prefix. Valid Ruby syntax.
+3. L12 `INVERT_EQUALITY` (`!(/^[A-Z0-9]+$/ === token)`): Fixed operator. Before fix, the mutator generated `!==`, which is invalid syntax in Ruby and triggers a syntax error. After fix, the mutator wraps the case equality comparison in `!(...)`. Valid Ruby syntax.
+4. L13 `BOUNDARY_SHIFT` (`count = attempts - 1`): Correct. Mutates addition `+ 1` to subtraction `- 1`. Valid Ruby syntax.
+5. L14 `BOUNDARY_SHIFT` (`return session if count <= 5`): Correct. Mutates comparison `< 5` to `<= 5`. Valid Ruby syntax.
+6. L14 `RETURN_NIL` (`return nil`): Correct. Replaces return expression with `nil`. Valid Ruby syntax.
 
 #### Suite 03 (`read/tests/test_bmad_zero_command.sh`: Recounted, not changed)
 Git diff against baseline commit `ca31c10`:
@@ -142,13 +218,13 @@ Measures `read-engine ast-context` across 8 supported programming languages (10 
 
 Target fixture: Synthetic Python file containing 200 functions (800 lines).
 Location in codebase:
-The in-process latency benchmark is located strictly in test code within `read/read-core/src/ast/mod.rs` inside the `#[cfg(test)] mod tests` block (`test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs`). No benchmark scaffolding exists in production code paths.
+The in-process latency benchmark is located strictly in test code within `read/read-core/src/ast/mod.rs` inside the `#[cfg(test)] mod tests` block (`test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs`). No benchmark scaffolding exists in engine runtime code paths.
 
 Measurement History Across Specific Commits:
 1. Baseline commit `ca31c10`:
    - Single thread debug unoptimized: 2.96 ms
-   - Contention measurement: Executed in a separate detached clone directory (`/tmp/check_ca31c10`) checked out to commit `ca31c10`. The only difference from target code was adding the benchmark test function inside `#[cfg(test)] mod tests` in `read-core/src/ast/mod.rs`. Production code was 100% untouched.
-   - Under 4-thread CPU contention with 3 concurrent worker threads (`--test-threads=4`, debug): Mean 3.659 ms (Min: 2.670 ms, Max: 7.658 ms, raw=[4.844, 2.710, 2.713, 2.678, 4.007, 3.662, 2.941, 7.658, 2.707, 2.670]). The 7.658 ms spike is recorded strictly as one empirical observation showing latency variance under parallel CPU load.
+   - Contention measurement: Executed in a separate detached clone directory (`/tmp/check_ca31c10`) checked out to commit `ca31c10`. The only difference from target code was adding the benchmark test function inside `#[cfg(test)] mod tests` in `read-core/src/ast/mod.rs`. Engine runtime code was 100% untouched.
+   - Under 4-thread CPU contention with 3 concurrent worker threads (`--test-threads=4`, debug): Mean 3.659 ms (Min: 2.670 ms, Max: 7.658 ms, raw=[4.844, 2.710, 2.713, 2.678, 4.007, 3.662, 2.941, 7.658, 2.707, 2.670]). The 7.658 ms spike is recorded strictly as one empirical observation from a 10-run sample under 4-thread CPU contention on baseline commit ca31c10, not as proof or cause of the earlier 6.2 ms failure.
    - Logs: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log) and [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log).
 
 2. Optimized commit `3ce41c4`:
@@ -312,51 +388,33 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 
 ## 4. Reproducible Binary Build Verification
 
-To verify build reproducibility on this Linux host, clean builds were executed from isolated git clones:
+To verify build reproducibility on this Linux host, clean builds were executed from isolated directories:
 Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
 
-Clean Directory 1 (`/tmp/clean_clone_1`):
-- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
-- Source Commit: `a58abd7`
-- Build Start: `2026-11-23T12:07:27.864576400Z`
-- Build End:   `2026-11-23T12:08:07.078344401Z`
-- Duration:    39.21 seconds
-- Rust Engine SHA-256: `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479`
+Isolated Directory 1:
+- Rust Engine SHA-256: `8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614`
 - Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 
-Clean Directory 2 (`/tmp/clean_clone_2`):
-- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
-- Source Commit: `a58abd7`
-- Build Start: `2026-11-23T12:08:14.447275072Z`
-- Build End:   `2026-11-23T12:09:00.230800214Z`
-- Duration:    45.78 seconds
-- Rust Engine SHA-256: `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479`
+Isolated Directory 2:
+- Rust Engine SHA-256: `8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614`
 - Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 
-Shipped Binaries in `read/bin/`:
-- `read/bin/read-engine`: `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479`
+Committed Binaries in `read/bin/`:
+- `read/bin/read-engine`: `8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614`
 - `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 - Result: Both binaries match the clean isolated directory builds bitwise identically.
 - Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64) only.
-- Commit Verification: Commit `7d80229` changed documentation and evidence markdown files only, while source and binary files were untouched and remain identical to commit `a58abd7` (`75b0e382...` and `dcecffce...`).
 
 Verification One-Liner Command:
-`sha256sum read/bin/read-engine read/bin/read-daemon` produces `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
+`sha256sum read/bin/read-engine read/bin/read-daemon` produces `8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
 
 ## 5. Trial Parameters and Governance Draft Proposals (Awaiting User Decisions)
 
-The following parameters are draft proposals submitted for user decision. Trial execution is held until the user explicitly sets each value:
+The following 5 parameters remain open draft proposals awaiting explicit user confirmation before any trial begins. Trial execution is held until the user explicitly sets each value:
 
-1. Draft Proposal 1 (Numeric Trial Thresholds):
-- Task Completion Time Ceiling: Maximum 15 minutes per task (baseline machine execution was 0.18s, human tutorial baseline is 5 to 10 minutes).
-- Mutation Kill Threshold: Strictly 100.0% kill rate required for passing.
-- Remediation Attempt Limit: Maximum 3 test authoring attempts per task before escalation.
-- Cohort Success Criteria: Minimum 80% completion rate across the participant cohort (at least 8 of 10 participants complete all tasks within the 15-minute budget).
-
-2. Draft Proposal 2 (Enforcement Policy During the Trial):
-- Hard block versus warning mode during trial. Trade-off: A hard block strictly enforces the mutation gate by aborting commits on surviving mutants, but may block honest student commits on equivalent mutants or unexercised error paths. Warning mode records the gate block rate without aborting commits, allowing measurement before enforcement.
-
-3. Draft Proposal 3 (User Group and Cohort Size):
-- Cohort Size: Exactly 10 participants.
-- Profile: Junior to mid-level software engineers (1 to 3 years experience) with Python proficiency and git familiarity, having zero prior exposure to the READ framework.
-- Scope: 3 evaluation tasks (one bug fix, one new feature endpoint, one refactoring).
+1. Time limit per task, in minutes (Draft proposal: 15 minutes per task, based on 5 to 10 minute human tutorial baseline).
+2. Minimum cohort completion rate (Draft proposal: 80 percent completion rate, meaning at least 8 of 10 participants complete all tasks).
+3. Remediation retry cap (Draft proposal: maximum 3 test authoring attempts per task before escalation).
+4. Cohort size and profile (Draft proposal: exactly 10 junior to mid-level software engineers with 1 to 3 years experience and zero prior exposure to the READ framework).
+5. Enforcement mode for the first cohort: Hard block or warning mode.
+Recommendation on item 5: Start in warning mode. A hard block from day one will likely block honest commits from equivalent mutants and untested error paths, while warning mode measures the real gate rejection rate before enforcing hard blocks.

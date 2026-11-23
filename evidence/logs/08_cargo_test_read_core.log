@@ -1,58 +1,21 @@
-   Compiling version_check v0.9.5
-   Compiling proc-macro2 v1.0.107
-   Compiling quote v1.0.47
-   Compiling unicode-ident v1.0.27
-   Compiling serde_core v1.0.229
-   Compiling typenum v1.20.1
-   Compiling generic-array v0.14.7
-   Compiling autocfg v1.5.1
-   Compiling memchr v2.8.3
-   Compiling libc v0.2.191
-   Compiling num-traits v0.2.19
-   Compiling syn v3.0.10
-   Compiling zmij v1.0.23
-   Compiling serde v1.0.229
-   Compiling cfg-if v1.0.5
-   Compiling block-buffer v0.10.4
-   Compiling crypto-common v0.1.7
-   Compiling aho-corasick v1.1.5
-   Compiling serde_json v1.0.154
-   Compiling regex-syntax v0.8.12
-   Compiling getrandom v0.4.3
-   Compiling serde_derive v1.0.229
-   Compiling rustix v1.1.6
-   Compiling digest v0.10.7
-   Compiling iana-time-zone v0.1.65
-   Compiling itoa v1.0.19
-   Compiling regex-automata v0.4.19
-   Compiling linux-raw-sys v0.12.1
-   Compiling bitflags v2.13.2
-   Compiling cpufeatures v0.2.17
-   Compiling sha2 v0.10.9
-   Compiling chrono v0.4.45
-   Compiling regex v1.13.2
-   Compiling once_cell v1.21.4
-   Compiling fastrand v2.5.0
-   Compiling tempfile v3.27.0
-   Compiling read-core v0.7.0 (/home/renan/Downloads/me/methodology_session/read/read-core)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.40s
-     Running unittests src/lib.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_core-a79b30c4d8ed73c2)
+    Finished `test` profile [optimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_core-2221cf18b40d7c62)
 
 running 58 tests
-test ast::tests::test_ast_resolver_cpp ... ok
 test ast::tests::test_ast_resolver_go ... ok
 test ast::tests::test_ast_resolver_csharp ... ok
-test ast::tests::test_ast_resolver_java ... ok
 test ast::tests::test_ast_resolver_non_ascii_and_unicode_handling ... ok
-test ast::tests::test_ast_resolver_ruby ... ok
 test ast::tests::test_ast_resolver_python ... ok
-test ast::tests::test_ast_resolver_rust ... ok
+test ast::tests::test_ast_resolver_ruby ... ok
+test ast::tests::test_ast_resolver_cpp ... ok
+test ast::tests::test_ast_resolver_java ... ok
 test ast::tests::test_ast_resolver_typescript ... ok
-test ast::tests::test_extraction_latency_under_5ms ... ok
+test ast::tests::test_ast_resolver_rust ... ok
 test ast::tests::test_syntax_error_resilience ... ok
 test config::tests::test_default_config ... ok
-test hasher::tests::test_hash_bytes ... ok
 test config::tests::test_workspace_local_override ... ok
+test hasher::tests::test_hash_bytes ... ok
+test ast::tests::test_extraction_latency_under_5ms ... ok
 test mutation::cpp::tests::test_boundary_shift ... ok
 test mutation::cpp::tests::test_invert_equality ... ok
 test mutation::cpp::tests::test_remove_nullptr_check ... ok
@@ -64,43 +27,43 @@ test mutation::csharp::tests::test_return_default ... ok
 test mutation::java::tests::test_boundary_shift ... ok
 test mutation::java::tests::test_invert_equality ... ok
 test mutation::java::tests::test_remove_null_check ... ok
-test mutation::java::tests::test_return_null ... ok
 test mutation::ruby::tests::test_boundary_shift ... ok
+test mutation::java::tests::test_return_null ... ok
 test mutation::ruby::tests::test_invert_equality ... ok
+test learn::tests::test_learn_lifecycle ... ok
 test mutation::ruby::tests::test_remove_safe_navigation ... ok
 test mutation::ruby::tests::test_return_nil ... ok
-test mutation::tests::test_bounded_mutant_cap ... ok
-test mutation::tests::test_cpp_diff_mutator ... ok
 test mutation::tests::test_csharp_diff_mutator ... ok
+test mutation::tests::test_cpp_diff_mutator ... ok
 test mutation::tests::test_diff_mutator_skips_python_docstrings ... ok
-test mutation::tests::test_diff_targeted_mutator ... ok
+test mutation::tests::test_bounded_mutant_cap ... ok
 test mutation::tests::test_execution_timeout_and_memory_ceiling ... ok
-test mutation::tests::test_gate_validation_error_formatting ... ok
-test mutation::tests::test_go_diff_mutator ... ok
+test mutation::tests::test_diff_targeted_mutator ... ok
 test mutation::tests::test_java_diff_mutator ... ok
+test mutation::tests::test_go_diff_mutator ... ok
+test mutation::tests::test_gate_validation_error_formatting ... ok
 test mutation::tests::test_mutation_score_calculation ... ok
 test mutation::tests::test_ruby_diff_mutator ... ok
 test mutation::tests::test_rust_diff_mutator ... ok
+test mutation::tests::test_typescript_diff_mutator ... ok
 test mutation::ts_js::tests::test_boundary_shift ... ok
 test mutation::ts_js::tests::test_invert_equality ... ok
 test mutation::ts_js::tests::test_remove_optional_chain ... ok
 test mutation::ts_js::tests::test_return_undefined ... ok
-test mutation::tests::test_typescript_diff_mutator ... ok
 test state::tests::test_cas_revision_monotonicity ... ok
+test ast::tests::test_extraction_latency_contention_10_runs ... ok
 test state::tests::test_handoff_unconditionally_blocked_on_diff_drift ... ok
-test learn::tests::test_learn_lifecycle ... ok
-test state::tests::test_master_override ... ok
 test state::tests::test_migration_from_legacy_method_path ... ok
+test state::tests::test_wal_compaction_preserves_revision_count ... ok
 test state::tests::test_lifecycle_and_cas_locks ... ok
 test state::tests::test_wal_cryptographic_chaining_and_corruption_detection ... ok
-test ast::tests::test_extraction_latency_contention_10_runs ... ok
-test state::tests::test_wal_compaction_preserves_revision_count ... ok
+test state::tests::test_master_override ... ok
 test state::tests::test_wal_git_anchor_verification_and_rewritten_chain_detection ... ok
 test state::tests::test_cas_lease_expiration_and_preemption ... ok
 
-test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.12s
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
 
-     Running unittests src/main.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_engine-9d4b69ec3af64aea)
+     Running unittests src/main.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_engine-677a493bf045712f)
 
 running 0 tests
 

@@ -43,7 +43,7 @@ pub fn generate_ruby_line_mutants(
         next_id += 1;
     }
 
-    // 1. INVERT_EQUALITY: === <-> !==, == <-> !=, eql? <-> !eql?
+    // 1. INVERT_EQUALITY: === <-> !(===), == <-> !=, eql? <-> !eql?
     if let Some(eql_idx) = line.find(".eql?(") {
         let before = &line[..eql_idx];
         let mut idx = before.len();
@@ -88,21 +88,44 @@ pub fn generate_ruby_line_mutants(
         next_id += 1;
     }
 
-    if line.contains(" === ") {
+    if let Some(idx) = line.find(" === ") {
+        let before = &line[..idx];
+        let indent_len = before.len() - before.trim_start().len();
+        let mut lhs_start = indent_len;
+        let delims = ["if ", "unless ", "while ", "until ", "&& ", "|| ", "(", "return "];
+        for d in &delims {
+            if let Some(d_idx) = before.rfind(d) {
+                let cand = d_idx + d.len();
+                if cand > lhs_start {
+                    lhs_start = cand;
+                }
+            }
+        }
+        let lhs = before[lhs_start..].trim();
+
+        let after = &line[idx + 5..];
+        let delims_after = [" &&", " ||", ")", "\n"];
+        let mut rhs_end = after.len();
+        for d in &delims_after {
+            if let Some(d_idx) = after.find(d) {
+                if d_idx < rhs_end {
+                    rhs_end = d_idx;
+                }
+            }
+        }
+        let rhs = after[..rhs_end].trim();
+
+        let mutated = format!(
+            "{}{}{}",
+            &line[..lhs_start],
+            format!("!({} === {})", lhs, rhs),
+            &after[rhs_end..]
+        );
+
         candidates.push(Mutant {
             id: next_id,
             original_line: line.to_string(),
-            mutated_line: line.replacen(" === ", " !== ", 1),
-            line_number: line_num,
-            operator: "INVERT_EQUALITY".to_string(),
-            file_path: file_path.map(|s| s.to_string()),
-        });
-        next_id += 1;
-    } else if line.contains(" !== ") {
-        candidates.push(Mutant {
-            id: next_id,
-            original_line: line.to_string(),
-            mutated_line: line.replacen(" !== ", " === ", 1),
+            mutated_line: mutated,
             line_number: line_num,
             operator: "INVERT_EQUALITY".to_string(),
             file_path: file_path.map(|s| s.to_string()),
@@ -232,7 +255,7 @@ mod tests {
         let m2 = generate_ruby_line_mutants("if status === 200", 14, Some("auth.rb"), 0);
         assert_eq!(m2.len(), 1);
         assert_eq!(m2[0].operator, "INVERT_EQUALITY");
-        assert_eq!(m2[0].mutated_line, "if status !== 200");
+        assert_eq!(m2[0].mutated_line, "if !(status === 200)");
 
         let m3 = generate_ruby_line_mutants("if count == 10", 16, Some("auth.rb"), 0);
         assert_eq!(m3.len(), 1);
