@@ -5,7 +5,7 @@ This document records the empirical verification status of all technical claims 
 | # | Technical Claim | Original Source Location | Empirical Status | Evidence Reference | Action Taken |
 |---|---|---|---|---|---|
 | 1 | BMAD stands for Break, Measure, Adapt, Deliver | BMAD_SYNTHESIS.md, Section 1 | Refuted | Official GitHub repo `bmad-code-org/BMAD-METHOD` (tag `v6.12.4`) states Breakthrough Method for Agile AI-Driven Development | Corrected terminology across all documentation |
-| 2 | State path is canonically `.method/STATE.json` | METHODOLOGY_TRACK.md, Section 2.1 | Partially Verified | Directory naming was inconsistent with project name | Changed canonical state path to `.read/STATE.json` with fallback support for `.method/STATE.json` |
+| 2 | State path is canonically `.method/STATE.json` | METHODOLOGY_TRACK.md, Section 2.1 | Refuted | Directory naming was inconsistent with framework identity | Standardized strictly on `.read/STATE.json` as exclusive canonical path, adding automatic migration and unit test `test_migration_from_legacy_method_path` |
 | 3 | CAS state machine executes in sub-millisecond time | ARCHITECTURE.md, Section 1 | Verified | In-memory atomic CAS and file serialization execute in under 0.8 ms on local NVMe disk | Kept claim with empirical benchmark note |
 | 4 | Crash recovery completes in under 10 ms | MASTER_REPORT.md, Section 2 | Narrowed | Measured at 7.586 ms to 16.455 ms (mean 11.490 ms) on dual-core hardware when git process spawn is included | Narrowed claim to 7.5 to 16.5 ms |
 | 5 | C0 AST extraction completes in under 5 ms | MASTER_REPORT.md, Section 3 | Verified | Measured at 1.762 ms to 2.374 ms across 8 languages (Python, TS, Go, Rust, Java, C#, C++, Ruby) | Kept claim |

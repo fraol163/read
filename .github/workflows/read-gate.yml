@@ -44,7 +44,7 @@ jobs:
         run: |
           STATUS=$(./bin/read-engine status | grep '"status":' | tr -d '", ' | cut -d: -f2)
           echo "Current READ State: $STATUS"
-          if [ "$STATUS" != "HandoffComplete" ] && [ "$STATUS" != "Verified" ]
+          if [ "$STATUS" != "handoff_complete" ] && [ "$STATUS" != "verified" ]
           then
             echo "[GATE FAILED] Commit was made without passing the READ verification gate."
             echo "Direct git commit --no-verify bypasses are mechanically rejected on CI."

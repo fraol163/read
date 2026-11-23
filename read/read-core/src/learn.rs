@@ -196,9 +196,9 @@ if __name__ == "__main__":
         fs::create_dir_all(&sdir)
             .map_err(|e| format!("Failed to create scenario directory: {}", e))?;
 
-        let method_dir = sdir.join(".method");
-        fs::create_dir_all(&method_dir)
-            .map_err(|e| format!("Failed to create .method directory: {}", e))?;
+        let state_dir = sdir.join(".read");
+        fs::create_dir_all(&state_dir)
+            .map_err(|e| format!("Failed to create .read directory: {}", e))?;
 
         let broken_state = r#"{
   "state_revision": 2,
@@ -214,14 +214,14 @@ if __name__ == "__main__":
     "lease_expires": "1970-01-01T00:00:00Z"
   }
 }"#;
-        fs::write(method_dir.join("STATE.json"), broken_state)
+        fs::write(state_dir.join("STATE.json"), broken_state)
             .map_err(|e| format!("Failed to write broken STATE.json: {}", e))?;
 
         let sample_wal = r#"2026-11-23T08:00:00Z | prev_hash=0000000000000000000000000000000000000000000000000000000000000000 | INIT | root=. | entry_hash=1a2b3c4d5e6f
 2026-11-23T08:01:00Z | prev_hash=1a2b3c4d5e6f | DEFINE | task_id=TASK-FAIL-OVER contract_hash=c8b417e29bca001289fe base_commit=e81d763b | entry_hash=2b3c4d5e6f7a
 2026-11-23T08:02:00Z | prev_hash=2b3c4d5e6f7a | START_BUILD | task_id=TASK-FAIL-OVER worker_id=crashed_worker_pid_99182 | entry_hash=3c4d5e6f7a8b
 "#;
-        fs::write(method_dir.join("WAL.log"), sample_wal)
+        fs::write(state_dir.join("WAL.log"), sample_wal)
             .map_err(|e| format!("Failed to write WAL.log: {}", e))?;
 
         let mut progress = self.load_progress();
@@ -340,9 +340,9 @@ Advancing to Scenario 03: 'CAS Race Condition'."#,
 
     fn diagnose_scenario_03(&self, progress: &mut LearnProgress) -> Result<String, String> {
         let sdir = self.learn_dir.join("scenario_03");
-        let method_dir = sdir.join(".method");
-        let state_file = method_dir.join("STATE.json");
-        let wal_file = method_dir.join("WAL.log");
+        let state_dir = sdir.join(".read");
+        let state_file = state_dir.join("STATE.json");
+        let wal_file = state_dir.join("WAL.log");
 
         if !state_file.exists() || !wal_file.exists() {
             return Err("Scenario 03 not initialized. Run 'read learn scenario 3' first.".to_string());

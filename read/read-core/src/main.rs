@@ -15,7 +15,7 @@ USAGE:
     read-engine <COMMAND> [ARGS]
 
 COMMANDS:
-    init                             Initialize .method state directory and STATE.json
+    init                             Initialize .read state directory and STATE.json
     status                           Display current CAS state machine status
     define <TASK_ID> <CONTRACT_HASH> <BASE_COMMIT>
                                      Freeze task contract into defined state
@@ -60,7 +60,7 @@ fn main() {
             println!("{}", serde_json::to_string_pretty(&cfg).unwrap());
         }
         "init" => match engine.init() {
-            Ok(_) => println!("[READ] Initialized state engine in .method/"),
+            Ok(_) => println!("[READ] Initialized state engine in .read/"),
             Err(e) => {
                 eprintln!("[ERROR] {}", e);
                 std::process::exit(1);

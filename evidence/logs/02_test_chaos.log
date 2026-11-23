@@ -1,12 +1,12 @@
 ================================================================================
 STARTING ADVERSARIAL CHAOS & RED-TEAM TEST SUITE
-Sandbox Directory: /tmp/read-chaos-suite-gGzjfx
+Sandbox Directory: /tmp/read-chaos-suite-ncjjTV
 READ Engine: /home/renan/Downloads/me/methodology_session/read/bin/read-engine
 READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 ================================================================================
 
 === [SCENARIO 1]: SIGKILL During Atomic State Writes & Crash Recovery ===
-[READ] Initialized state engine in .method/
+[READ] Initialized state engine in .read/
 [READ] Task defined. State revision: 1
 [READ] Build started. Status: Executing
 [SCENARIO 1] Delivered 15 violent SIGKILL signals mid-execution.
@@ -44,13 +44,13 @@ READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 
 === [SCENARIO 3]: Dead & Hanging Sockets During Dynamic Harness Scan ===
 [SCENARIO 3] Probing daemon /api/v1/harnesses with hanging socket on port 11434...
-[SCENARIO 3] Probe completed in: 239ms (Status Code: 200)
-[SCENARIO 3] Assertion Passed: Hanging socket timed out within 239ms (< 500ms limit).
+[SCENARIO 3] Probe completed in: 30ms (Status Code: 200)
+[SCENARIO 3] Assertion Passed: Hanging socket timed out within 30ms (< 500ms limit).
 [SCENARIO 3] Assertion Passed: Daemon remained online and unblocked.
 [PASS] SCENARIO 3 PASSED: Dynamic scanner strictly bounds network timeouts (<500ms).
 
 === [SCENARIO 4]: Concurrent CAS Race Condition Audit ===
-[READ] Initialized state engine in .method/
+[READ] Initialized state engine in .read/
 [READ] Task defined. State revision: 1
 [SCENARIO 4.1] Firing 10 concurrent 'read build' executions simultaneously...
 [SCENARIO 4.1] Results: 1 succeeded, 9 failed.
@@ -62,7 +62,7 @@ READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 [PASS] SCENARIO 4 PASSED: CAS revision locks mechanically reject stale transitions.
 
 === [SCENARIO 5]: Unauthorized Gate Bypass Attacks ===
-[READ] Initialized state engine in .method/
+[READ] Initialized state engine in .read/
 [READ] Task defined. State revision: 1
 [READ] Build started. Status: Executing
 [SCENARIO 5.1] Assertion Passed: Premature handoff blocked by CasLockViolation.
@@ -78,7 +78,7 @@ READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 [SCENARIO 6.2] Assertion Passed: 2GB available RAM correctly calibrated to 30% (614400000 bytes).
 [SCENARIO 6.3] Assertion Passed: Missing meminfo correctly triggers warning and 512MB fallback.
 [SCENARIO 6.4] Assertion Passed: Corrupt meminfo correctly triggers 512MB fallback.
-[SCENARIO 6.5] Assertion Passed: Live host RAM dynamically calibrated to 670 MB ceiling.
+[SCENARIO 6.5] Assertion Passed: Live host RAM dynamically calibrated to 832 MB ceiling.
 [PASS] SCENARIO 6 PASSED: Dynamic RLIMIT calibration operates correctly under all memory conditions.
 
 === [SCENARIO 7]: TLS Enforcement on Non-Loopback Interfaces ===

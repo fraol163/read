@@ -1,0 +1,23 @@
+=== TEST: Outside Repository AROP Mutation Verification Gate ===
+Target Codebase: /home/renan/gate8_reconstruction
+Date: 2026-11-23T12:58:41+03:00
+
+[STEP 1] Running baseline test suite on unmodified outside code...
+[PASS] Baseline tests pass on outside repository.
+
+[STEP 2] Introducing realistic feature addition to backend/version_catalog.py...
+
+[STEP 3] Generating AROP diff mutants via read-engine mutate...
+Generated 3 targeted mutants on outside diff:
+  Mutant #1: INVERT_EQ at L396 -> if len(var_name) != 0:
+  Mutant #2: FLIP_BOOL_FALSE at L397 -> return True
+  Mutant #3: RETURN_NONE at L397 -> return None
+
+[STEP 4] Evaluating each mutant against tests (Expect 100% kill on good suite)...
+  Mutant #1 (INVERT_EQ): KILLED (test suite failed as expected)
+  Mutant #2 (FLIP_BOOL_FALSE): KILLED (test suite failed as expected)
+  Mutant #3 (RETURN_NONE): KILLED (test suite failed as expected)
+Final Mutation Score: 100.0% (3/3 killed)
+[PASS] Outside repository mutation verification gate passed at strictly 100% kill rate.
+
+=== OUTSIDE REPOSITORY MUTATION TEST COMPLETED SUCCESSFULLY ===

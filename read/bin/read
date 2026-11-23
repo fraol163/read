@@ -178,7 +178,7 @@ EOF
     exit 0
 fi
 
-# Subcommand: init (Initializes .method state AND installs declarative .read contracts + pre-commit hook)
+# Subcommand: init (Initializes .read state AND installs declarative .read contracts + pre-commit hook)
 if [ "$1" = "init" ]; then
     shift
     if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]; then
@@ -271,7 +271,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] || [ $# -eq 0 ]; 
     echo ""
     echo "CORE ENGINE COMMANDS:"
     echo "    setup                            Interactive BMAD-style repository setup wizard"
-    echo "    init                             Initialize .method state directory and STATE.json"
+    echo "    init                             Initialize .read state directory and STATE.json"
     echo "    status                           Display current CAS state machine status"
     echo "    define <TASK_ID> <CONTRACT_HASH> <BASE_COMMIT>"
     echo "                                     Freeze task contract into defined state"

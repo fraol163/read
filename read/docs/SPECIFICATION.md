@@ -5,11 +5,11 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 
 ## 1. Canonical State Path and Structure
 
-1.1 Canonical State File:
-- The system MUST store its runtime state in `.read/STATE.json`.
-- The system MAY fall back to reading `.method/STATE.json` if `.method/STATE.json` exists and `.read/STATE.json` does not exist.
+1.1 Canonical State File and Migration:
+- The system MUST store its runtime state exclusively in `.read/STATE.json` and its log in `.read/WAL.log`.
+- If an existing legacy `.method` directory is detected in the repository without `.read`, the engine MUST automatically migrate `.method` to `.read`.
 - Implementation: `read-core/src/state/mod.rs` and `read-daemon/config/config.go`.
-- Enforcing Test: `read-core/src/state/mod.rs` (`test_state_engine_canonical_read_path`).
+- Enforcing Test: `read-core/src/state/mod.rs` (`test_migration_from_legacy_method_path`).
 
 1.2 State Schema:
 - The state file MUST contain the fields: `task_id`, `contract_hash`, `base_commit`, `status`, `state_revision`, `staged_diff_hash`, `verify_hash`, and `updated_at`.

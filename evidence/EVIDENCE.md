@@ -7,20 +7,25 @@ Compilers and Runtimes: rustc 1.99.1, go 1.27.3, python 3.15.2, dotnet 10.0.403,
 
 ## 1. Automated Test Suite Executions
 
-All ten test suites were executed directly on the host machine. Output logs are preserved in `evidence/logs/`.
+Every suite was executed directly on the host machine. Output logs are preserved in `evidence/logs/`.
 
-| Suite # | Test Target | Command Executed | Exit Code | Raw Evidence Log |
-|---|---|---|---|---|
-| 01 | End-to-End Lifecycle | `bash read/tests/test_e2e.sh` | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
-| 02 | Chaos and Stress Tests | `bash read/tests/test_chaos.sh` | 0 | [02_test_chaos.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/02_test_chaos.log) |
-| 03 | BMAD Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
-| 04 | Full System Integration | `bash read/tests/test_full_system.sh` | 0 | [04_test_full_system.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/04_test_full_system.log) |
-| 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
-| 06 | Packaging and Distribution | `bash read/tests/test_packaging.sh` | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
-| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
-| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 (54 passed) | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
-| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
-| 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
+| Suite # | Test Target | Command Executed | Exit Code | Pass Count | Fail Count | Raw Evidence Log |
+|---|---|---|---|---|---|---|
+| 01 | End-to-End Lifecycle | `bash read/tests/test_e2e.sh` | 0 | 9 | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
+| 02 | Chaos & Stress Suite | `bash read/tests/test_chaos.sh` | 0 | 10 | 0 | [02_test_chaos.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/02_test_chaos.log) |
+| 03 | BMAD Zero-Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | 5 | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
+| 04 | Full System Integration | `bash read/tests/test_full_system.sh` | 0 | 9 | 0 | [04_test_full_system.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/04_test_full_system.log) |
+| 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
+| 06 | Packaging & Installation | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
+| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 4 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
+| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 55 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
+| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 22 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
+| 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
+| 11 | Orchestrator Test Rerun | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 3 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
+| 12 | CI Gate Workflow Simulation | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
+| 13 | WAL Tamper & Anchor Detection | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
+| 14 | Outside Repo Mutation Gate | `bash evidence/test_outside_repo_mutation.sh` | 0 | 4 | 0 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 15 | Tutorial Timed Execution | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
 ## 2. Quantitative Performance Measurements
 
@@ -42,7 +47,7 @@ Measures state engine recovery across 10 fresh repositories with uncommitted sta
 - Standard Deviation: 3.113 ms
 - Min: 7.586 ms
 - Max: 16.455 ms
-- Observation: The previous marketing claim of "strictly under 10ms" fails on 2-core hardware when process creation is measured. Latency ranges between 7.5 ms and 16.5 ms. The claim has been narrowed accordingly.
+- Observation: The previous marketing claim of strictly under 10ms fails on 2-core hardware when process creation is measured. Latency ranges between 7.5 ms and 16.5 ms. The claim has been narrowed accordingly.
 
 ### 2.3 AST Context Extraction Latency
 Measures `read-engine ast-context` across 8 supported programming languages (10 runs each):
@@ -62,13 +67,21 @@ Microbenchmark `BenchmarkPtyStreaming` in `read-daemon/pty`:
 - Execution speed: 42,422 ns/op
 - Heap memory allocated: 993 B/op
 - Allocations per frame: 4 allocs/op
-- Verdict: The claim of "zero allocation PTY streaming" is false. Memory is allocated for byte slice buffers and WebSocket frame encapsulation. The claim has been removed from all documentation.
+- Verdict: The claim of zero allocation PTY streaming is false. Memory is allocated for byte slice buffers and WebSocket frame encapsulation. The claim has been removed from all documentation.
 
 ### 2.5 Large Test Suite Hook Latency
 Measured executing a synthetic 500-assertion Python test suite under the harness:
 - Mean: 127.431 ms
 - Min: 108.445 ms
 - Max: 136.777 ms
+
+### 2.6 Tutorial Execution Timing
+Measured running all 8 steps of `TUTORIAL.md` in a fresh clean directory via `evidence/time_tutorial.py`:
+- Start Timestamp UTC: `2026-11-23T09:59:13.124315+00:00`
+- End Timestamp UTC: `2026-11-23T09:59:13.390945+00:00`
+- Total Step Count: 8
+- Total Wall-Clock Execution Time: 266.62 ms (0.267 seconds)
+- All 8 steps completed with exit code 0.
 
 ## 3. Security and Vulnerability Empirical Verifications
 
@@ -88,8 +101,8 @@ Tested Java and .NET process execution under virtual memory constraints:
 - Finding: Setting `RLIMIT_AS` limits virtual address space rather than resident memory (RSS). 64-bit managed runtimes reserve large virtual address regions on startup and crash when `RLIMIT_AS` is constrained to 30% RAM on systems with under 6 GB memory.
 
 ### 3.3 Mutation Testing on External Codebase
-Tested AROP mutation engine against real Python code from `veloce-acceptance/github-repo/backend/version_catalog.py`:
-- Baseline test suite: `tests/test_version_catalog.py` (2 tests, 0.001s).
+Tested AROP mutation engine against real Python code from `/home/renan/gate8_reconstruction/backend/version_catalog.py`:
+- Baseline test suite: `tests/test_version_catalog.py` (2 tests, 0.004s).
 - Staged modification: Added length validation check in `update_toml_version`.
 - Mutants generated: 3 bounded mutants:
   1. `INVERT_EQ` at line 396 (`==` to `!=`).

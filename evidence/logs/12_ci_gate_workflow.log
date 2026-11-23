@@ -1,0 +1,31 @@
+=== TEST: GitHub Actions CI Verification Gate Simulation ===
+Workflow Target: .github/workflows/read-gate.yml
+Date: 2026-11-23T12:57:53+03:00
+
+--- SCENARIO 1: Valid Verified Commit with Git Tag Anchor (Must PASS) ---
+[READ] Initialized state engine in .read/
+[READ] Task defined. State revision: 1
+[READ] Build started. Status: Executing
+[READ] Verification recorded. verify_hash: 71836bf576615af8da9ab63dd7ce2e1310693b8d9dc030dfe5f521bc61913249
+[READ] CAS Handoff successful. State: HandoffComplete
+[CI STEP] Verifying state and contract integrity...
+[CI STEP] State file presence verified.
+[CI STEP] Verifying cryptographic WAL git tag anchor...
+[READ] WAL git tag anchor verified successfully
+[CI STEP] WAL git tag anchor verified successfully.
+[CI STEP] Enforcing sealed state handoff...
+Current READ State: handoff_complete
+[PASS] Scenario 1: Valid verified commit passed CI gate.
+
+--- SCENARIO 2: Unverified Commit / git commit --no-verify Bypass (Must REJECT) ---
+[CI STEP] Running CI gate checks against unverified commit...
+Inspecting state status: handoff_complete
+[GATE BLOCKED] Server-side CI gate successfully rejected unverified code change.
+[PASS] Scenario 2: Unverified bypass attempt successfully rejected.
+
+--- SCENARIO 3: Tampered WAL Chain Detection in CI (Must REJECT) ---
+[GATE BLOCKED] Server-side CI gate rejected tampered WAL chain (exit code: 1).
+[ERROR] WAL corruption detected at line 1: WAL entry hash mismatch! Computed '1ebff1479e88992997d4f89a84141b70667eb7a37874ee738b2cfe803caf3180' but found 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+[PASS] Scenario 3: Tampered WAL chain successfully rejected by CI anchor check.
+
+=== ALL 3 CI GATE WORKFLOW SCENARIOS PASSED ===

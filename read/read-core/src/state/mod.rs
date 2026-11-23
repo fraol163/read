@@ -201,7 +201,7 @@ impl WalEntry {
 
 pub struct StateEngine {
     root: PathBuf,
-    method_dir: PathBuf,
+    state_dir: PathBuf,
     state_file: PathBuf,
     wal_file: PathBuf,
     lock_file: PathBuf,
@@ -211,29 +211,29 @@ impl StateEngine {
     pub fn new<P: AsRef<Path>>(root: P) -> Self {
         let root = root.as_ref().to_path_buf();
         let read_dir = root.join(".read");
-        let method_dir = if !read_dir.exists() && root.join(".method").exists() {
-            root.join(".method")
-        } else {
-            read_dir
-        };
-        let state_file = method_dir.join("STATE.json");
-        let wal_file = method_dir.join("WAL.log");
-        let lock_file = method_dir.join(".state.lock");
+        let legacy_dir = root.join(".method");
+        if legacy_dir.exists() && !read_dir.exists() {
+            let _ = fs::rename(&legacy_dir, &read_dir);
+        }
+        let state_dir = read_dir;
+        let state_file = state_dir.join("STATE.json");
+        let wal_file = state_dir.join("WAL.log");
+        let lock_file = state_dir.join(".state.lock");
         Self {
             root,
-            method_dir,
+            state_dir,
             state_file,
             wal_file,
             lock_file,
         }
     }
 
-    /// Initializes .method directory and initial idle STATE.json with cryptographic genesis WAL.
+    /// Initializes .read directory and initial idle STATE.json with cryptographic genesis WAL.
     pub fn init(&self) -> Result<(), String> {
         let _lock = FileLock::acquire_exclusive(&self.lock_file)?;
 
-        fs::create_dir_all(&self.method_dir)
-            .map_err(|e| format!("Failed to create .method dir: {}", e))?;
+        fs::create_dir_all(&self.state_dir)
+            .map_err(|e| format!("Failed to create .read dir: {}", e))?;
 
         if self.state_file.exists() {
             return Err("READ framework already initialized in this directory".to_string());
@@ -259,7 +259,7 @@ impl StateEngine {
     /// Atomic write to STATE.json using POSIX .tmp file swap + fsync.
     pub fn atomic_save(&self, state: &State) -> Result<(), String> {
         let pid = std::process::id();
-        let tmp_file = self.method_dir.join(format!("STATE.json.tmp.{}", pid));
+        let tmp_file = self.state_dir.join(format!("STATE.json.tmp.{}", pid));
         let data = serde_json::to_string_pretty(state)
             .map_err(|e| format!("Failed to serialize state: {}", e))?;
 
@@ -332,8 +332,8 @@ impl StateEngine {
 
     /// Internal append assuming lock already held.
     fn internal_append_wal(&self, event_type: &str, payload: &str) -> Result<WalEntry, String> {
-        fs::create_dir_all(&self.method_dir)
-            .map_err(|e| format!("Failed to create .method dir: {}", e))?;
+        fs::create_dir_all(&self.state_dir)
+            .map_err(|e| format!("Failed to create .read dir: {}", e))?;
 
         let prev_hash = if self.wal_file.exists() {
             let entries = self.verify_wal()?;
@@ -436,7 +436,7 @@ impl StateEngine {
             entry_hash,
         };
 
-        let tmp_wal = self.method_dir.join("WAL.log.tmp");
+        let tmp_wal = self.state_dir.join("WAL.log.tmp");
         {
             let mut file = File::create(&tmp_wal)
                 .map_err(|e| format!("Failed to create WAL.log.tmp: {}", e))?;
@@ -1127,5 +1127,22 @@ mod tests {
         assert!(verify_res.is_err());
         let err_msg = verify_res.unwrap_err();
         assert!(err_msg.contains("WAL git anchor mismatch"));
+    }
+
+    #[test]
+    fn test_migration_from_legacy_method_path() {
+        let dir = tempdir().unwrap();
+        let path = dir.path();
+        let legacy = path.join(".method");
+        fs::create_dir_all(&legacy).unwrap();
+        fs::write(legacy.join("STATE.json"), "{\"status\": \"idle\"}").unwrap();
+        fs::write(legacy.join("WAL.log"), "genesis\n").unwrap();
+
+        // Calling StateEngine::new must migrate .method to .read
+        let engine = StateEngine::new(path);
+        assert!(!legacy.exists(), "Legacy .method directory should be migrated away");
+        assert!(path.join(".read").exists(), "Canonical .read directory should exist");
+        assert!(engine.state_file.exists());
+        assert!(engine.wal_file.exists());
     }
 }
