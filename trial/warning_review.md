@@ -4,6 +4,34 @@
 
 This document provides guidelines and an evaluation checklist for determining whether pre-commit gate warnings identify genuine gaps in test coverage or represent noise such as equivalent mutants.
 
+## Diagnostic Output Format
+
+The pre-commit gate in warning mode outputs diagnostics in the following standardized format:
+
+1. Test Suite Diagnostics:
+```
+----------------------------------------------------------------
+[READ GATE WARNING] Test suite failed with exit code <EXIT_CODE> (Warning Mode):
+<RAW_TEST_OUTPUT>
+----------------------------------------------------------------
+Proceeding with mutation analysis in warning mode...
+```
+
+2. Mutation Evaluation Diagnostics:
+```
+[READ AROP] Evaluating <TOTAL> targeted mutants on production code diff...
+  [<OPERATOR> at L<LINE> in <FILE>] (mutated: <MUTATED_LINE>) -> <KILLED | SURVIVED>
+[READ AROP] Mutation Score: <SCORE>% (<KILLED>/<TOTAL> killed) == 100% threshold.
+```
+
+3. Warning Disposition Summary:
+```
+================================================================
+[READ GATE WARNING] Commit allowed in warning mode.
+Review test failures and mutant diagnostics before release.
+================================================================
+```
+
 ## Blinded Evaluation Methodology
 
 To prevent reviewer bias based on developer identity or experience level, warning reviews must follow a blinded protocol:
@@ -13,7 +41,7 @@ To prevent reviewer bias based on developer identity or experience level, warnin
    - The participant identifier (`participant_id`) and git commit author metadata are stripped before the package reaches reviewers.
    - Reviewers receive only:
      - The staged git diff
-     - The exact mutant description (file, line number, operator, and mutated text)
+     - The exact mutant line diagnostic: `[<OPERATOR> at L<LINE> in <FILE>] (mutated: <MUTATED_LINE>) -> <STATUS>`
      - The test suite execution output and test file source code
 2. Independent Scoring:
    - Two reviewers evaluate each blinded package independently.
@@ -57,8 +85,11 @@ For each evaluated warning, record:
 ```
 Review Token: <random_uuid>
 Task ID: <bugfix | endpoint | refactor>
+Mutant Diagnostic: [<OPERATOR> at L<LINE> in <FILE>] (mutated: <MUTATED_LINE>) -> <STATUS>
 Mutant Location: <filepath>:<linenumber>
 Mutant Operator: <operator_name>
+Mutated Code: <mutated_line_text>
+Outcome: [KILLED | SURVIVED]
 Classification: [Real Gap | Equivalent Mutant | Inconclusive]
 Gap Type: [Missing Assertion | Missing Case | None]
 Resolution Actionable in 5 Min: [Yes | No]

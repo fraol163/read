@@ -25,6 +25,12 @@ A task is defined as completed when all unit tests in the assigned task test sui
 
 Justification: Defining completion strictly by passing the task test suite allows the trial to evaluate baseline functional correctness independently from measuring how participants interact with and remediate mutation warnings.
 
+## Cohort Completion Threshold (80% Rule)
+
+The 80% cohort completion rate is defined as achieving successful completion on at least 80% of all assigned task attempts across the cohort, requiring at least 29 out of 36 total task attempts to pass their test suite within the 20-minute limit.
+
+Justification: Defining the threshold by task attempts prevents an isolated failure on a single task from disqualifying a participant's entire contribution while providing a granular evaluation of developer success across all tasks.
+
 ## Stop-or-Continue Rule
 
 1. Task-Level Progression:
@@ -75,5 +81,5 @@ To prevent participants from tampering with enforcement mode during the trial:
 
 ## Evaluation Criteria
 
-- Target cohort completion rate: 80% of all assigned tasks passing final test suites within the 20-minute limit.
+- Target cohort completion rate: 80% of all assigned task attempts passing final test suites within the 20-minute limit.
 - Warning review: Warnings emitted during commits are reviewed using the blinded review protocol in `warning_review.md`.

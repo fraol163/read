@@ -50,6 +50,8 @@ fi
 if [ -z "$ENGINE_BIN" ]; then
     if command -v read-engine >/dev/null 2>&1; then
         ENGINE_BIN="$(command -v read-engine)"
+    elif [ -x "/home/renan/Downloads/me/methodology_session/read/bin/read-engine" ]; then
+        ENGINE_BIN="/home/renan/Downloads/me/methodology_session/read/bin/read-engine"
     elif [ -x "./bin/read-engine" ]; then
         ENGINE_BIN="./bin/read-engine"
     elif [ -x "./read/bin/read-engine" ]; then
@@ -146,30 +148,14 @@ if [ -n "$TEST_CMD" ]; then
             echo "[READ GATE WARNING] Test suite failed with exit code $TEST_EXIT (Warning Mode):"
             echo "$TEST_OUTPUT"
             echo "----------------------------------------------------------------"
-            echo "Commit allowed in warning mode. Review test failures before release."
+            echo "Proceeding with mutation analysis in warning mode..."
+        else
+            echo "[READ GATE FAILED] Test suite failed with exit code $TEST_EXIT:"
+            echo "$TEST_OUTPUT"
+            echo "----------------------------------------------------------------"
+            echo "Commit rejected. Fix test failures to seal task handoff."
 
             cat << EOF > "$EVIDENCE_FILE"
-{
-  "task_id": "$TASK_ID",
-  "status": "warning",
-  "test_exit": $TEST_EXIT,
-  "test_command": "$TEST_CMD",
-  "contract_hash": "$CONTRACT_HASH",
-  "diff_hash": "$DIFF_HASH",
-  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "warning": "Test suite execution failed"
-}
-EOF
-            git add "$EVIDENCE_FILE" 2>/dev/null || true
-            exit 0
-        fi
-
-        echo "[READ GATE FAILED] Test suite failed with exit code $TEST_EXIT:"
-        echo "$TEST_OUTPUT"
-        echo "----------------------------------------------------------------"
-        echo "Commit rejected. Fix test failures to seal task handoff."
-
-        cat << EOF > "$EVIDENCE_FILE"
 {
   "task_id": "$TASK_ID",
   "status": "failed",
@@ -181,9 +167,11 @@ EOF
   "error": "Test suite execution failed"
 }
 EOF
-        exit 1
+            exit 1
+        fi
+    else
+        echo "[READ Verification] Test suite passed cleanly."
     fi
-    echo "[READ Verification] Test suite passed cleanly."
 fi
 
 # 8. Execute AROP Mutation Verification if read-engine is available
@@ -195,7 +183,8 @@ if [ -n "$ENGINE_BIN" ] && [ -n "$TEST_CMD" ]; then
     DIFF_TMP=$(mktemp -t read-diff-XXXXXX.patch)
     git diff --staged > "$DIFF_TMP"
 
-    MUTANTS_JSON=$("$ENGINE_BIN" mutate --json "$DIFF_TMP" 2>/dev/null || echo '[]')
+    MUTANTS_JSON_FILE=$(mktemp -t read-mutants-XXXXXX.json)
+    "$ENGINE_BIN" mutate --json "$DIFF_TMP" > "$MUTANTS_JSON_FILE" 2>/dev/null || echo '[]' > "$MUTANTS_JSON_FILE"
     rm -f "$DIFF_TMP"
 
     # Evaluate mutants using embedded python mutation harness
@@ -204,9 +193,9 @@ if [ -n "$ENGINE_BIN" ] && [ -n "$TEST_CMD" ]; then
     python3 -c '
 import json, sys, subprocess, os, shutil
 
-raw_json = """'"$MUTANTS_JSON"'"""
 try:
-    mutants = json.loads(raw_json)
+    with open("'"$MUTANTS_JSON_FILE"'", "r") as f:
+        mutants = json.load(f)
 except Exception:
     mutants = []
 
@@ -255,10 +244,10 @@ for m in source_mutants:
         res = subprocess.run(test_cmd, shell=True, env=env, capture_output=True, text=True)
         if res.returncode != 0:
             killed += 1
-            print(f"  [{op} at L{line} in {fp}] -> KILLED")
+            print(f"  [{op} at L{line} in {fp}] (mutated: {mutated.strip()}) -> KILLED")
         else:
             survivors.append(f"  - [SURVIVOR] {op} at {fp}:{line} (mutated: {mutated.strip()})")
-            print(f"  [{op} at L{line} in {fp}] -> SURVIVED")
+            print(f"  [{op} at L{line} in {fp}] (mutated: {mutated.strip()}) -> SURVIVED")
 
         with open(fp, "w") as f:
             f.write(orig_content)
@@ -273,7 +262,7 @@ with open("'"$SURVIVORS_FILE"'", "w") as out:
         out.write(s + "\n")
 '
     SCORE_LINE=$(cat "$MUT_RES_FILE" 2>/dev/null || echo "100.0:0:0")
-    rm -f "$MUT_RES_FILE"
+    rm -f "$MUT_RES_FILE" "$MUTANTS_JSON_FILE"
 
     MUTATION_SCORE=$(echo "$SCORE_LINE" | cut -d':' -f1)
     KILLED=$(echo "$SCORE_LINE" | cut -d':' -f2)
@@ -334,6 +323,30 @@ EOF
         rm -f "$SURVIVORS_FILE"
         echo "[READ AROP] Mutation Score: ${MUTATION_SCORE}% ($KILLED/$TOTAL killed) == 100% threshold."
     fi
+fi
+
+if [ "$TEST_EXIT" -ne 0 ] && [ "$ENFORCEMENT_MODE" = "warning" ]; then
+    echo "================================================================"
+    echo "[READ GATE WARNING] Commit allowed in warning mode."
+    echo "Review test failures and mutant diagnostics before release."
+    echo "================================================================"
+
+    cat << EOF > "$EVIDENCE_FILE"
+{
+  "task_id": "$TASK_ID",
+  "status": "warning",
+  "test_exit": $TEST_EXIT,
+  "mutation_score": $MUTATION_SCORE,
+  "mutants_killed": $KILLED,
+  "mutants_total": $TOTAL,
+  "contract_hash": "$CONTRACT_HASH",
+  "diff_hash": "$DIFF_HASH",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "warning": "Test suite execution failed"
+}
+EOF
+    git add "$EVIDENCE_FILE" 2>/dev/null || true
+    exit 0
 fi
 
 # 9. Compute Cryptographic Verify Hash
