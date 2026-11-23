@@ -1,0 +1,8 @@
+Command: bun x tsc --strictNullChecks --noEmit evidence/patches/auth_service_mutant.ts
+Exit code: 1
+
+STDOUT:
+evidence/patches/auth_service_mutant.ts(12,9): error TS2322: Type 'undefined' is not assignable to type 'boolean'.
+
+STDERR:
+

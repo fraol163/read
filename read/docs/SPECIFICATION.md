@@ -84,8 +84,9 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 
 4.4 Latency Threshold and Build Profile:
 - The AST engine MUST extract deterministic symbol signatures and dependencies with an in-process execution latency of under 5 ms per file on release builds.
-- Normative Applicability: The under 5 ms latency threshold applies normatively to the release build profile (`read-engine`), which executes in 0.14 ms to 0.18 ms.
-- Test Profile Configuration: The unit test suite in `read/read-core/Cargo.toml` executes under `[profile.test] opt-level = 1` to ensure basic compiler optimizations (inlining, register allocation) are active during concurrent test runner execution on 2-core hardware.
+- Normative Applicability: The shipped binary is built in release mode (`cargo build --release -p read-core --bin read-engine`). The binary hashes do not change between builds, and the under 5 ms release latency threshold is the sole binding requirement. In release mode, extraction executes in 0.14 ms to 0.18 ms across test workloads.
+- Measurement Methodology: The latency test methodology executes an unmeasured warm-up run followed by calculating the median duration of 10 runs under a serialized mutex lock. This replaces earlier unbuffered single-run measurements to guard against operating system CPU scheduler context-switch jitter on multi-threaded hosts while avoiding the bias of minimum-of-three filtering.
+- Test Profile Configuration: The unit test suite in `read/read-core/Cargo.toml` executes under `[profile.test] opt-level = 1` to ensure compiler optimizations are active during concurrent test runner execution on 2-core hardware. Under baseline unoptimized debug code, measured contention spiked to 7.658 ms in [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log), and unrecorded scheduler starvation spikes up to 10 ms were observed prior to test serialization.
 - Implementation: `read-core/src/ast/mod.rs` (`extract_symbols_and_imports`).
 - Enforcing Test: `read-core/src/ast/mod.rs` (`test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs`).
 

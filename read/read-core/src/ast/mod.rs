@@ -2072,26 +2072,29 @@ export function midEditFn(a: string,
             ));
         }
 
-        // Warm up and take minimum of 3 runs to insulate against OS scheduler context switch noise
-        let mut min_elapsed = std::time::Duration::from_secs(10);
-        for _ in 0..3 {
+        // Warm up run (unmeasured) to initialize parser state and populate CPU caches
+        let _ = AstContextResolver::extract_symbols_and_imports(&large_file, "synthetic.py", SourceLanguage::Python);
+
+        // Take 10 runs and calculate median elapsed time to guard against OS scheduler variance
+        let mut samples = Vec::with_capacity(10);
+        for _ in 0..10 {
             let start = Instant::now();
             let (symbols, imports, degraded) =
                 AstContextResolver::extract_symbols_and_imports(&large_file, "synthetic.py", SourceLanguage::Python);
             let elapsed = start.elapsed();
-            if elapsed < min_elapsed {
-                min_elapsed = elapsed;
-            }
+            samples.push(elapsed);
             assert!(!degraded);
             assert_eq!(imports.len(), 1);
             assert_eq!(symbols.len(), 200);
         }
+        samples.sort();
+        let median_elapsed = samples[samples.len() / 2];
 
         // Requirement: < 5ms per file deterministic signature extraction
         assert!(
-            min_elapsed.as_millis() < 5,
-            "Extraction took {} ms, exceeding 5ms target",
-            min_elapsed.as_millis()
+            median_elapsed.as_millis() < 5,
+            "Median extraction took {} ms, exceeding 5ms target",
+            median_elapsed.as_millis()
         );
     }
 
