@@ -67,6 +67,10 @@ To prevent participants from tampering with enforcement mode during the trial:
    - Residual Risk: A participant who owns the directory can delete and recreate `.read/config.json` in their local working tree during task work without committing the altered file.
    - Supervisor-Side Check: To mitigate this residual risk, the supervisor-side grading pipeline executes `trial/supervisor_check.sh <repo> <canonical_config>`. The script performs an automated clean clone check, verifies that `.read/config.json` matches the canonical baseline hash, and runs the test suite against the canonical configuration in an isolated sandbox. Any submission exhibiting divergent behavior or tampered configuration is rejected and flagged for manual review.
 
+### Local Hook Bypass and Server CI Enforcement Point
+
+Running `git commit --no-verify` bypasses the client-side pre-commit hook entirely. Client-side git hooks serve as developer feedback mechanisms rather than security boundaries. Authoritative policy enforcement occurs on server-side CI [UNTESTED] pipelines (`.github/workflows/read-gate.yml`) that execute verification in isolated environments.
+
 ## Reviewer Protocol for Surviving Mutants
 
 Reviewers judge only SURVIVED mutants, and only after step 3 shows real survivors on a passing baseline.

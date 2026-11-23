@@ -365,7 +365,7 @@ bash read/tests/test_chaos.sh
 2. Virtual Memory Constraints (`RLIMIT_AS`): Setting `RLIMIT_AS` to 30% of RAM breaks 64-bit Java (JVM) and .NET CoreCLR runtimes on machines with under 6 GB memory. Use cgroups v2 instead of virtual memory limits for managed runtimes.
 3. Mutation Truncation on Large Diffs: The AROP mutation engine accepts the first 10 mutants sequentially. Modified lines appearing later in a diff receive no mutation testing.
 4. Reverse Proxy Header Spoofing: Trusting `X-Forwarded-For` allows external clients to spoof loopback status unless the reverse proxy strips client headers.
-5. Client-Side Git Hook Bypass: Developers can bypass client hooks with `git commit --no-verify`. Deployments must enforce verification gates on server CI [UNTESTED] (`.github/workflows/read-gate.yml`).
+5. Client-Side Git Hook Bypass: Developers can bypass client hooks with `git commit --no-verify`. Deployments must enforce verification gates on server CI [UNTESTED] (`.github/workflows/read-gate.yml`), which serves as the authoritative enforcement point.
 
 ---
 
