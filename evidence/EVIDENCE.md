@@ -409,34 +409,34 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 To verify build reproducibility on this Linux host, clean builds were executed from isolated git clones:
 Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
 
-Source Commit: `2fd292d` on branch `report-review-v0.7.1`
+Source Commit: `9c2adb3` on branch `report-review-v0.7.1`
 
 Clean Clone 1 (`/tmp/clean_clone_1`):
-- Build Start Time: `2026-11-23T13:43:54.399577+00:00`
+- Build Start Time: `2026-11-23T14:02:29.108085+00:00`
 - Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
 - Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
-- read-engine SHA-256: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
+- read-engine SHA-256: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
 - Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T13:44:34.412498+00:00`
+- Build End Time: `2026-11-23T14:03:04.521834+00:00`
 
 Clean Clone 2 (`/tmp/clean_clone_2`):
-- Build Start Time: `2026-11-23T13:44:34.503954+00:00`
+- Build Start Time: `2026-11-23T14:03:04.600682+00:00`
 - Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
 - Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
-- read-engine SHA-256: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
+- read-engine SHA-256: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
 - Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T13:45:15.291277+00:00`
+- Build End Time: `2026-11-23T14:03:35.258224+00:00`
 
 Committed Binaries in `read/bin/`:
-- `read/bin/read-engine`: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
+- `read/bin/read-engine`: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
 - `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 - Result: Both binaries match the clean isolated directory builds bitwise identically.
 - Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U) only. Cross-platform or multi-host bitwise reproducibility has not been evaluated.
 
 Verification One-Liner Command:
-`sha256sum read/bin/read-engine read/bin/read-daemon` produces `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
+`sha256sum read/bin/read-engine read/bin/read-daemon` produces `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
 
 ## 5. Trial Parameters and Governance Draft Proposals (Awaiting User Decisions)
 

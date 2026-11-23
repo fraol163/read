@@ -3,7 +3,7 @@
 **Framework Identity:** READ (Resource-conscious, Evidence-driven AI Development)  
 **Date of Record:** 2026-11-23  
 **Release Target:** v0.7.1  
-**Working Git Branch:** `report-review-v0.7.1` at commit `2fd292d` (Zero changes were made or pushed to `main`).  
+**Working Git Branch:** `report-review-v0.7.1` (Zero changes were made or pushed to `main`).  
 **Host Environment:** Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
 
 CRITICAL GATE STATUS:
@@ -97,7 +97,7 @@ Suite 01 note: The 15 passed checks represent assertion lines executed within `r
 - Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED. Empirical line coverage (`pytest --cov`) proves lines 258-259 had zero executions during the test run, proving the survivors represent genuine test gaps.
 - Compile Error Rule Verification: Invalid mutants failing compilation under type checkers are filtered out. Exact TypeScript compiler rejection for `return undefined;` under strictNullChecks is captured in [21_typescript_strict_null_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/21_typescript_strict_null_check.log) using [auth_service_mutant.ts](file:///home/renan/Downloads/me/methodology_session/evidence/patches/auth_service_mutant.ts).
 - Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean git clones from commit `2fd292d` on this Linux host (Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U) only for Rust release binary `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f` and Go daemon binary with `-trimpath` `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`. Cross-platform or multi-host bitwise reproducibility has not been evaluated.
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean git clones from the branch HEAD on this Linux host (Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U) only for Rust release binary `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774` and Go daemon binary with `-trimpath` `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`. Cross-platform or multi-host bitwise reproducibility has not been evaluated.
 - Build Profile Disclosure: `read/read-core/Cargo.toml` sets `[profile.test] opt-level = 1` to eliminate scheduling jitter during parallel test runs under multi-thread contention on 2-core hardware. Latency benchmarks in `ast/mod.rs` are serialized via a Mutex. Release runtime execution executes in 0.14 ms to 0.18 ms, satisfying the under 5 ms threshold.
 
 ### Trial Parameters and Governance Draft Proposals (Awaiting User Decisions)
