@@ -1,0 +1,42 @@
+=== REPRODUCIBLE BINARY BUILD VERIFICATION (TASK 2) ===
+Source Commit: b5c5ec6 (b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72) on branch report-review-v0.7.1
+Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U
+
+--- Clean Clone 1: /tmp/clean_clone_1 ---
+Clone Command: git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1
+Checkout Command: git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72
+Rust Build Command: cd read/read-core && cargo build --release --bin read-engine
+Rust Build Start Time: 2026-11-23T14:17:52.880836+00:00
+Rust Build End Time:   2026-11-23T14:18:01.695613+00:00
+Rust Build Exit Code:  0
+read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
+Go Build Command: cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go
+Go Build Start Time: 2026-11-23T14:18:01.741282+00:00
+Go Build End Time:   2026-11-23T14:18:02.244717+00:00
+Go Build Exit Code:  0
+read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+
+--- Clean Clone 2: /tmp/clean_clone_2 ---
+Clone Command: git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2
+Checkout Command: git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72
+Rust Build Command: cd read/read-core && cargo build --release --bin read-engine
+Rust Build Start Time: 2026-11-23T14:18:13.749098+00:00
+Rust Build End Time:   2026-11-23T14:18:19.921078+00:00
+Rust Build Exit Code:  0
+read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
+Go Build Command: cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go
+Go Build Start Time: 2026-11-23T14:18:19.955372+00:00
+Go Build End Time:   2026-11-23T14:18:20.056066+00:00
+Go Build Exit Code:  0
+read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+
+--- Task 1 Reference Hashes ---
+read/bin/read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
+read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+
+--- Hash Verification Summary ---
+Clean Clone 1 read-engine Match: True (PASS)
+Clean Clone 2 read-engine Match: True (PASS)
+Clean Clone 1 read-daemon Match: True (PASS)
+Clean Clone 2 read-daemon Match: True (PASS)
+Status: PASS (All clean clone binary hashes match Task 1 reference hashes bitwise identically)

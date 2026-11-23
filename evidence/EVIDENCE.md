@@ -268,7 +268,7 @@ Why it was added:
 Default Rust test profiles run at `opt-level = 0` (unoptimized). When all 60 unit tests run concurrently across worker threads on a host with 2 physical cores (AMD Ryzen 3 3250U), running `test_extraction_latency_contention_10_runs` (which spawns 3 continuous worker threads) alongside other concurrent tests creates 7 concurrent threads competing for 2 physical cores. Under Linux CFS CPU scheduling, unoptimized debug code suffered from context switch delays. Recorded runs in [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log) measured spikes up to 7.658 ms under 4-thread CPU contention on baseline ca31c10. Adding `[profile.test] opt-level = 1` enables basic compiler optimization (inlining, register allocation, loop unrolling) for the test binary, dropping in-process extraction to 0.18 ms and eliminating test flakiness.
 
 Latency Methodology Change:
-The latency test methodology was updated from a single unbuffered timing to an unmeasured warm-up run followed by calculating the median duration of 10 runs under a serialized mutex lock (`LATENCY_TEST_LOCK`). This guards against operating system CPU scheduler context-switch jitter on multi-threaded hosts while avoiding the bias of minimum-of-three filtering.
+The latency test methodology was updated from a single unbuffered timing to an unmeasured warm-up run followed by calculating the median duration of 10 runs under a serialized mutex lock (`LATENCY_TEST_LOCK`). This guards against operating system CPU scheduler context-switch jitter on multi-threaded hosts while avoiding the bias of minimum-of-three filtering. The latency test diff against baseline commit ca31c10 is recorded in [22_latency_test_diff.patch](file:///home/renan/Downloads/me/methodology_session/evidence/logs/22_latency_test_diff.patch). A fresh execution of the latency test is recorded in [23_latency_test_run.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/23_latency_test_run.log) with exit code 0.
 
 Effect on debug profile latency in the specification:
 The specification under 5 ms latency threshold applies normatively to the runtime release binary (`read-engine`), which is the sole binding requirement and executes in 0.14 ms to 0.18 ms. Binary hashes do not change between builds. Under the test profile with `opt-level = 1`, extraction executes in ~0.18 ms. On unoptimized debug builds (`opt-level = 0`), extraction executes in 1.2 ms to 1.9 ms on an idle host, but can spike up to 7.658 ms under heavy parallel multi-thread load on 2-core hardware. Latency tests in `ast/mod.rs` are synchronized via a static Mutex `LATENCY_TEST_LOCK` to ensure clean measurement.
@@ -410,27 +410,30 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 ## 4. Reproducible Binary Build Verification
 
 To verify build reproducibility on this Linux host, clean builds were executed from isolated git clones:
-Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
+- Active Verification Log: [18b_clean_build_b5c5ec6.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18b_clean_build_b5c5ec6.log)
+- Historical Log (Superseded): [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log) (Recorded at commit `2fd292d` for prior binary builds)
 
-Source Commit: `9c2adb3` on branch `report-review-v0.7.1`
+Source Commit: `b5c5ec6` on branch `report-review-v0.7.1`
 
 Clean Clone 1 (`/tmp/clean_clone_1`):
-- Build Start Time: `2026-11-23T14:02:29.108085+00:00`
-- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
-- Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
+- Build Start Time: `2026-11-23T14:17:52.880836+00:00`
+- Clone Command: `git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
+- Checkout Command: `git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72`
+- Rust Build Command: `cd read/read-core && cargo build --release --bin read-engine` (Exit code: 0)
 - read-engine SHA-256: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
-- Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
+- Go Build Command: `cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go` (Exit code: 0)
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T14:03:04.521834+00:00`
+- Build End Time: `2026-11-23T14:18:02.244717+00:00`
 
 Clean Clone 2 (`/tmp/clean_clone_2`):
-- Build Start Time: `2026-11-23T14:03:04.600682+00:00`
-- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
-- Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
+- Build Start Time: `2026-11-23T14:18:13.749098+00:00`
+- Clone Command: `git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
+- Checkout Command: `git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72`
+- Rust Build Command: `cd read/read-core && cargo build --release --bin read-engine` (Exit code: 0)
 - read-engine SHA-256: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
-- Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
+- Go Build Command: `cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go` (Exit code: 0)
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T14:03:35.258224+00:00`
+- Build End Time: `2026-11-23T14:18:20.056066+00:00`
 
 Committed Binaries in `read/bin/`:
 - `read/bin/read-engine`: `5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774`
