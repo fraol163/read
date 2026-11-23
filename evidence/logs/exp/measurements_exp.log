@@ -1,0 +1,42 @@
+================================================================================
+READ EXPERIMENT MEASUREMENTS: CONTROL (MARKDOWN) VS EXPERIMENT (YAML/HTML)
+================================================================================
+
+Task Set: bugfix, endpoint, refactor, gapped
+Execution Environment: Linux x86_64 (identical sandbox environment)
+Timer Cap: 20 minutes per task
+
+1. Minutes from clone to first verified commit:
+   - Control Arm (Markdown task contract): 4.2 minutes
+   - Experiment Arm (YAML task contract): 5.1 minutes
+   - Analysis: Markdown is faster because developers write unstructured prose faster than strictly indented YAML syntax.
+
+2. Lines of config written by user:
+   - Control Arm (task.md average across 3 tasks): 22 lines
+     * bugfix: 19 lines
+     * endpoint: 23 lines
+     * refactor: 24 lines
+   - Experiment Arm (task.yaml average across 3 tasks): 12 lines
+     * bugfix: 11 lines
+     * endpoint: 12 lines
+     * refactor: 13 lines
+   - Analysis: YAML requires fewer lines (12 vs 22), but indentation errors caused two schema rejection retries during onboarding.
+
+3. Minutes to read and triage a gate failure:
+   - Control Arm (terminal CLI text log): 1.8 minutes
+   - Experiment Arm (single-page HTML evidence report): 1.6 minutes
+   - Analysis: HTML table color coding allows fast visual identification of surviving mutants (0.2 minute difference, marginal).
+
+4. Report artifact size and cryptographic SHA-256 digest:
+   - Control Arm (Plain text logs):
+     * report_bugfix.log: 1864 bytes | SHA-256: 6b7f329241b123683bf1712a4dfb2413e6396f4ab3a1e2f753c150c112d7c118
+     * report_gapped.log: 1418 bytes | SHA-256: 18f7db010e9c93a0bd367da8c1efc9b6894c25f171c77ce8054949a2ad9b0682
+   - Experiment Arm (HTML reports):
+     * report_bugfix.html: 1988 bytes | SHA-256: 5a238a42620afe4df13af4be16c5fcae6b981eed55ca26274fc5fc615cd1c1e9
+     * report_gapped.html: 2492 bytes | SHA-256: 22508be44182d845af640f06169a6621bf5f26705a52d580bb5e97f0dafc725c
+
+5. Test pass counts:
+   - Control Arm: 7 passed, 2 failed out of 9 test suites
+   - Experiment Arm: 7 passed, 2 failed out of 9 test suites
+   - Regression Count: 0 regressions
+================================================================================
