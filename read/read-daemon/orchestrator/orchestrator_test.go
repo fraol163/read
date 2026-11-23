@@ -52,11 +52,11 @@ func setupTestWorkspace(t *testing.T) string {
 	cmd.Dir = dir
 	_ = cmd.Run()
 
-	_ = os.WriteFile(filepath.Join(dir, ".gitignore"), []byte(".method/\n"), 0644)
+	_ = os.WriteFile(filepath.Join(dir, ".gitignore"), []byte(".read/\n.method/\n"), 0644)
 	cmd = exec.Command("git", "add", ".gitignore")
 	cmd.Dir = dir
 	_ = cmd.Run()
-	cmd = exec.Command("git", "commit", "-qm", "Ignore .method")
+	cmd = exec.Command("git", "commit", "-qm", "Ignore .read and .method")
 	cmd.Dir = dir
 	_ = cmd.Run()
 
@@ -209,11 +209,8 @@ if __name__ == '__main__':
 		t.Errorf("expected non-empty verify hash")
 	}
 
-	// Verify STATE.json on disk
+	// Verify STATE.json on disk strictly under .read/
 	statePath := filepath.Join(ws, ".read", "STATE.json")
-	if _, err := os.Stat(statePath); os.IsNotExist(err) {
-		statePath = filepath.Join(ws, ".method", "STATE.json")
-	}
 	stateData, err := os.ReadFile(statePath)
 	if err != nil {
 		t.Fatalf("failed to read STATE.json: %v", err)
@@ -229,11 +226,8 @@ if __name__ == '__main__':
 		t.Errorf("STATE.json status is '%s', expected 'handoff_complete'", diskState.Status)
 	}
 
-	// Verify WAL.log contains DEFINE, BUILD_START, VERIFIED, HANDOFF
+	// Verify WAL.log contains DEFINE, BUILD_START, VERIFIED, HANDOFF strictly under .read/
 	walPath := filepath.Join(ws, ".read", "WAL.log")
-	if _, err := os.Stat(walPath); os.IsNotExist(err) {
-		walPath = filepath.Join(ws, ".method", "WAL.log")
-	}
 	walData, err := os.ReadFile(walPath)
 	if err != nil {
 		t.Fatalf("failed to read WAL.log: %v", err)
@@ -401,3 +395,43 @@ sleep 60
 		t.Errorf("expected stage 3 to fail, got %s", res.StageResults["stage3_harness_dispatch"])
 	}
 }
+
+func TestLegacyMethodDirectoryMigration(t *testing.T) {
+	engineBin := findEngineBin()
+	if engineBin == "" {
+		t.Skip("read-engine binary not found, skipping integration test")
+	}
+
+	ws := setupTestWorkspace(t)
+	defer os.RemoveAll(ws)
+
+	legacyDir := filepath.Join(ws, ".method")
+	if err := os.MkdirAll(legacyDir, 0755); err != nil {
+		t.Fatalf("failed to create .method directory: %v", err)
+	}
+	legacyState := filepath.Join(legacyDir, "STATE.json")
+	validJSON := `{"state_revision":0,"status":"idle","active_task_id":null,"contract_hash":null,"base_commit":null,"staged_diff_hash":null,"verify_hash":null,"cas_lock":{"expected_revision":0,"locked_by":"system","lease_expires":"2099-01-01T00:00:00Z"}}`
+	if err := os.WriteFile(legacyState, []byte(validJSON), 0644); err != nil {
+		t.Fatalf("failed to write legacy state: %v", err)
+	}
+	legacyWal := filepath.Join(legacyDir, "WAL.log")
+	if err := os.WriteFile(legacyWal, []byte("INIT\n"), 0644); err != nil {
+		t.Fatalf("failed to write legacy wal: %v", err)
+	}
+
+	cmd := exec.Command(engineBin, "status")
+	cmd.Dir = ws
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("read-engine status failed: %s (%v)", string(out), err)
+	}
+
+	if _, err := os.Stat(legacyDir); !os.IsNotExist(err) {
+		t.Errorf("expected legacy .method to be migrated and removed")
+	}
+	newPath := filepath.Join(ws, ".read", "STATE.json")
+	if _, err := os.Stat(newPath); err != nil {
+		t.Errorf("expected .read/STATE.json to exist after migration: %v", err)
+	}
+}
+

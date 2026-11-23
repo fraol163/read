@@ -1,6 +1,6 @@
 ================================================================================
 STARTING ADVERSARIAL CHAOS & RED-TEAM TEST SUITE
-Sandbox Directory: /tmp/read-chaos-suite-ncjjTV
+Sandbox Directory: /tmp/read-chaos-suite-kdnVRm
 READ Engine: /home/renan/Downloads/me/methodology_session/read/bin/read-engine
 READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 ================================================================================
@@ -44,8 +44,8 @@ READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 
 === [SCENARIO 3]: Dead & Hanging Sockets During Dynamic Harness Scan ===
 [SCENARIO 3] Probing daemon /api/v1/harnesses with hanging socket on port 11434...
-[SCENARIO 3] Probe completed in: 30ms (Status Code: 200)
-[SCENARIO 3] Assertion Passed: Hanging socket timed out within 30ms (< 500ms limit).
+[SCENARIO 3] Probe completed in: 35ms (Status Code: 200)
+[SCENARIO 3] Assertion Passed: Hanging socket timed out within 35ms (< 500ms limit).
 [SCENARIO 3] Assertion Passed: Daemon remained online and unblocked.
 [PASS] SCENARIO 3 PASSED: Dynamic scanner strictly bounds network timeouts (<500ms).
 
@@ -78,7 +78,7 @@ READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
 [SCENARIO 6.2] Assertion Passed: 2GB available RAM correctly calibrated to 30% (614400000 bytes).
 [SCENARIO 6.3] Assertion Passed: Missing meminfo correctly triggers warning and 512MB fallback.
 [SCENARIO 6.4] Assertion Passed: Corrupt meminfo correctly triggers 512MB fallback.
-[SCENARIO 6.5] Assertion Passed: Live host RAM dynamically calibrated to 832 MB ceiling.
+[SCENARIO 6.5] Assertion Passed: Live host RAM dynamically calibrated to 717 MB ceiling.
 [PASS] SCENARIO 6 PASSED: Dynamic RLIMIT calibration operates correctly under all memory conditions.
 
 === [SCENARIO 7]: TLS Enforcement on Non-Loopback Interfaces ===

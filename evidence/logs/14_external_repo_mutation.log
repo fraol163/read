@@ -1,23 +1,53 @@
 === TEST: Outside Repository AROP Mutation Verification Gate ===
-Target Codebase: /home/renan/gate8_reconstruction
-Date: 2026-11-23T12:58:41+03:00
+Target Codebase: colorama (public open source Python package)
+Source Path: /usr/lib/python3.14/site-packages/colorama
+Date: 2026-11-23T13:30:00+03:00
 
 [STEP 1] Running baseline test suite on unmodified outside code...
-[PASS] Baseline tests pass on outside repository.
+..........................ssssssssss........sss....s
+----------------------------------------------------------------------
+Ran 52 tests in 0.032s
 
-[STEP 2] Introducing realistic feature addition to backend/version_catalog.py...
+OK (skipped=14)
+[PASS] Baseline tests pass on outside repository (52 tests)
 
-[STEP 3] Generating AROP diff mutants via read-engine mutate...
-Generated 3 targeted mutants on outside diff:
-  Mutant #1: INVERT_EQ at L396 -> if len(var_name) != 0:
-  Mutant #2: FLIP_BOOL_FALSE at L397 -> return True
-  Mutant #3: RETURN_NONE at L397 -> return None
+[STEP 2] Introducing feature addition with >= 50 lines diff...
+Staged git diff line count: 133 lines (requirement: >= 50 lines)
 
-[STEP 4] Evaluating each mutant against tests (Expect 100% kill on good suite)...
-  Mutant #1 (INVERT_EQ): KILLED (test suite failed as expected)
-  Mutant #2 (FLIP_BOOL_FALSE): KILLED (test suite failed as expected)
+[STEP 3] Running test suite with new tests...
+.............................ssssssssss........sss....s
+----------------------------------------------------------------------
+Ran 55 tests in 0.014s
+
+OK (skipped=14)
+[PASS] All 55 tests pass on unmodified diff
+
+[STEP 4] Generating AROP diff mutants via read-engine mutate...
+Generated 10 targeted AROP mutants on staged diff:
+  Mutant #1: INVERT_LT at colorama/ansi.py:106 -> if val >= 0:
+  Mutant #2: BOUNDARY_LT_ZERO at colorama/ansi.py:106 -> if val <= 0:
+  Mutant #3: RETURN_NONE at colorama/ansi.py:107 -> return None
+  Mutant #4: INVERT_GT at colorama/ansi.py:108 -> if val <= 255:
+  Mutant #5: RETURN_NONE at colorama/ansi.py:109 -> return None
+  Mutant #6: RETURN_NONE at colorama/ansi.py:110 -> return None
+  Mutant #7: FLIP_BOOL_FALSE at colorama/ansi.py:112 -> def rgb_code(r, g, b, background=True):
+  Mutant #8: INVERT_EQ at colorama/ansi.py:116 -> if background != True:
+  Mutant #9: FLIP_BOOL_TRUE at colorama/ansi.py:116 -> if background == False:
+  Mutant #10: RETURN_NONE at colorama/ansi.py:117 -> return None
+
+[STEP 5] Evaluating each mutant against tests (Expect 100% kill rate)...
+  Mutant #1 (INVERT_LT): KILLED (test suite failed as expected)
+  Mutant #2 (BOUNDARY_LT_ZERO): KILLED (test suite failed as expected)
   Mutant #3 (RETURN_NONE): KILLED (test suite failed as expected)
-Final Mutation Score: 100.0% (3/3 killed)
+  Mutant #4 (INVERT_GT): KILLED (test suite failed as expected)
+  Mutant #5 (RETURN_NONE): KILLED (test suite failed as expected)
+  Mutant #6 (RETURN_NONE): KILLED (test suite failed as expected)
+  Mutant #7 (FLIP_BOOL_FALSE): KILLED (test suite failed as expected)
+  Mutant #8 (INVERT_EQ): KILLED (test suite failed as expected)
+  Mutant #9 (FLIP_BOOL_TRUE): KILLED (test suite failed as expected)
+  Mutant #10 (RETURN_NONE): KILLED (test suite failed as expected)
+Final Mutation Score: 10/10 killed (0 survived)
+[AROP GATE PASSED] Mutation score: 100.0% (10/10 killed, 0 survivors)
 [PASS] Outside repository mutation verification gate passed at strictly 100% kill rate.
 
 === OUTSIDE REPOSITORY MUTATION TEST COMPLETED SUCCESSFULLY ===

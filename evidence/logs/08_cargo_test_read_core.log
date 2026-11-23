@@ -1,50 +1,48 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
-     Running unittests src/lib.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_core-a79b30c4d8ed73c2)
 
 running 55 tests
-test ast::tests::test_ast_resolver_cpp ... ok
+test ast::tests::test_ast_resolver_csharp ... ok
 test ast::tests::test_ast_resolver_go ... ok
 test ast::tests::test_ast_resolver_java ... ok
-test ast::tests::test_ast_resolver_csharp ... ok
-test ast::tests::test_ast_resolver_python ... ok
-test ast::tests::test_ast_resolver_rust ... ok
+test ast::tests::test_ast_resolver_cpp ... ok
 test ast::tests::test_ast_resolver_ruby ... ok
+test ast::tests::test_ast_resolver_rust ... ok
 test ast::tests::test_ast_resolver_typescript ... ok
-test config::tests::test_default_config ... ok
-test hasher::tests::test_hash_bytes ... ok
-test config::tests::test_workspace_local_override ... ok
+test ast::tests::test_ast_resolver_python ... ok
 test ast::tests::test_syntax_error_resilience ... ok
+test config::tests::test_default_config ... ok
+test config::tests::test_workspace_local_override ... ok
+test hasher::tests::test_hash_bytes ... ok
 test mutation::cpp::tests::test_boundary_shift ... ok
-test mutation::cpp::tests::test_invert_equality ... ok
 test mutation::cpp::tests::test_remove_nullptr_check ... ok
-test mutation::cpp::tests::test_return_default ... ok
+test mutation::cpp::tests::test_invert_equality ... ok
 test ast::tests::test_extraction_latency_under_5ms ... ok
+test mutation::cpp::tests::test_return_default ... ok
 test mutation::csharp::tests::test_boundary_shift ... ok
-test mutation::csharp::tests::test_invert_equality ... ok
 test mutation::csharp::tests::test_remove_null_conditional ... ok
+test mutation::csharp::tests::test_invert_equality ... ok
 test mutation::csharp::tests::test_return_default ... ok
-test mutation::java::tests::test_invert_equality ... ok
 test mutation::java::tests::test_boundary_shift ... ok
+test mutation::java::tests::test_invert_equality ... ok
 test mutation::java::tests::test_remove_null_check ... ok
 test mutation::java::tests::test_return_null ... ok
-test mutation::ruby::tests::test_invert_equality ... ok
-test mutation::ruby::tests::test_return_nil ... ok
 test mutation::ruby::tests::test_boundary_shift ... ok
+test mutation::ruby::tests::test_invert_equality ... ok
 test mutation::ruby::tests::test_remove_safe_navigation ... ok
+test mutation::ruby::tests::test_return_nil ... ok
 test mutation::tests::test_bounded_mutant_cap ... ok
 test mutation::tests::test_cpp_diff_mutator ... ok
-test mutation::tests::test_csharp_diff_mutator ... ok
 test mutation::tests::test_diff_targeted_mutator ... ok
+test mutation::tests::test_execution_timeout_and_memory_ceiling ... ok
+test mutation::tests::test_csharp_diff_mutator ... ok
 test mutation::tests::test_gate_validation_error_formatting ... ok
 test mutation::tests::test_go_diff_mutator ... ok
 test mutation::tests::test_java_diff_mutator ... ok
 test mutation::tests::test_mutation_score_calculation ... ok
-test mutation::tests::test_execution_timeout_and_memory_ceiling ... ok
 test mutation::tests::test_ruby_diff_mutator ... ok
-test mutation::tests::test_typescript_diff_mutator ... ok
-test mutation::ts_js::tests::test_boundary_shift ... ok
 test mutation::tests::test_rust_diff_mutator ... ok
+test mutation::tests::test_typescript_diff_mutator ... ok
 test mutation::ts_js::tests::test_invert_equality ... ok
+test mutation::ts_js::tests::test_boundary_shift ... ok
 test mutation::ts_js::tests::test_remove_optional_chain ... ok
 test mutation::ts_js::tests::test_return_undefined ... ok
 test state::tests::test_cas_revision_monotonicity ... ok
@@ -52,21 +50,19 @@ test learn::tests::test_learn_lifecycle ... ok
 test state::tests::test_handoff_unconditionally_blocked_on_diff_drift ... ok
 test state::tests::test_migration_from_legacy_method_path ... ok
 test state::tests::test_wal_compaction_preserves_revision_count ... ok
+test state::tests::test_master_override ... ok
 test state::tests::test_wal_cryptographic_chaining_and_corruption_detection ... ok
 test state::tests::test_lifecycle_and_cas_locks ... ok
-test state::tests::test_master_override ... ok
 test state::tests::test_wal_git_anchor_verification_and_rewritten_chain_detection ... ok
 test state::tests::test_cas_lease_expiration_and_preemption ... ok
 
 test result: ok. 55 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.11s
 
-     Running unittests src/main.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_engine-9d4b69ec3af64aea)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-   Doc-tests read_core
 
 running 0 tests
 

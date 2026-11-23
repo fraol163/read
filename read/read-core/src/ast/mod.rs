@@ -2077,10 +2077,10 @@ export function midEditFn(a: string,
         assert!(!degraded);
         assert_eq!(imports.len(), 1);
         assert_eq!(symbols.len(), 200);
-        // Requirement: < 10ms per file deterministic signature extraction in debug mode (<0.5ms release)
+        // Requirement: < 5ms per file deterministic signature extraction
         assert!(
-            elapsed.as_millis() <= 10,
-            "Extraction took {} ms, exceeding target",
+            elapsed.as_millis() < 5,
+            "Extraction took {} ms, exceeding 5ms target",
             elapsed.as_millis()
         );
     }

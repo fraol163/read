@@ -86,7 +86,7 @@ READ eliminates these failure modes through mechanical systems enforcement rathe
 |  | - Asymmetric Bounded Mutation Verifier (AROP, <=10 mutants, <4.5s)          |  |
 |  | - Staged Diff Hasher (SHA-256 over git diff --staged, <0.1ms)               |  |
 |  | - Master Override Audit Trail ([OVERRIDE] with SHA-256 proof)               |  |
-|  | - Zero-Token Crash Recovery System (<10ms recovery time)                    |  |
+|  | - Zero-Token Crash Recovery System (7.5ms to 16.5ms recovery time)          |  |
 |  +-----------------------------------------------------------------------------+  |
 +-----------------------------------------------------------------------------------+
 ```

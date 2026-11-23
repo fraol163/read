@@ -44,7 +44,7 @@ The system topology is organized around a dual-engine architecture:
 |   |  - Staged Diff Hasher (SHA-256 over git diff --staged, <0.1ms)                |   |
 |   |  - Asymmetric Bounded Mutation Verifier (AROP, <=10 mutants, <4.5s ceiling)   |   |
 |   |  - Master Override Audit Ledger ([OVERRIDE] with SHA-256 proof)               |   |
-|   |  - Zero-Token Crash Recovery System (<10ms recovery time)                     |   |
+|   |  - Zero-Token Crash Recovery System (7.5ms to 16.5ms recovery time)          |   |
 |   +-------------------------------------------------------------------------------+   |
 |                                          |                                            |
 |                                          v                                            |

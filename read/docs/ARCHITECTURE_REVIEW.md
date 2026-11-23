@@ -77,11 +77,11 @@ Analysis:
 
 ## 7. Ongoing Maintenance Burden and Engineering Hours
 
-Maintaining this dual-binary architecture requires ongoing engineering allocation:
-- Core State Engine and AST Parsers (Rust): 8 to 10 engineering hours per week for AST operator expansion across eight languages, syntax edge cases, and parser fuzzing.
-- Process Supervisor and Daemon Gateway (Go): 6 to 8 engineering hours per week for cgroups v2 migration, PTY terminal edge cases, WebSocket session management, and TLS lifecycle.
-- Integration and Chaos Testing: 4 to 6 engineering hours per week maintaining multi-language test fixtures, cross-platform harness scripts, and CI runners.
-- Total Estimated Maintenance Effort: 18 to 24 engineering hours per week.
+Maintaining this dual-binary architecture involves ongoing engineering overhead (estimated projection based on multi-language surface area):
+- Core State Engine and AST Parsers (Rust): Estimated 8 to 10 engineering hours per week for AST operator expansion across eight languages, syntax edge cases, and parser fuzzing.
+- Process Supervisor and Daemon Gateway (Go): Estimated 6 to 8 engineering hours per week for cgroups v2 migration, PTY terminal edge cases, WebSocket session management, and TLS lifecycle.
+- Integration and Chaos Testing: Estimated 4 to 6 engineering hours per week maintaining multi-language test fixtures, cross-platform harness scripts, and CI runners.
+- Total Estimated Maintenance Effort: 18 to 24 engineering hours per week (estimated range, historical Git commit logs show 21 commits during the current development cycle across these directories).
 
 ---
 

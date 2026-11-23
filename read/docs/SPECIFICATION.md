@@ -52,12 +52,14 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 - The engine MUST provide a crash recovery routine that parses the entire WAL from beginning to end.
 - The recovery routine MUST recalculate and verify the hash chain of every record.
 - If any record fails hash verification, recovery MUST abort with `TamperedWalChain`.
+- The crash recovery routine executes without API token cost. Measured crash recovery latency ranges from 7.5 ms to 16.5 ms (mean: 11.49 ms across 10 iterations).
 - Implementation: `read-core/src/state/mod.rs` (`recover`).
 - Enforcing Test: `tests/test_chaos.sh` (Scenario 2: WAL Tamper Detection).
 
 3.3 Git Tag Anchoring:
 - Upon completing a valid handoff transition, the engine MUST anchor the latest WAL entry hash into the repository by creating or updating the git tag `read-wal-head`.
 - The engine MUST verify this anchor during recovery. If the git tag `read-wal-head` points to a hash that does not match the latest entry in `.read/WAL.log`, recovery MUST fail.
+- Tag Anchoring Security Boundary: Git tag anchoring requires remote server-side tag protection (e.g. protected tags on GitHub or GitLab). If an attacker possesses write permissions allowing force-pushing tags to the remote repository, they can overwrite both the local log and the tag. Server-side branch and tag protection rules are strictly required to enforce non-repudiation across distributed peers.
 - Implementation: `read-core/src/state/mod.rs` (`anchor_wal_in_git` and `verify_wal_anchor`).
 - Enforcing Test: `read-core/src/state/mod.rs` (`test_wal_git_anchor_verification_and_rewritten_chain_detection`).
 

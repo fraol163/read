@@ -29,8 +29,8 @@ BMAD stands for Breakthrough Method for Agile AI-Driven Development (`bmad-code-
 The operational specification for the framework is codified in [docs/SPECIFICATION.md](file:///home/renan/Downloads/me/methodology_session/read/docs/SPECIFICATION.md) using RFC 2119 normative language. Every rule links directly to its implementing source file and enforcing test.
 
 Key systems include:
-- Canonical State Path: Runtime state is stored in `.read/STATE.json` with backward-compatible fallback to `.method/STATE.json`.
-- Compare-And-Swap State Engine (`read-core`): Coordinates transitions across Defined, Executing, Verifying, Verified, and HandoffComplete. Prevents race conditions using revision checks and POSIX advisory locking.
+- Canonical State Path: Runtime state is stored exclusively in `.read/STATE.json`. Legacy `.method/` directories are automatically migrated and removed on detection.
+- Compare-And-Swap State Engine (`read-core`): Coordinates transitions across Defined, Executing, Verifying, Verified, and Handoff states. Prevents race conditions using revision checks and POSIX advisory locking.
 - Cryptographic Write-Ahead Log (`WAL.log`): Chained SHA-256 record entries. Recovers consistent state following process crashes.
 - Cryptographic Git Tag Anchor: Subcommands `anchor-wal` and `verify-wal-anchor` bind the latest WAL entry hash to git tag `read-wal-head`, detecting rewritten log chains.
 - AST Context Resolver: Extracts declarations and dependencies across 8 languages (Python, TypeScript/JavaScript, Go, Rust, Java, C#, C++, Ruby) using local line scanning.
@@ -42,7 +42,8 @@ Key systems include:
 ## 3. Empirical Evidence and Test Logs
 
 All test suites and benchmark measurements were executed directly on the host machine. Output logs are preserved in `evidence/logs/`.
-The comprehensive evidence dossier is documented in [evidence/EVIDENCE.md](file:///home/renan/Downloads/me/methodology_session/evidence/EVIDENCE.md).
+The evidence dossier is documented in [evidence/EVIDENCE.md](file:///home/renan/Downloads/me/methodology_session/evidence/EVIDENCE.md).
+Suites 12 and 13 represent local shell scenarios executing real binary steps rather than cloud GitHub Actions runners.
 
 ### Automated Test Suite Execution Summary
 
@@ -58,11 +59,11 @@ The comprehensive evidence dossier is documented in [evidence/EVIDENCE.md](file:
 | 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 55 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
 | 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 22 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
-| 11 | Orchestrator Test Rerun | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 3 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
-| 12 | CI Gate Workflow Simulation | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
-| 13 | WAL Tamper & Anchor Detection | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate | `bash evidence/test_outside_repo_mutation.sh` | 0 | 4 | 0 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
-| 15 | Tutorial Timed Execution | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
+| 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
+| 12 | CI Gate Local Scenario | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
+| 13 | WAL Tamper Local Scenario | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
+| 14 | Outside Repo Mutation Gate | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
 ### Measured Benchmark Metrics (10 Runs Each)
 
@@ -79,7 +80,8 @@ The comprehensive evidence dossier is documented in [evidence/EVIDENCE.md](file:
   - Ruby: Mean 1.927 ms
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
 - PTY Stream Allocation: 42,422 ns/op, 993 B/op, 4 allocs/op.
-- Real External Repo Mutation Test: Tested against `backend/version_catalog.py` in `veloce-acceptance/github-repo`. Generated 3 mutants. Killed 3 mutants (100.0% score).
+- Real External Repo Mutation Test: Tested against genuine public open-source Python library `colorama` (`/usr/lib/python3.14/site-packages/colorama`). 52 baseline tests, 133 lines staged diff, 10 targeted mutants generated, 10 killed, 0 survived (100.0% score).
+- Tutorial Completion Timing: Machine execution 301.36 ms (0.30 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.30s, human trial unconducted).
 
 ---
 
