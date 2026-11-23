@@ -6,10 +6,13 @@ Host Environment: Linux 7.2.15-1-omarchy x86_64
 Hardware: AMD Ryzen 3 3250U with Radeon Graphics (2 cores, 4 threads), 5.7 GiB RAM
 Compilers and Runtimes: rustc 1.99.1, go 1.27.3, python 3.15.2, dotnet 10.0.403, openjdk 21.0.9
 
+CRITICAL GATE STATUS:
+The outside repository mutation verification gate on veloce-acceptance/github-repo strictly FAILED (Exit Code: 1). Score: 75.0% (6 killed, 2 survived). The framework invariant requires a 100% kill rate, so verification was rejected.
+
 ## 1. Automated Test Suite Executions
 
 Every suite was executed directly on the host machine. Output logs are preserved in `evidence/logs/`.
-Suites 12 and 13 represent local shell scenarios executing real binary steps rather than cloud GitHub Actions runners.
+Suites 12 and 13 represent local shell scenarios executing real binary steps rather than cloud GitHub Actions runners. The CI gate remains UNTESTED on cloud runners because no git remote is configured.
 
 | Suite # | Test Target | Command Executed | Exit Code | Pass Count | Fail Count | Raw Evidence Log |
 |---|---|---|---|---|---|---|
@@ -26,9 +29,34 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
 | 12 | CI Gate Local Scenario (untested on cloud runners) | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
 | 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 3 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `python3 evidence/eval_outside_mutation.py` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
 | 14a | Outside Repo Integration Check (colorama) | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
+
+### 1.1 Traceability of Test Count Changes Across Suites
+
+Test pass counts changed across development iterations as new language fixtures, adversarial edge cases, and granular lifecycle assertions were added:
+
+1. Suite 01 (test_e2e.sh: 9 to 15):
+   Added 6 language and boundary verification sub-tests:
+   - Step 6b: Mechanical rejection of 90% mutation score (9/10 killed, 1 survivor)
+   - Step 6c: TypeScript AST Diff Mutation (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN)
+   - Step 6d: Java AST Diff Mutation (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
+   - Step 6e: C# AST Diff Mutation (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT)
+   - Step 6f: C++ AST Diff Mutation (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
+   - Step 6g: Ruby AST Diff Mutation (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL)
+
+2. Suite 03 (test_bmad_zero_command.sh: 5 to 6):
+   - Added verification test: Mechanical rejection of pre-commit when mutation score is below 100%.
+
+3. Suite 07 (test_live_realtime.sh: 4 to 8):
+   - Earlier reports counted 4 selective assertions. The script executes 8 sequential lifecycle stages: Step 1 (Setup Wizard), Step 2 (Contract Definition), Step 3 (Authoring Code), Step 4 (Hook Intercept), Step 5 (State Verification), Step 6 (Adversarial Untested Commit Blocked), Step 7 (Test Remediation), Step 8 (Final Sealed Proof).
+
+4. Suite 08 (read-core: 55 to 56):
+   - Added unit test: test_ast_resolver_non_ascii_and_unicode_handling in read/read-core/src/ast/mod.rs (validating multi-byte UTF-8 parsing for Japanese docstrings, Cyrillic comments, Greek symbols, and French accents).
+
+5. Suite 09 (read-daemon: 22 to 57):
+   - Earlier reports counted 22 top-level test groups. Running go test -v executes 57 individual test functions across packages config, gateway, orchestrator, pty, scanner, and security.
 
 ## 2. Quantitative Performance Measurements
 
@@ -68,17 +96,26 @@ Measures `read-engine ast-context` across 8 supported programming languages (10 
 ### 2.4 Diagnostic Explanation of AST Latency Variance and Thread Contention
 Target fixture: Synthetic Python file containing 200 functions (800 lines).
 Measured across 10 repeated benchmark iterations on an AMD Ryzen 3 3250U host:
-- CLI process execution (including binary startup and file reading):
-  - Debug profile (10 runs): Mean 3.745 ms (Min 3.327 ms, Max 4.287 ms, StdDev 0.323 ms).
-  - Release profile (10 runs): Mean 2.014 ms (Min 1.894 ms, Max 2.138 ms, StdDev 0.077 ms).
-- Pure in-process function execution:
-  - Debug unoptimized: 1.65 ms.
-  - Release optimized: 0.375 ms.
-  - Baseline commit `ca31c10` unoptimized: 2.96 ms single thread, 6.2 ms under 4-thread CPU contention (`--test-threads=4`).
-- Profile applicability: The specification threshold of under 5 ms applies normatively to the release build profile for runtime use. The optimized implementation satisfies the threshold in both release and debug profiles.
-- Raw logs:
-  - Baseline log: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log).
-  - Optimized log: [17_latency_optimized_3ce41c4.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/17_latency_optimized_3ce41c4.log).
+
+1. Pure in-process function execution (10 iterations):
+- Release profile: Mean 0.140 ms (Min: 0.122 ms, Max: 0.226 ms, StdDev: 0.032 ms)
+- Debug profile:   Mean 1.225 ms (Min: 0.962 ms, Max: 1.677 ms, StdDev: 0.274 ms)
+
+2. CLI process execution including binary startup and file reading (10 iterations):
+- Release profile: Mean 2.014 ms (Min: 1.894 ms, Max: 2.138 ms, StdDev: 0.077 ms)
+- Debug profile:   Mean 3.745 ms (Min: 3.327 ms, Max: 4.287 ms, StdDev: 0.323 ms)
+
+3. Full test suite concurrent execution (--test-threads=4, debug profile):
+- Measured extraction time: 2.1 to 2.4 ms
+- Host CPU load: 100% saturation across all 4 worker threads
+- Result: PASS (strictly below 5 ms ceiling under CPU contention)
+
+Normative Profile Applicability:
+The specification threshold of under 5 ms applies normatively to the release build profile for runtime execution. Both release and debug profiles satisfy the requirement on this hardware.
+
+Raw logs:
+- Baseline log: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log)
+- Optimized log: [17_latency_optimized_3ce41c4.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/17_latency_optimized_3ce41c4.log)
 
 UTF-8 Handling Verification:
 Test `test_ast_resolver_non_ascii_and_unicode_handling` in `read/read-core/src/ast/mod.rs` validates parsing Japanese identifiers and docstrings, Cyrillic comments, Greek symbols, and French accents without panics or degraded fallback states.
@@ -131,20 +168,49 @@ Tested Java and .NET process execution under virtual memory constraints:
 
 ### 3.3 Mutation Testing on External Public Repository
 Tested AROP mutation engine against genuine public repository `veloce-acceptance/github-repo`:
+- Target Repository Commit Hash: `7732578c560572cb0e60d3aa83fdd2fdac6a85cf`
 - Target File: `backend/resources/preview.py`
-- Methodology: Reverted past bug fix commit `7a34571` on a scratch branch, staged the diff, and ran `read-engine mutate` on the staged diff. Staged diff stat confirmed 33 insertions, 13 deletions across `backend/resources/preview.py` only. Zero test files were staged.
-- Mutants evaluated:
-  - Initial run: Generated 10 mutants with 4 survivors (60.0% score).
-    - Survivor 1 [L259 FLIP_BOOL_FALSE]: Real test gap. The test suite does not exercise `ascii_from_png` with corrupted pixel input that triggers `ValueError`.
-    - Survivor 2 [L259 RETURN_NONE]: Real test gap. Same unexercised error handling path.
-    - Survivor 3 [L264 LOGICAL_OR_TO_AND]: Equivalent mutant from an operator design flaw. Mutated "or" to "and" inside a triple-quoted Python docstring.
-    - Survivor 4 [L267 LOGICAL_AND_TO_OR]: Equivalent mutant from an operator design flaw. Mutated "and" to "or" inside a triple-quoted Python docstring.
-  - Corrected run (with docstrings skipped): Generated 8 mutants.
-    - 6 mutants killed by `pytest tests/test_m7_vector_preview.py`.
-    - 2 mutants survived on line 259 (the unasserted `ValueError` handling path).
-- Gate Status: FAILED. The score of 75.0% (6/8 killed) fails the strictly required 100.0% threshold.
-- Raw log: [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log).
-- Integration check log: [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log).
+- Methodology: Reverted past bug fix commit `7a34571f9d6e29bcaeb0226765dde34720ba0982` on a scratch branch, staged the diff, and ran `read-engine mutate` on the staged diff.
+- Staged diff stat: 33 additions, 13 deletions across `backend/resources/preview.py` only. Zero test files were staged.
+- Exact Execution Command:
+  `python3 evidence/eval_outside_mutation.py`
+  (invokes `read-engine mutate` in `/tmp/test_outside_repo` and evaluates mutants against `pytest tests/test_m7_vector_preview.py`)
+
+Detailed Mutant Comparison Between Initial Run and Corrected Run:
+
+Run A (Initial Run with Docstring Mutants: 10 Mutants Generated):
+- Mutant #1 [L259 FLIP_BOOL_FALSE]: SURVIVED (Real test gap on ValueError handling)
+- Mutant #2 [L259 RETURN_NONE]: SURVIVED (Real test gap on ValueError handling)
+- Mutant #3 [L260 FLIP_BOOL_TRUE]: KILLED (test failure)
+- Mutant #4 [L260 RETURN_NONE]: KILLED (test failure)
+- Mutant #5 [L264 LOGICAL_OR_TO_AND]: SURVIVED (Equivalent mutant in docstring: 'or' changed to 'and')
+- Mutant #6 [L267 LOGICAL_AND_TO_OR]: SURVIVED (Equivalent mutant in docstring: 'and' changed to 'or')
+- Mutant #7 [L272 LOGICAL_OR_TO_AND]: KILLED (test failure)
+- Mutant #8 [L285 INVERT_LT]: KILLED (test failure)
+- Mutant #9 [L294 INVERT_NEQ]: KILLED (test failure)
+- Mutant #10 [L296 RETURN_NONE]: KILLED (test failure)
+Score: 6/10 killed, 4 survived (60.0% score). Gate status: FAILED.
+
+Run B (Corrected Run with Docstring Operator Fix: 8 Mutants Generated):
+The mutator was updated to track Python triple quotes (`"""` and `'''`) and skip docstrings. Mutants #5 and #6 from Run A were eliminated because they targeted comments. No tests were added or altered.
+- Mutant #1 [L259 FLIP_BOOL_FALSE]: SURVIVED (Real test gap on ValueError handling)
+- Mutant #2 [L259 RETURN_NONE]: SURVIVED (Real test gap on ValueError handling)
+- Mutant #3 [L260 FLIP_BOOL_TRUE]: KILLED (test failure)
+- Mutant #4 [L260 RETURN_NONE]: KILLED (test failure)
+- Mutant #5 [L272 LOGICAL_OR_TO_AND]: KILLED (test failure)
+- Mutant #6 [L285 INVERT_LT]: KILLED (test failure)
+- Mutant #7 [L294 INVERT_NEQ]: KILLED (test failure)
+- Mutant #8 [L296 RETURN_NONE]: KILLED (test failure)
+Score: 6/8 killed, 2 survived (75.0% score). Gate status: FAILED (Exit Code: 1).
+
+Why Survivors Remain Open:
+Mutants #1 and #2 mutate line 259 inside `ascii_from_png`:
+`except ValueError as e: return TextPreview(False, metrics=metrics, message=f"text preview failed: {e}")`
+The target repository test suite does not include a test that feeds malformed pixel output into `ascii_from_png` to assert this error path. This gap remains open. The mutation gate strictly failed and mechanically blocked handoff.
+
+Raw logs:
+- Evaluated log: [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log)
+- Integration check log: [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log)
 
 ### 3.4 WAL Tag Anchoring Security Boundary
 Git tag anchoring links the latest WAL entry hash to the git tag `read-wal-head`.
@@ -158,17 +224,22 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 ## 4. Reproducible Binary Build Verification
 
 To verify build reproducibility on this Linux host, clean builds were executed across independent isolated directories:
+Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
 
-### 4.1 Rust Engine Reproducibility (`read-engine`)
-Built using `cargo build --release --manifest-path read/read-core/Cargo.toml`.
-- Binary SHA-256 in `read/bin/read-engine`: `d1504e35fa9ad89b32a531331a258ed0ebc28e76b68cbb101fec1c0887a990c0`
-- Clean isolated build SHA-256 (`/tmp/reproduce_clean1`): `d1504e35fa9ad89b32a531331a258ed0ebc28e76b68cbb101fec1c0887a990c0`
-- Result: SHA-256 hashes match identically. Rust release builds are bitwise reproducible on this Linux host.
+Clean Directory 1 (`/tmp/clean_build_1`):
+- Build Start: `2026-11-23T11:32:21.674246+00:00`
+- Build End:   `2026-11-23T11:33:36.364143+00:00`
+- Rust Engine SHA-256: `454813b594a02bc8995543f142ca653e8e26863d5dd17ddebde979d561d38735`
+- Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 
-### 4.2 Go Host Daemon Reproducibility (`read-daemon`)
-Built using `go build -trimpath -o bin/read-daemon cmd/read-daemon/main.go`.
-- Standard `go build` embeds local directory paths into debug symbols, producing different hashes across different directories.
-- With `-trimpath` and building `cmd/read-daemon/main.go`, file system paths are stripped from the compiled binary.
-- Binary SHA-256 in `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Clean isolated build SHA-256 (`/tmp/reproduce_clean1`): `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Result: SHA-256 hashes match identically. With `-trimpath`, Go daemon builds are bitwise reproducible on this Linux host.
+Clean Directory 2 (`/tmp/clean_build_2`):
+- Build Start: `2026-11-23T11:33:36.441206+00:00`
+- Build End:   `2026-11-23T11:34:27.792999+00:00`
+- Rust Engine SHA-256: `454813b594a02bc8995543f142ca653e8e26863d5dd17ddebde979d561d38735`
+- Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
+
+Shipped Binaries in `read/bin/`:
+- `read/bin/read-engine`: `454813b594a02bc8995543f142ca653e8e26863d5dd17ddebde979d561d38735`
+- `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
+- Result: Both binaries match the clean isolated directory builds bitwise identically.
+- Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64) only.

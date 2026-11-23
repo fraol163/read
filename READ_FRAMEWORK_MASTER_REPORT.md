@@ -6,6 +6,9 @@
 **Working Git Branch:** `report-review-v0.7.1`  
 **Host Environment:** Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
 
+CRITICAL GATE STATUS:
+The outside repository mutation verification gate on veloce-acceptance/github-repo strictly FAILED (Exit Code: 1). Score: 75.0% (6 killed, 2 survived). The framework invariant requires a 100% kill rate, so verification was rejected.
+
 ---
 
 ## 1. Executive Summary and Vision
@@ -43,7 +46,7 @@ Key systems include:
 
 All test suites and benchmark measurements were executed directly on the host machine. Output logs are preserved in `evidence/logs/`.
 The evidence dossier is documented in [evidence/EVIDENCE.md](file:///home/renan/Downloads/me/methodology_session/evidence/EVIDENCE.md).
-Suites 12 and 13 represent local shell scenarios executing real binary steps rather than cloud GitHub Actions runners.
+Suites 12 and 13 represent local shell scenarios executing real binary steps rather than cloud GitHub Actions runners. The CI gate remains UNTESTED on cloud runners because no git remote is configured.
 
 ### Automated Test Suite Execution Summary
 
@@ -62,7 +65,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
 | 12 | CI Gate Local Scenario (untested on cloud runners) | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
 | 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 3 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `python3 evidence/eval_outside_mutation.py` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
 | 14a | Outside Repo Integration Check (colorama) | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
@@ -70,7 +73,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 
 - Staged Diff Hashing: Mean 8.835 ms (Min 8.053 ms, Max 10.500 ms, StdDev 0.706 ms). Dominated by git process spawn overhead.
 - Crash Recovery: Mean 11.490 ms (Min 7.586 ms, Max 16.455 ms, StdDev 3.113 ms). Replays WAL entries without token re-spend.
-- AST Context Extraction:
+- AST Context Extraction Across Languages:
   - Python: Mean 2.243 ms
   - TypeScript: Mean 1.921 ms
   - Go: Mean 1.762 ms
@@ -79,12 +82,15 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - C#: Mean 2.374 ms
   - C++: Mean 1.962 ms
   - Ruby: Mean 1.927 ms
-  - 200 functions fixture across 10 runs: Mean 2.014 ms in release profile (StdDev 0.077 ms) and Mean 3.745 ms in debug profile (StdDev 0.323 ms). The specification threshold of under 5 ms applies normatively to the release profile. Multi-byte UTF-8 handling verified with non-ASCII test cases.
+- 200 Functions Fixture Variance (10 Iterations):
+  - Pure In-Process: Mean 0.140 ms in release profile (StdDev 0.032 ms) and Mean 1.225 ms in debug profile (StdDev 0.274 ms).
+  - CLI Process: Mean 2.014 ms in release profile (StdDev 0.077 ms) and Mean 3.745 ms in debug profile (StdDev 0.323 ms).
+  - Normative Threshold: The under 5 ms threshold applies normatively to the release build profile for runtime execution.
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
 - PTY Stream Allocation: 56,628 ns/op, 974 B/op, 4 allocs/op.
-- Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions, zero test file changes), and evaluated mutants against `pytest tests/test_m7_vector_preview.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: FAILED.
+- Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED.
 - Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `d1504e35...` and Go daemon binary with `-trimpath` `dcecffce...`.
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `454813b5...` and Go daemon binary with `-trimpath` `dcecffce...`.
 
 ---
 
@@ -97,7 +103,7 @@ Key claim adjustments include:
 - Refuted for Managed Runtimes: Dynamic `RLIMIT_AS` (30% RAM ceiling) causes 64-bit JVM and .NET CoreCLR to abort on startup because it restricts virtual memory address space.
 - Narrowed: Crash recovery claims were narrowed from "under 10 ms" to 7.5 ms through 16.5 ms based on empirical measurements.
 - Refuted: "Master Override provides non-repudiation" was corrected to "provides cryptographic integrity and auditability via SHA-256 hash chaining".
-- Refuted: "Outside codebase achieves 100% mutation kill score" was refuted by testing on `veloce-acceptance/github-repo` (75.0% score, gate failed on unexercised error path).
+- Refuted: "Outside codebase achieves 100% mutation kill score" was refuted by testing on `veloce-acceptance/github-repo` (75.0% score, gate strictly failed on unexercised error path).
 
 ---
 
@@ -110,7 +116,7 @@ Key findings:
 2. Static Token Risk: Bearer tokens are static and lack granular scopes. Passing `--auth-token` via CLI exposes secrets in `/proc`.
 3. Reverse Proxy XFF Spoofing: The daemon trusts incoming `X-Forwarded-For` unconditionally. Sending `X-Forwarded-For: 127.0.0.1` bypasses rate limits. Reverse proxies must strip client-supplied headers.
 4. Advisory Lock Limits: POSIX `libc::flock` coordinates only cooperating processes. Uncooperating text editors can write directly to state files. Integrity is guarded by WAL hash verification.
-5. Server-Side CI Enforcement: Developers can bypass client-side pre-commit hooks via `git commit --no-verify`. Server-side CI enforcement has been implemented in [.github/workflows/read-gate.yml](file:///home/renan/Downloads/me/methodology_session/.github/workflows/read-gate.yml).
+5. Server-Side CI Enforcement: Developers can bypass client-side pre-commit hooks via `git commit --no-verify`. Server-side CI enforcement has been implemented in [.github/workflows/read-gate.yml](file:///home/renan/Downloads/me/methodology_session/.github/workflows/read-gate.yml), but remains UNTESTED on cloud runners until a remote repository is configured and pushed.
 
 ---
 
@@ -123,8 +129,8 @@ Key findings:
 
 ---
 
-## 7. Accepted Decisions
+## 7. Open User Decisions
 
-1. Human Student Trial Thresholds: Setup under 10 minutes for at least 4 of 5 students, at least 4 of 5 finish all 20 tasks, and READ catches at least 20 percent more seeded bugs than a plain test run.
-2. Target Initial Audience: Undergraduate students learning test-first development.
-3. CI Gate Infrastructure Status: Labeled as local shell scenario until remote repository push enables cloud GitHub Actions runners.
+1. Human Student Trial Thresholds: Propose setup under 10 minutes for at least 4 of 5 students, at least 4 of 5 finish all 20 tasks, and READ catches at least 20 percent more seeded bugs than a plain test run. Requires final confirmation before conducting trial.
+2. Target Initial Audience: Propose undergraduate students learning test-first development. Requires final confirmation.
+3. CI Gate Cloud Status: The repository has no configured git remote (`git remote -v` outputs nothing). The workflow remains labeled as UNTESTED on cloud infrastructure until a remote is configured and pushed.
