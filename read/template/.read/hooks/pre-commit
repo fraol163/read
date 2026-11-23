@@ -148,7 +148,6 @@ if [ -n "$TEST_CMD" ]; then
             echo "[READ GATE WARNING] Test suite failed with exit code $TEST_EXIT (Warning Mode):"
             echo "$TEST_OUTPUT"
             echo "----------------------------------------------------------------"
-            echo "Proceeding with mutation analysis in warning mode..."
         else
             echo "[READ GATE FAILED] Test suite failed with exit code $TEST_EXIT:"
             echo "$TEST_OUTPUT"
@@ -180,17 +179,20 @@ KILLED=0
 TOTAL=0
 
 if [ -n "$ENGINE_BIN" ] && [ -n "$TEST_CMD" ]; then
-    DIFF_TMP=$(mktemp -t read-diff-XXXXXX.patch)
-    git diff --staged > "$DIFF_TMP"
+    if [ "$TEST_EXIT" -ne 0 ]; then
+        echo "MUTATION SKIPPED: baseline tests fail"
+    else
+        DIFF_TMP=$(mktemp -t read-diff-XXXXXX.patch)
+        git diff --staged > "$DIFF_TMP"
 
-    MUTANTS_JSON_FILE=$(mktemp -t read-mutants-XXXXXX.json)
-    "$ENGINE_BIN" mutate --json "$DIFF_TMP" > "$MUTANTS_JSON_FILE" 2>/dev/null || echo '[]' > "$MUTANTS_JSON_FILE"
-    rm -f "$DIFF_TMP"
+        MUTANTS_JSON_FILE=$(mktemp -t read-mutants-XXXXXX.json)
+        "$ENGINE_BIN" mutate --json "$DIFF_TMP" > "$MUTANTS_JSON_FILE" 2>/dev/null || echo '[]' > "$MUTANTS_JSON_FILE"
+        rm -f "$DIFF_TMP"
 
-    # Evaluate mutants using embedded python mutation harness
-    MUT_RES_FILE=$(mktemp -t read-mut-res-XXXXXX.txt)
-    SURVIVORS_FILE=$(mktemp -t read-surv-XXXXXX.txt)
-    python3 -c '
+        # Evaluate mutants using embedded python mutation harness
+        MUT_RES_FILE=$(mktemp -t read-mut-res-XXXXXX.txt)
+        SURVIVORS_FILE=$(mktemp -t read-surv-XXXXXX.txt)
+        python3 -c '
 import json, sys, subprocess, os, shutil
 
 try:
@@ -261,26 +263,26 @@ with open("'"$SURVIVORS_FILE"'", "w") as out:
     for s in survivors:
         out.write(s + "\n")
 '
-    SCORE_LINE=$(cat "$MUT_RES_FILE" 2>/dev/null || echo "100.0:0:0")
-    rm -f "$MUT_RES_FILE" "$MUTANTS_JSON_FILE"
+        SCORE_LINE=$(cat "$MUT_RES_FILE" 2>/dev/null || echo "100.0:0:0")
+        rm -f "$MUT_RES_FILE" "$MUTANTS_JSON_FILE"
 
-    MUTATION_SCORE=$(echo "$SCORE_LINE" | cut -d':' -f1)
-    KILLED=$(echo "$SCORE_LINE" | cut -d':' -f2)
-    TOTAL=$(echo "$SCORE_LINE" | cut -d':' -f3)
+        MUTATION_SCORE=$(echo "$SCORE_LINE" | cut -d':' -f1)
+        KILLED=$(echo "$SCORE_LINE" | cut -d':' -f2)
+        TOTAL=$(echo "$SCORE_LINE" | cut -d':' -f3)
 
-    if [ "$TOTAL" -gt 0 ]; then
-        SCORE_INT=$(echo "$MUTATION_SCORE" | cut -d'.' -f1)
-        if [ "$KILLED" -ne "$TOTAL" ] || [ "$SCORE_INT" -lt 100 ]; then
-            echo "----------------------------------------------------------------"
-            if [ "$ENFORCEMENT_MODE" = "warning" ]; then
-                echo "[READ GATE WARNING] Mutation score ${MUTATION_SCORE}% is below 100.0% threshold (Warning Mode)"
-                echo "Killed $KILLED/$TOTAL mutants. Surviving mutants:"
-                cat "$SURVIVORS_FILE"
-                rm -f "$SURVIVORS_FILE"
-                echo "Commit allowed in warning mode. Review test gaps for remediation."
+        if [ "$TOTAL" -gt 0 ]; then
+            SCORE_INT=$(echo "$MUTATION_SCORE" | cut -d'.' -f1)
+            if [ "$KILLED" -ne "$TOTAL" ] || [ "$SCORE_INT" -lt 100 ]; then
                 echo "----------------------------------------------------------------"
+                if [ "$ENFORCEMENT_MODE" = "warning" ]; then
+                    echo "[READ GATE WARNING] Mutation score: ${MUTATION_SCORE}% (Killed $KILLED/$TOTAL)"
+                    echo "Surviving mutants:"
+                    cat "$SURVIVORS_FILE"
+                    rm -f "$SURVIVORS_FILE"
+                    echo "Commit allowed in warning mode. Review test gaps for remediation."
+                    echo "----------------------------------------------------------------"
 
-                cat << EOF > "$EVIDENCE_FILE"
+                    cat << EOF > "$EVIDENCE_FILE"
 {
   "task_id": "$TASK_ID",
   "status": "warning",
@@ -290,22 +292,22 @@ with open("'"$SURVIVORS_FILE"'", "w") as out:
   "contract_hash": "$CONTRACT_HASH",
   "diff_hash": "$DIFF_HASH",
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "warning": "Mutation score below 100% threshold: surviving mutants detected"
+  "warning": "Mutation score: surviving mutants detected"
 }
 EOF
-                git add "$EVIDENCE_FILE" 2>/dev/null || true
-                exit 0
-            fi
+                    git add "$EVIDENCE_FILE" 2>/dev/null || true
+                    exit 0
+                fi
 
-            echo "[READ GATE FAILED] Mutation score ${MUTATION_SCORE}% is below strictly required 100.0% threshold (Killed $KILLED/$TOTAL)"
-            echo "Your test suite allows code modifications to survive silently."
-            echo "Strictly 100% mutation score required. Surviving mutants:"
-            cat "$SURVIVORS_FILE"
-            rm -f "$SURVIVORS_FILE"
-            echo "Strengthen assertions in test suite before committing."
-            echo "----------------------------------------------------------------"
+                echo "[READ GATE FAILED] Mutation score ${MUTATION_SCORE}% is below strictly required 100.0% threshold (Killed $KILLED/$TOTAL)"
+                echo "Your test suite allows code modifications to survive silently."
+                echo "Strictly 100% mutation score required. Surviving mutants:"
+                cat "$SURVIVORS_FILE"
+                rm -f "$SURVIVORS_FILE"
+                echo "Strengthen assertions in test suite before committing."
+                echo "----------------------------------------------------------------"
 
-            cat << EOF > "$EVIDENCE_FILE"
+                cat << EOF > "$EVIDENCE_FILE"
 {
   "task_id": "$TASK_ID",
   "status": "gate_failed",
@@ -318,17 +320,22 @@ EOF
   "error": "Mutation score below 100% threshold: surviving mutants detected"
 }
 EOF
-            exit 1
+                exit 1
+            fi
+            rm -f "$SURVIVORS_FILE"
+            if [ "$ENFORCEMENT_MODE" = "warning" ]; then
+                echo "[READ AROP] Mutation Score: ${MUTATION_SCORE}% ($KILLED/$TOTAL killed)."
+            else
+                echo "[READ AROP] Mutation Score: ${MUTATION_SCORE}% ($KILLED/$TOTAL killed) == 100% threshold."
+            fi
         fi
-        rm -f "$SURVIVORS_FILE"
-        echo "[READ AROP] Mutation Score: ${MUTATION_SCORE}% ($KILLED/$TOTAL killed) == 100% threshold."
     fi
 fi
 
 if [ "$TEST_EXIT" -ne 0 ] && [ "$ENFORCEMENT_MODE" = "warning" ]; then
     echo "================================================================"
     echo "[READ GATE WARNING] Commit allowed in warning mode."
-    echo "Review test failures and mutant diagnostics before release."
+    echo "Review test failures before release."
     echo "================================================================"
 
     cat << EOF > "$EVIDENCE_FILE"
@@ -336,13 +343,10 @@ if [ "$TEST_EXIT" -ne 0 ] && [ "$ENFORCEMENT_MODE" = "warning" ]; then
   "task_id": "$TASK_ID",
   "status": "warning",
   "test_exit": $TEST_EXIT,
-  "mutation_score": $MUTATION_SCORE,
-  "mutants_killed": $KILLED,
-  "mutants_total": $TOTAL,
   "contract_hash": "$CONTRACT_HASH",
   "diff_hash": "$DIFF_HASH",
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "warning": "Test suite execution failed"
+  "warning": "Test suite execution failed, mutation skipped"
 }
 EOF
     git add "$EVIDENCE_FILE" 2>/dev/null || true

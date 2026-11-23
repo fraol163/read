@@ -27,9 +27,9 @@ Justification: Defining completion strictly by passing the task test suite allow
 
 ## Cohort Completion Threshold (80% Rule)
 
-The 80% cohort completion rate is defined as achieving successful completion on at least 80% of all assigned task attempts across the cohort, requiring at least 29 out of 36 total task attempts to pass their test suite within the 20-minute limit.
+The 80% completion rule counts PARTICIPANTS who pass all three tasks. At least 10 of 12 participants must pass all three tasks. Per-task pass rates are reported as a secondary table.
 
-Justification: Defining the threshold by task attempts prevents an isolated failure on a single task from disqualifying a participant's entire contribution while providing a granular evaluation of developer success across all tasks.
+Justification: Counting participants who pass all three tasks ensures that the cohort demonstrates proficiency across bug fixing, endpoint implementation, and refactoring rather than compensating for a failed domain with multiple simple passes.
 
 ## Stop-or-Continue Rule
 
@@ -37,7 +37,7 @@ Justification: Defining the threshold by task attempts prevents an isolated fail
    - If a participant exhausts their 3-retry cap or reaches the 20-minute limit on any task without passing all tests, they must stop work on that task, record the task as failed in `record_template.csv`, and continue immediately to the next assigned task.
    - A failure or timeout on one task does not disqualify a participant from continuing to the next task.
 2. Cohort-Level Evaluation:
-   - If overall cohort completion falls below the 80% threshold across all completed tasks, the trial is stopped for protocol and guidance review before running subsequent cohorts.
+   - If overall cohort completion falls below the 80% threshold (fewer than 10 of 12 participants passing all three tasks), the trial is stopped for protocol and guidance review before running subsequent cohorts.
    - If an unrecoverable platform or environment defect occurs during a session, the trial session is stopped immediately for remediation.
 
 ## Cohort Profile
@@ -61,8 +61,17 @@ To prevent participants from tampering with enforcement mode during the trial:
 1. Filesystem Permission Control:
    - The `.read/` directory and `.read/config.json` file in each participant workspace are set to read-only permissions (`chmod 444 .read/config.json`) and owned by the supervisor account.
 2. Automated Submission Audit Control:
-   - During automated evaluation, every participant submission is checked via `git diff <baseline> HEAD -- .read/config.json`.
-   - Any commit that modifies or stages changes to `.read/config.json` is flagged as an invalid tamper attempt and marked as escalated in `record_template.csv`.
+   - During automated evaluation, every participant submission is checked via `trial/audit_config.sh <repo> <baseline>`.
+   - The audit covers committed changes only.
+   - The hook enforces the working-tree config during active development.
+   - Residual Risk: A participant who owns the directory can delete and recreate `.read/config.json` in their local working tree during task work without committing the altered file.
+   - Supervisor-Side Check: To mitigate this residual risk, the supervisor-side grading pipeline performs an automated clean clone check. The pipeline pulls the participant branch, verifies that `.read/config.json` matches the canonical baseline hash, and runs the pre-commit gate against the canonical configuration in an isolated sandbox. Any submission exhibiting divergent behavior or tampered configuration is flagged for manual review.
+
+## Reviewer Protocol for Surviving Mutants
+
+Reviewers judge only SURVIVED mutants, and only after step 3 shows real survivors on a passing baseline.
+- Each SURVIVED mutant gets one label: "real test gap" or "equivalent mutant", with a one-line reason.
+- If a reviewer cannot label a survivor in under two minutes, it goes into an "unclear" bucket, counted separately, and not counted as a gap.
 
 ## Data Collection
 
@@ -81,5 +90,5 @@ To prevent participants from tampering with enforcement mode during the trial:
 
 ## Evaluation Criteria
 
-- Target cohort completion rate: 80% of all assigned task attempts passing final test suites within the 20-minute limit.
+- Target cohort completion rate: At least 10 of 12 participants passing all three tasks within the 20-minute limit per task. Per-task pass rates are reported as a secondary table.
 - Warning review: Warnings emitted during commits are reviewed using the blinded review protocol in `warning_review.md`.

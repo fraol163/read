@@ -12,9 +12,10 @@ if [ ! -d ".git" ]; then
     exit 2
 fi
 
-# Fallback to root commit if specified baseline does not resolve
+# Exit with code 2 if specified baseline does not resolve
 if ! git rev-parse --verify "$BASELINE_COMMIT" >/dev/null 2>&1; then
-    BASELINE_COMMIT=$(git rev-list --max-parents=0 HEAD | head -n 1)
+    echo "Error: Baseline commit '$BASELINE_COMMIT' could not be resolved."
+    exit 2
 fi
 
 echo "Auditing .read/config.json between baseline $BASELINE_COMMIT and HEAD in $REPO_DIR..."

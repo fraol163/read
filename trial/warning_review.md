@@ -8,29 +8,45 @@ This document provides guidelines and an evaluation checklist for determining wh
 
 The pre-commit gate in warning mode outputs diagnostics in the following standardized format:
 
-1. Test Suite Diagnostics:
+1. Test Suite Diagnostics (Failing Baseline):
 ```
 ----------------------------------------------------------------
 [READ GATE WARNING] Test suite failed with exit code <EXIT_CODE> (Warning Mode):
 <RAW_TEST_OUTPUT>
 ----------------------------------------------------------------
-Proceeding with mutation analysis in warning mode...
+MUTATION SKIPPED: baseline tests fail
+================================================================
+[READ GATE WARNING] Commit allowed in warning mode.
+Review test failures before release.
+================================================================
 ```
 
-2. Mutation Evaluation Diagnostics:
+2. Mutation Evaluation Diagnostics (Passing Baseline):
 ```
 [READ AROP] Evaluating <TOTAL> targeted mutants on production code diff...
   [<OPERATOR> at L<LINE> in <FILE>] (mutated: <MUTATED_LINE>) -> <KILLED | SURVIVED>
-[READ AROP] Mutation Score: <SCORE>% (<KILLED>/<TOTAL> killed) == 100% threshold.
+----------------------------------------------------------------
+[READ GATE WARNING] Mutation score: <SCORE>% (Killed <KILLED>/<TOTAL>)
+Surviving mutants:
+  - [SURVIVOR] <OPERATOR> at <FILE>:<LINE> (mutated: <MUTATED_LINE>)
+Commit allowed in warning mode. Review test gaps for remediation.
+----------------------------------------------------------------
 ```
 
-3. Warning Disposition Summary:
-```
-================================================================
-[READ GATE WARNING] Commit allowed in warning mode.
-Review test failures and mutant diagnostics before release.
-================================================================
-```
+## Review Rules and Survivor Judging Protocol
+
+Reviewers judge only SURVIVED mutants, and only after validation shows real survivors on a passing baseline. Mutants are not judged when baseline tests fail.
+
+Each SURVIVED mutant gets one label: "real test gap" or "equivalent mutant", with a one-line reason.
+If a reviewer cannot label a survivor in under two minutes, it goes into an "unclear" bucket, counted separately, and not counted as a gap.
+
+### 1. Label Definitions
+- Real Test Gap: The mutant causes observable functional divergence in behavior that a comprehensive unit test suite should detect and fail.
+- Equivalent Mutant: The mutant produces behavior semantically identical to the original code or alters non-functional string descriptions without changing control flow or error classes.
+- Unclear Bucket: Assigned when classification exceeds two minutes of inspection. Counted separately and explicitly excluded from test gap counts.
+
+### 2. Time-Boxed Evaluation (Two-Minute Rule)
+Reviewers must complete the evaluation of a single mutant survivor in under two minutes. If ambiguity or complex code paths prevent reaching a definitive label within two minutes, the survivor is immediately routed to the "unclear" bucket.
 
 ## Blinded Evaluation Methodology
 
@@ -89,8 +105,9 @@ Mutant Diagnostic: [<OPERATOR> at L<LINE> in <FILE>] (mutated: <MUTATED_LINE>) -
 Mutant Location: <filepath>:<linenumber>
 Mutant Operator: <operator_name>
 Mutated Code: <mutated_line_text>
-Outcome: [KILLED | SURVIVED]
-Classification: [Real Gap | Equivalent Mutant | Inconclusive]
+Outcome: SURVIVED
+Classification: [real test gap | equivalent mutant | unclear]
+Reason: <one-line reason>
 Gap Type: [Missing Assertion | Missing Case | None]
 Resolution Actionable in 5 Min: [Yes | No]
 Notes: <observations without participant attribution>
