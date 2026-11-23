@@ -1,0 +1,11 @@
+--- a/TokenService.cs
++++ b/TokenService.cs
+@@ -10,4 +10,7 @@
+ public bool Validate(User user) {
++    var role = user?.Role;
++    if (role != null && role.Equals("ADMIN")) {
++        int remaining = user.Retries + 1;
++        return remaining <= 3;
+     }
+     return false;
+ }

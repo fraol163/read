@@ -124,8 +124,8 @@ if ! grep -q "REMOVE_OPTIONAL_CHAIN" ts_mutation_output.txt || ! grep -q "INVERT
     exit 1
 fi
 TS_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' ts_mutation_output.txt | grep -o '[0-9]*')
-if [ "$TS_COUNT" -ne 7 ]; then
-    echo "[FAIL] Expected exactly 7 TypeScript mutants, got: $TS_COUNT" >&2
+if [ "$TS_COUNT" -ne 6 ]; then
+    echo "[FAIL] Expected exactly 6 TypeScript mutants, got: $TS_COUNT" >&2
     exit 1
 fi
 PASS_TS_OUTPUT=$("$READ" eval-mutation-score "$TS_COUNT" "$TS_COUNT" 2>&1)
@@ -163,8 +163,8 @@ if ! grep -q "REMOVE_NULL_CHECK" java_mutation_output.txt || ! grep -q "INVERT_E
     exit 1
 fi
 JAVA_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' java_mutation_output.txt | grep -o '[0-9]*')
-if [ "$JAVA_COUNT" -ne 5 ]; then
-    echo "[FAIL] Expected exactly 5 Java mutants, got: $JAVA_COUNT" >&2
+if [ "$JAVA_COUNT" -ne 4 ]; then
+    echo "[FAIL] Expected exactly 4 Java mutants, got: $JAVA_COUNT" >&2
     exit 1
 fi
 PASS_JAVA_OUTPUT=$("$READ" eval-mutation-score "$JAVA_COUNT" "$JAVA_COUNT" 2>&1)

@@ -80,9 +80,15 @@ pub fn generate_ts_js_line_mutants(
         next_id += 1;
     }
 
-    // 2. RETURN_UNDEFINED: return <expr>; -> return undefined;
+    // 2. RETURN_UNDEFINED: return <expr>; -> return undefined; (suppressed for boolean literal returns where FLIP_BOOL applies and undefined causes compile error under strictNullChecks)
+    let is_bool_return = trimmed == "return true;"
+        || trimmed == "return false;"
+        || trimmed.starts_with("return true")
+        || trimmed.starts_with("return false");
+
     if (trimmed.starts_with("return ") || trimmed == "return")
         && !trimmed.contains("return undefined")
+        && !is_bool_return
     {
         let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
         candidates.push(Mutant {

@@ -137,8 +137,20 @@ pub fn generate_java_line_mutants(
         next_id += 1;
     }
 
-    // 2. RETURN_NULL: return x <-> return null
-    if (trimmed.starts_with("return ") || trimmed == "return") && !trimmed.contains("return null") {
+    // 2. RETURN_NULL: return x <-> return null (suppressed for boolean/relational expressions to avoid compile errors)
+    let is_bool_or_relational = trimmed.contains("true")
+        || trimmed.contains("false")
+        || trimmed.contains(" > ")
+        || trimmed.contains(" < ")
+        || trimmed.contains(" == ")
+        || trimmed.contains(" != ")
+        || trimmed.contains(" && ")
+        || trimmed.contains(" || ");
+
+    if (trimmed.starts_with("return ") || trimmed == "return")
+        && !trimmed.contains("return null")
+        && !is_bool_or_relational
+    {
         let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
         candidates.push(Mutant {
             id: next_id,

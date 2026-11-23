@@ -1,0 +1,10 @@
+--- a/auth_service.ts
++++ b/auth_service.ts
+@@ -10,3 +10,6 @@
+ export function verifySession(session: UserSession): boolean {
++    const verified = session?.profile?.verified;
++    if (session.role === "admin" && session.quota > 0) {
++        return true;
++    }
+     return false;
+ }

@@ -1,0 +1,12 @@
+--- a/BufferPool.cpp
++++ b/BufferPool.cpp
+@@ -10,4 +10,7 @@
+ void* BufferPool::allocate(size_t size) {
++    if (ptr != nullptr) {
++        int next = current + 1;
++        if (size <= max_capacity) {
++            return ptr;
+         }
+     }
+     return nullptr;
+ }

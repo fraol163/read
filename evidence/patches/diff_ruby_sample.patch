@@ -1,0 +1,11 @@
+--- a/auth_service.rb
++++ b/auth_service.rb
+@@ -10,4 +10,8 @@
+ def authenticate(user, token)
++    return nil unless user&.active
++    if /^[A-Z0-9]+$/ === token && secret.eql?(expected)
++        count = attempts + 1
++        return session if count < 5
+     end
+     return nil
+ end

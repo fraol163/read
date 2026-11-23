@@ -1,0 +1,10 @@
+--- a/OrderService.java
++++ b/OrderService.java
+@@ -10,4 +10,7 @@
+ public boolean process(Order order) {
++    if (order != null && order.getRole().equals("ADMIN")) {
++        int remaining = order.getQuota() - 1;
++        return remaining > 0;
+     }
+     return false;
+ }
