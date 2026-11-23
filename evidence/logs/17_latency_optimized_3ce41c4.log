@@ -1,0 +1,24 @@
+=== AST EXTRACTION LATENCY: OPTIMIZED COMMIT 3ce41c4 ===
+Commit: 3ce41c48ce2894edbb08d7413380f443e835e426
+Host: AMD Ryzen 3 3250U (2 cores, 4 hardware threads, 5.7 GiB RAM)
+Platform: Linux 7.2.15-1-omarchy x86_64
+Compiler: rustc 1.99.1
+Optimization: Single-pass UTF-8 byte slice inspection for parentheses and single-line detection
+Target Fixture: Synthetic Python file containing 200 functions (800 lines)
+
+Execution Configuration 1: Debug unoptimized profile (single thread)
+Measured Extraction Time: 1651 microseconds (1.65 ms)
+CPU Load: Single thread idle host
+Exit Code: 0 (PASS, asserts < 5 ms)
+
+Execution Configuration 2: Release optimized profile (single thread)
+Measured Extraction Time: 375 microseconds (0.375 ms)
+CPU Load: Single thread idle host
+Exit Code: 0 (PASS, asserts < 5 ms)
+
+Execution Configuration 3: Full test suite parallel execution (--test-threads=4, debug profile)
+Measured Extraction Time: 2100 to 2400 microseconds (2.1 to 2.4 ms)
+CPU Load: 100% saturation across all 4 worker threads
+Exit Code: 0 (PASS, strictly below 5 ms ceiling under load)
+
+Correction Note: An earlier summary reported an unverified projection of 0.05 ms in debug and 0.01 ms in release. Real measured execution times on this hardware are 1.65 ms in debug and 0.375 ms in release.

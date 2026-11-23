@@ -2084,4 +2084,25 @@ export function midEditFn(a: string,
             elapsed.as_millis()
         );
     }
+
+    #[test]
+    fn test_ast_resolver_non_ascii_and_unicode_handling() {
+        // Unicode docstrings, multi-byte identifiers, Greek symbols, and accents
+        let unicode_python = "import sys\n\ndef calculate_cafe_metric(x: float, y: float) -> float:\n    \"\"\"計算 metric: café & résumé (π = 3.14159, коментар)\"\"\"\n    return x + y\n";
+        let (symbols, imports, degraded) =
+            AstContextResolver::extract_symbols_and_imports(unicode_python, "unicode.py", SourceLanguage::Python);
+        assert!(!degraded);
+        assert_eq!(imports.len(), 1);
+        assert_eq!(symbols.len(), 1);
+        assert_eq!(symbols[0].name, "calculate_cafe_metric");
+
+        // Unicode in TypeScript
+        let unicode_ts = "import { café } from './types';\n\nexport function computeRésumé(a: number): number {\n    // 説明: コメント\n    return a * 2;\n}\n";
+        let (symbols_ts, imports_ts, degraded_ts) =
+            AstContextResolver::extract_symbols_and_imports(unicode_ts, "unicode.ts", SourceLanguage::TypeScript);
+        assert!(!degraded_ts);
+        assert_eq!(imports_ts.len(), 1);
+        assert_eq!(symbols_ts.len(), 1);
+        assert_eq!(symbols_ts[0].name, "computeRésumé");
+    }
 }

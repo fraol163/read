@@ -56,13 +56,13 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Distribution | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
 | 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 4 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
-| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 55 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
+| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 56 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
 | 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 22 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
-| 12 | CI Gate Local Scenario | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
-| 13 | WAL Tamper Local Scenario | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 12 | CI Gate Local Scenario (untested on cloud runners) | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
+| 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
+| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 0 | 6 | 4 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
 ### Measured Benchmark Metrics (10 Runs Each)
@@ -78,10 +78,12 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - C#: Mean 2.374 ms
   - C++: Mean 1.962 ms
   - Ruby: Mean 1.927 ms
+  - Latency test on 200 functions fixture: 1.65 ms in unoptimized debug and 0.375 ms in release on dual-core hardware (spikes to 2.4 ms under 4-thread CPU contention, strictly below 5 ms limit). Multi-byte UTF-8 handling verified with non-ASCII test cases.
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
 - PTY Stream Allocation: 42,422 ns/op, 993 B/op, 4 allocs/op.
-- Real External Repo Mutation Test: Tested against genuine public open-source Python library `colorama` (`/usr/lib/python3.14/site-packages/colorama`). 52 baseline tests, 133 lines staged diff, 10 targeted mutants generated, 10 killed, 0 survived (100.0% score).
+- Real External Repo Mutation Test: Tested against genuine public repository `veloce-acceptance/github-repo` on `backend/resources/preview.py`. Reverted a past bug fix, generated 10 bounded AROP mutants on the staged diff, evaluated with `pytest`. Result: 6 killed, 4 survived (60.0% score) on unasserted branches and docstrings.
 - Tutorial Completion Timing: Machine execution 301.36 ms (0.30 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.30s, human trial unconducted).
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across independent clean clone builds for Rust release binary `fd925ce1...` and Go daemon binary with `-trimpath` `dcecffce...`.
 
 ---
 

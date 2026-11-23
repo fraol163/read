@@ -1,0 +1,18 @@
+=== AST EXTRACTION LATENCY: BASELINE COMMIT ca31c10 ===
+Commit: ca31c10baseline: v0.7.1 READ framework prior to independent review
+Host: AMD Ryzen 3 3250U (2 cores, 4 hardware threads, 5.7 GiB RAM)
+Platform: Linux 7.2.15-1-omarchy x86_64
+Compiler: rustc 1.99.1 (unoptimized debug profile)
+Target Fixture: Synthetic Python file containing 200 functions (800 lines)
+
+Execution Configuration 1: Single thread alone (no load)
+Measured Extraction Time: 2962 microseconds (2.96 ms)
+CPU Core Count: 2 physical cores
+Thread Count: 1 thread
+Exit Code: 0 (PASS, was asserting <= 10 ms)
+
+Execution Configuration 2: Full test suite parallel execution (--test-threads=4)
+Measured Extraction Time: 6200 microseconds (6.2 ms)
+CPU Load: 100% saturation across all 4 worker threads
+Result: FAILED when evaluated against strict < 5 ms specification threshold.
+Observation: Preemption under CPU saturation combined with character-by-character scanning caused latency to exceed 5 ms.
