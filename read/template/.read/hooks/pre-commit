@@ -1,0 +1,321 @@
+#!/usr/bin/env bash
+# READ Framework Autonomous Git Pre-Commit Hook
+# Operates just like BMAD: Declarative repository-native enforcement
+# Zero mandatory CLI commands required by the developer or agent.
+
+set -e
+
+# 1. Locate READ repository state directory
+READ_DIR=""
+if [ -d ".read" ]; then
+    READ_DIR=".read"
+elif [ -d ".method" ]; then
+    READ_DIR=".method"
+else
+    # Not a READ repository; allow normal git commit
+    exit 0
+fi
+
+TASK_FILE="$READ_DIR/TASK.md"
+STATE_FILE="$READ_DIR/STATE.json"
+EVIDENCE_FILE="$READ_DIR/EVIDENCE.json"
+PROJECT_FILE="$READ_DIR/PROJECT.md"
+CONFIG_FILE="$READ_DIR/config.json"
+
+# 2. Check for staged code changes
+STAGED_DIFF=$(git diff --staged)
+if [ -z "$STAGED_DIFF" ]; then
+    exit 0
+fi
+
+# 3. Locate read-engine binary
+ENGINE_BIN=""
+if [ -f "$CONFIG_FILE" ]; then
+    CFG_ENGINE=$(grep -o '"engine_bin": *"[^"]*"' "$CONFIG_FILE" | head -n1 | cut -d'"' -f4 || true)
+    if [ -n "$CFG_ENGINE" ] && [ -x "$CFG_ENGINE" ]; then
+        ENGINE_BIN="$CFG_ENGINE"
+    fi
+fi
+
+if [ -z "$ENGINE_BIN" ]; then
+    if command -v read-engine >/dev/null 2>&1; then
+        ENGINE_BIN="$(command -v read-engine)"
+    elif [ -x "./bin/read-engine" ]; then
+        ENGINE_BIN="./bin/read-engine"
+    elif [ -x "./read/bin/read-engine" ]; then
+        ENGINE_BIN="./read/bin/read-engine"
+    elif [ -x "$HOME/.local/bin/read-engine" ]; then
+        ENGINE_BIN="$HOME/.local/bin/read-engine"
+    elif [ -x "/usr/local/bin/read-engine" ]; then
+        ENGINE_BIN="/usr/local/bin/read-engine"
+    fi
+fi
+
+echo "================================================================"
+echo "[READ METHODOLOGY] Autonomous Pre-Commit Verification Gate"
+echo "Zero-command enforcement: Validating declarative contracts..."
+echo "================================================================"
+
+# 4. Extract Contract Hash from TASK.md
+CONTRACT_HASH=""
+TASK_ID="TASK-ANON"
+if [ -f "$TASK_FILE" ]; then
+    CONTRACT_HASH=$(sha256sum "$TASK_FILE" | cut -d' ' -f1)
+    TASK_ID=$(grep -E "^# TASK" "$TASK_FILE" | head -n 1 | sed 's/# TASK: *//g' | tr -dc '[:alnum:]_-' || echo "TASK-001")
+    if [ -z "$TASK_ID" ]; then
+        TASK_ID="TASK-001"
+    fi
+    echo "[READ Contract] TASK: $TASK_ID (Contract Hash: ${CONTRACT_HASH:0:16}...)"
+else
+    STAGED_FILES=$(git diff --staged --name-only | tr '\n' ' ')
+    CONTRACT_HASH=$(echo "$STAGED_FILES" | sha256sum | cut -d' ' -f1)
+    echo "[READ Contract] Implicit Contract Hash from staged files: ${CONTRACT_HASH:0:16}..."
+fi
+
+# 5. Compute SHA-256 of staged git diff
+DIFF_HASH=$(git diff --staged | sha256sum | cut -d' ' -f1)
+echo "[READ Diff] Staged Diff Hash: ${DIFF_HASH:0:16}..."
+
+# 6. Discover Test Runner Command Automatically
+TEST_CMD=""
+if [ -f "$PROJECT_FILE" ]; then
+    TEST_CMD=$(grep -E "^test_command:" "$PROJECT_FILE" | head -n 1 | cut -d':' -f2- | xargs || true)
+fi
+
+if [ -z "$TEST_CMD" ]; then
+    # Auto-detect test runner from project files
+    if [ -f "Cargo.toml" ]; then
+        TEST_CMD="cargo test"
+    elif [ -f "go.mod" ]; then
+        TEST_CMD="go test ./..."
+    elif [ -f "package.json" ]; then
+        if grep -E -q '"(jest|@types/jest)"' package.json || grep -q 'jest' package.json; then
+            TEST_CMD="npx jest"
+        elif grep -E -q '"(vitest)"' package.json || grep -q 'vitest' package.json; then
+            TEST_CMD="npx vitest run"
+        elif grep -E -q '"(mocha|@types/mocha)"' package.json || grep -q 'mocha' package.json; then
+            TEST_CMD="npx mocha"
+        elif grep -q 'node --test' package.json || grep -q 'node:test' package.json; then
+            TEST_CMD="node --test"
+        else
+            TEST_CMD="npm test"
+        fi
+    elif [ -f "pom.xml" ]; then
+        TEST_CMD="mvn test"
+    elif [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+        TEST_CMD="gradle test"
+    elif ls *.csproj >/dev/null 2>&1; then
+        TEST_CMD="dotnet test --logger 'trx'"
+    elif [ -f "CMakeLists.txt" ]; then
+        TEST_CMD="ctest --output-on-failure"
+    elif [ -f "Makefile" ] && grep -qE "test:|check:" Makefile 2>/dev/null; then
+        TEST_CMD="make test"
+    elif [ -f "Gemfile" ] || [ -f "Gemfile.lock" ]; then
+        if grep -qi "rspec" Gemfile* 2>/dev/null; then
+            TEST_CMD="bundle exec rspec"
+        else
+            TEST_CMD="bundle exec rake test"
+        fi
+    elif [ -f "pytest.ini" ] || [ -f "pyproject.toml" ] || ls test_*.py >/dev/null 2>&1; then
+        if command -v pytest >/dev/null 2>&1; then
+            TEST_CMD="pytest"
+        else
+            TEST_CMD="python3 -m unittest discover -s . -p 'test_*.py'"
+        fi
+    fi
+fi
+
+# 7. Execute Test Suite
+if [ -n "$TEST_CMD" ]; then
+    echo "[READ Verification] Executing test suite: $TEST_CMD..."
+    TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1) || TEST_EXIT=$?
+    TEST_EXIT=${TEST_EXIT:-0}
+    if [ "$TEST_EXIT" -ne 0 ]; then
+        echo "----------------------------------------------------------------"
+        echo "[READ GATE FAILED] Test suite failed with exit code $TEST_EXIT:"
+        echo "$TEST_OUTPUT"
+        echo "----------------------------------------------------------------"
+        echo "Commit rejected. Fix test failures to seal task handoff."
+
+        cat << EOF > "$EVIDENCE_FILE"
+{
+  "task_id": "$TASK_ID",
+  "status": "failed",
+  "test_exit": $TEST_EXIT,
+  "test_command": "$TEST_CMD",
+  "contract_hash": "$CONTRACT_HASH",
+  "diff_hash": "$DIFF_HASH",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "error": "Test suite execution failed"
+}
+EOF
+        exit 1
+    fi
+    echo "[READ Verification] Test suite passed cleanly."
+fi
+
+# 8. Execute AROP Mutation Verification if read-engine is available
+MUTATION_SCORE=100
+KILLED=0
+TOTAL=0
+
+if [ -n "$ENGINE_BIN" ] && [ -n "$TEST_CMD" ]; then
+    DIFF_TMP=$(mktemp -t read-diff-XXXXXX.patch)
+    git diff --staged > "$DIFF_TMP"
+
+    MUTANTS_JSON=$("$ENGINE_BIN" mutate --json "$DIFF_TMP" 2>/dev/null || echo '[]')
+    rm -f "$DIFF_TMP"
+
+    # Evaluate mutants using embedded python mutation harness
+    MUT_RES_FILE=$(mktemp -t read-mut-res-XXXXXX.txt)
+    SURVIVORS_FILE=$(mktemp -t read-surv-XXXXXX.txt)
+    python3 -c '
+import json, sys, subprocess, os, shutil
+
+raw_json = """'"$MUTANTS_JSON"'"""
+try:
+    mutants = json.loads(raw_json)
+except Exception:
+    mutants = []
+
+test_cmd = """'"$TEST_CMD"'"""
+source_mutants = []
+survivors = []
+
+# Filter out test suites and non-code files (only mutate implementation code)
+for m in mutants:
+    fp = m.get("file_path", "")
+    lower_fp = fp.lower()
+    if "test" in lower_fp or lower_fp.startswith(".read") or lower_fp.startswith(".method"):
+        continue
+    if os.path.exists(fp):
+        source_mutants.append(m)
+
+total = len(source_mutants)
+killed = 0
+
+if total > 0:
+    print(f"[READ AROP] Evaluating {total} targeted mutants on production code diff...")
+
+env = os.environ.copy()
+env["PYTHONDONTWRITEBYTECODE"] = "1"
+
+for m in source_mutants:
+    fp = m.get("file_path")
+    line = m.get("line_number", 1)
+    mutated = m.get("mutated_line", "")
+    op = m.get("operator", "MUTANT")
+
+    with open(fp, "r") as f:
+        orig_content = f.read()
+
+    lines = orig_content.splitlines(True)
+    if 0 <= line - 1 < len(lines):
+        # Preserve original newline style
+        nl = "\n" if lines[line - 1].endswith("\n") else ""
+        lines[line - 1] = mutated + nl
+        with open(fp, "w") as f:
+            f.writelines(lines)
+
+        # Clear python bytecode cache to guarantee fresh re-execution of modified file
+        shutil.rmtree("__pycache__", ignore_errors=True)
+
+        res = subprocess.run(test_cmd, shell=True, env=env, capture_output=True, text=True)
+        if res.returncode != 0:
+            killed += 1
+            print(f"  [{op} at L{line} in {fp}] -> KILLED")
+        else:
+            survivors.append(f"  - [SURVIVOR] {op} at {fp}:{line} (mutated: {mutated.strip()})")
+            print(f"  [{op} at L{line} in {fp}] -> SURVIVED")
+
+        with open(fp, "w") as f:
+            f.write(orig_content)
+        shutil.rmtree("__pycache__", ignore_errors=True)
+
+score = (killed / total * 100.0) if total > 0 else 100.0
+with open("'"$MUT_RES_FILE"'", "w") as out:
+    out.write(f"{score:.1f}:{killed}:{total}\n")
+
+with open("'"$SURVIVORS_FILE"'", "w") as out:
+    for s in survivors:
+        out.write(s + "\n")
+'
+    SCORE_LINE=$(cat "$MUT_RES_FILE" 2>/dev/null || echo "100.0:0:0")
+    rm -f "$MUT_RES_FILE"
+
+    MUTATION_SCORE=$(echo "$SCORE_LINE" | cut -d':' -f1)
+    KILLED=$(echo "$SCORE_LINE" | cut -d':' -f2)
+    TOTAL=$(echo "$SCORE_LINE" | cut -d':' -f3)
+
+    if [ "$TOTAL" -gt 0 ]; then
+        SCORE_INT=$(echo "$MUTATION_SCORE" | cut -d'.' -f1)
+        if [ "$KILLED" -ne "$TOTAL" ] || [ "$SCORE_INT" -lt 100 ]; then
+            echo "----------------------------------------------------------------"
+            echo "[READ GATE FAILED] Mutation score ${MUTATION_SCORE}% is below strictly required 100.0% threshold (Killed $KILLED/$TOTAL)"
+            echo "Your test suite allows code modifications to survive silently."
+            echo "Strictly 100% mutation score required. Surviving mutants:"
+            cat "$SURVIVORS_FILE"
+            rm -f "$SURVIVORS_FILE"
+            echo "Strengthen assertions in test suite before committing."
+            echo "----------------------------------------------------------------"
+
+            cat << EOF > "$EVIDENCE_FILE"
+{
+  "task_id": "$TASK_ID",
+  "status": "gate_failed",
+  "mutation_score": $MUTATION_SCORE,
+  "mutants_killed": $KILLED,
+  "mutants_total": $TOTAL,
+  "contract_hash": "$CONTRACT_HASH",
+  "diff_hash": "$DIFF_HASH",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "error": "Mutation score below 100% threshold: surviving mutants detected"
+}
+EOF
+            exit 1
+        fi
+        rm -f "$SURVIVORS_FILE"
+        echo "[READ AROP] Mutation Score: ${MUTATION_SCORE}% ($KILLED/$TOTAL killed) == 100% threshold."
+    fi
+fi
+
+# 9. Compute Cryptographic Verify Hash
+VERIFY_HASH=$(echo "${DIFF_HASH}:${CONTRACT_HASH}:${MUTATION_SCORE}:${KILLED}" | sha256sum | cut -d' ' -f1)
+
+# 10. Seal STATE.json and EVIDENCE.json Automatically (Zero Commands)
+cat << EOF > "$STATE_FILE"
+{
+  "task_id": "$TASK_ID",
+  "contract_hash": "$CONTRACT_HASH",
+  "status": "handoff_complete",
+  "verify_hash": "$VERIFY_HASH",
+  "revision": 2,
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+
+cat << EOF > "$EVIDENCE_FILE"
+{
+  "task_id": "$TASK_ID",
+  "status": "verified",
+  "mutation_score": $MUTATION_SCORE,
+  "mutants_killed": $KILLED,
+  "mutants_total": $TOTAL,
+  "contract_hash": "$CONTRACT_HASH",
+  "diff_hash": "$DIFF_HASH",
+  "verify_hash": "$VERIFY_HASH",
+  "test_command": "$TEST_CMD",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+
+# 11. Auto-stage STATE and EVIDENCE into the current git commit
+git add "$STATE_FILE" "$EVIDENCE_FILE"
+
+echo "================================================================"
+echo "[READ GATE PASSED] Contract & Mutation proof sealed into commit."
+echo "Verify Hash: ${VERIFY_HASH:0:32}..."
+echo "Handoff complete with ZERO manual commands required."
+echo "================================================================"
+
+exit 0

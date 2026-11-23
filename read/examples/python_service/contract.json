@@ -1,0 +1,16 @@
+{
+  "task_id": "TASK-PY-RATELIMITER-001",
+  "name": "Token Bucket and Sliding Window Ingress Rate Limiter",
+  "base_commit": "4e1a89c97b830d12e61a6b0542171bf784a92351",
+  "target_files": [
+    "src/rate_limiter.py",
+    "tests/test_rate_limiter.py"
+  ],
+  "invariants": [
+    "Rate limiter capacity and refill_rate must be strictly positive floats",
+    "Token acquisition must be thread-safe with non-negative remaining token counts",
+    "Requested tokens must be positive non-zero values",
+    "Clients must maintain strict state isolation"
+  ],
+  "verification_command": "pytest tests/ -v"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "typescript-service",
+  "version": "1.0.0",
+  "description": "READ Framework Production TypeScript Service Example with Express and Jest",
+  "type": "module",
+  "main": "src/auth_service.ts",
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/auth_service.test.ts"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5"
+  }
+}

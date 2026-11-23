@@ -1,0 +1,17 @@
+{
+  "task_id": "TASK-JAVA-ORDER-001",
+  "name": "Java Order Validation and Allocation Service",
+  "base_commit": "c4b189a02fe819bc8910248a7bce91028374a8bc",
+  "target_files": [
+    "src/main/java/com/example/service/OrderValidationService.java",
+    "src/test/java/com/example/service/OrderValidationServiceTest.java"
+  ],
+  "invariants": [
+    "Null orders must be rejected immediately without throwing unhandled NullPointerException",
+    "Strict equality check (.equals(\"ADMIN\")) must gate privileged allocation",
+    "Boundary checks on quantity must reject all non-positive quantities (quantity <= 0)",
+    "Allocated quantity must strictly decrement original quantity by 1",
+    "All AST mutants must be killed with strictly 100.0% mutation score"
+  ],
+  "verification_command": "bash test.sh"
+}

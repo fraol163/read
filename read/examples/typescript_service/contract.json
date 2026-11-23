@@ -1,0 +1,16 @@
+{
+  "task_id": "TASK-TS-AUTH-001",
+  "name": "TypeScript RBAC and Service Token Validation Engine",
+  "base_commit": "e81d763bc15a0d33e52187bfa1e6e9bca9354011",
+  "target_files": [
+    "src/auth_service.ts",
+    "tests/auth_service.test.ts"
+  ],
+  "invariants": [
+    "Strict equality (=== and !==) must be enforced across all role and token checks",
+    "Optional chaining (?.) must safely handle missing nested profile structures without unhandled TypeError crashes",
+    "Quota boundary checks must reject all quota <= 0 requests",
+    "Mutant kill score must reach strictly 100.0% with 0 surviving mutants"
+  ],
+  "verification_command": "node --experimental-strip-types --test tests/auth_service.test.ts"
+}

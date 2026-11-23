@@ -1,0 +1,17 @@
+{
+  "task_id": "TASK-RS-RINGBUFFER-001",
+  "name": "Bounded FIFO Ring Buffer with Zero Allocation Hot Paths",
+  "base_commit": "18f92a4e21a0c8b6d391f1a56e07890f5c3b1287",
+  "target_files": [
+    "src/lib.rs",
+    "src/ring_buffer.rs",
+    "tests/test_integration.rs"
+  ],
+  "invariants": [
+    "Zero capacity initialization must return RingBufferError::ZeroCapacity",
+    "Buffer underflow on pop must return RingBufferError::BufferEmpty",
+    "Reject overflow policy must return RingBufferError::BufferFull without mutating storage",
+    "Overwrite overflow policy must advance head and preserve FIFO ordering of newest elements"
+  ],
+  "verification_command": "cargo test"
+}

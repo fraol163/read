@@ -1,0 +1,18 @@
+{
+  "task_id": "TASK-RUBY-AUTH-001",
+  "name": "Ruby Authentication & Access Token Service",
+  "base_commit": "e8d91b491a629b3984e1b9b4f91e8471c9b3a720",
+  "target_files": [
+    "lib/auth_service.rb",
+    "spec/auth_service_spec.rb"
+  ],
+  "invariants": [
+    "Safe navigation token verification must gracefully handle nil user context",
+    "Scope pattern matching must strictly evaluate case equality (===)",
+    "String equality for secret keys must strictly enforce eql?",
+    "Token expiration TTL must enforce upper bound (ttl < max_ttl)",
+    "Successful validation must return structured session payload and not nil",
+    "All AST mutants must be killed with strictly 100.0% mutation score"
+  ],
+  "verification_command": "bash test.sh"
+}

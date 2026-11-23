@@ -1,0 +1,241 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "READ Framework Configuration Schema",
+  "description": "Configuration schema for READ Framework (Resource-conscious, Evidence-driven AI Development)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "description": "Framework version tag"
+    },
+    "daemon": {
+      "type": "object",
+      "description": "Host daemon gateway settings",
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Listen host IP address"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 8089,
+          "description": "Listen port for HTTP / WebSocket gateway"
+        },
+        "workspace_root": {
+          "type": "string",
+          "default": ".",
+          "description": "Default workspace root directory"
+        },
+        "engine_bin": {
+          "type": "string",
+          "default": "",
+          "description": "Path to native read-engine binary (empty to auto-discover)"
+        },
+        "custom_harness": {
+          "type": "string",
+          "default": "",
+          "description": "Path to custom harnesses.json file"
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "description": "3-way storage and synchronization settings",
+      "additionalProperties": false,
+      "properties": {
+        "default_policy": {
+          "type": "string",
+          "enum": ["both_sync", "pc_only", "phone_only"],
+          "default": "both_sync",
+          "description": "Default synchronization storage policy"
+        },
+        "sync_interval_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30,
+          "description": "Automatic background sync interval in seconds"
+        },
+        "chunk_size_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "default": 1048576,
+          "description": "Block transfer chunk size in bytes (default: 1MB)"
+        },
+        "exclude_patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns excluded from synchronization"
+        }
+      }
+    },
+    "core": {
+      "type": "object",
+      "description": "Core state engine and WAL storage settings",
+      "additionalProperties": false,
+      "properties": {
+        "state_dir": {
+          "type": "string",
+          "default": ".method",
+          "description": "Directory for persistent CAS state and WAL"
+        },
+        "state_file": {
+          "type": "string",
+          "default": ".method/STATE.json",
+          "description": "Relative path to state JSON"
+        },
+        "wal_file": {
+          "type": "string",
+          "default": ".method/WAL.log",
+          "description": "Relative path to write-ahead log"
+        },
+        "strict_cas": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enforce strict CAS revision locking on every mutation"
+        },
+        "wal_compaction_threshold": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 1000,
+          "description": "WAL log entry threshold before automatic compaction"
+        }
+      }
+    },
+    "ast": {
+      "type": "object",
+      "description": "C0 AST context extraction settings",
+      "additionalProperties": false,
+      "properties": {
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Maximum recursive import dependency traversal depth"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100,
+          "description": "AST extraction timeout budget in milliseconds"
+        },
+        "supported_languages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of language extensions supported by parser"
+        }
+      }
+    },
+    "mutation": {
+      "type": "object",
+      "description": "AROP bounded mutation testing settings",
+      "additionalProperties": false,
+      "properties": {
+        "max_mutants": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10,
+          "description": "Maximum mutant population generated per diff"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 100,
+          "default": 4500,
+          "description": "Verification execution ceiling in milliseconds"
+        },
+        "operators": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Enabled mutation operator identifiers"
+        }
+      }
+    },
+    "harness": {
+      "type": "object",
+      "description": "Dynamic AI agent detection settings",
+      "additionalProperties": false,
+      "properties": {
+        "discovery_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable host scanner for available CLI and socket agents"
+        },
+        "scan_timeout_ms": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 500,
+          "description": "Socket probe timeout in milliseconds"
+        },
+        "local_endpoints": {
+          "type": "object",
+          "description": "Map of inference engine names to socket URLs",
+          "additionalProperties": { "type": "string" }
+        },
+        "custom_config_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Search paths for harnesses.json configurations"
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "description": "Security policies and command execution constraints",
+      "additionalProperties": false,
+      "properties": {
+        "sandbox_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Confine filesystem interactions within workspace boundaries"
+        },
+        "allow_process_spawn": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow daemon to launch subagent PTY processes"
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelisted filesystem root paths"
+        },
+        "blocked_commands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Disallowed shell command prefixes"
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "description": "Logging configuration",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info",
+          "description": "Log verbosity level"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["json", "text"],
+          "default": "json",
+          "description": "Log serialization format"
+        },
+        "file": {
+          "type": "string",
+          "default": "",
+          "description": "Optional log output file path (empty for stdout/stderr)"
+        }
+      }
+    }
+  }
+}

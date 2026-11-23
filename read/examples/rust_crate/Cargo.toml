@@ -1,0 +1,10 @@
+[package]
+name = "read-ringbuffer"
+version = "0.1.0"
+edition = "2021"
+description = "Bounded circular ring buffer with deterministic overflow policies"
+authors = ["READ Framework Contributors"]
+
+[dependencies]
+
+[dev-dependencies]

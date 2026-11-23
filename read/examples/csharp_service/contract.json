@@ -1,0 +1,17 @@
+{
+  "task_id": "TASK-CSHARP-TOKEN-001",
+  "name": "C# ASP.NET Core Token Validation Service",
+  "base_commit": "e8d192a01ce729bc9910248a7bce91028374a8cd",
+  "target_files": [
+    "src/TokenValidationService.cs",
+    "tests/TokenValidationServiceTest.cs"
+  ],
+  "invariants": [
+    "Null user object must be safely evaluated using null conditional (user?.Role) without throwing NullReferenceException",
+    "Admin role requirement must strictly compare case-sensitive role string using .Equals(\"ADMIN\")",
+    "Status code check must strictly compare equality (status == 200)",
+    "Token expiration boundary must strictly reject expired tokens (retries + 1 > 3)",
+    "All AST mutants must be killed with strictly 100.0% mutation score"
+  ],
+  "verification_command": "bash test.sh"
+}

@@ -1,0 +1,14 @@
+{
+  "state_revision": 1,
+  "status": "idle",
+  "active_task_id": null,
+  "contract_hash": null,
+  "base_commit": null,
+  "staged_diff_hash": null,
+  "verify_hash": null,
+  "cas_lock": {
+    "expected_revision": 1,
+    "locked_by": "declarative_engine",
+    "lease_expires": "2099-01-01T00:00:00Z"
+  }
+}

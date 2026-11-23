@@ -1,0 +1,16 @@
+{
+  "task_id": "TASK-GO-CACHE-001",
+  "name": "Thread-Safe In-Memory Key-Value Cache with TTL Expiration",
+  "base_commit": "3c98a12e5f0b4d78a9c21045e7f8b901a23c4567",
+  "target_files": [
+    "cache/cache.go",
+    "cache/cache_test.go"
+  ],
+  "invariants": [
+    "Empty keys must be rejected with ErrInvalidKey",
+    "Expired keys must return ErrKeyNotFound and increment Evicts and Misses stats",
+    "All cache operations must be safe for concurrent execution across multiple goroutines",
+    "Zero TTL must indicate non-expiring permanent storage"
+  ],
+  "verification_command": "go test ./cache"
+}

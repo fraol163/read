@@ -1,0 +1,17 @@
+{
+  "task_id": "TASK-CPP-BUFFER-001",
+  "name": "C++ Bounded Memory Buffer Pool Service",
+  "base_commit": "f9a203b10de839bc9910248a7bce91028374a8ce",
+  "target_files": [
+    "src/buffer_pool.cpp",
+    "tests/test_buffer_pool.cpp"
+  ],
+  "invariants": [
+    "Null pointer deallocation must safely no-op without memory corruption or segmentation fault",
+    "Allocation must be strictly bounded by capacity check (size <= max_capacity)",
+    "Status validation must strictly verify equality (status == 200)",
+    "Allocation counter must increment by exactly one per successful acquisition",
+    "All AST mutants must be killed with strictly 100.0% mutation score"
+  ],
+  "verification_command": "bash test.sh"
+}
