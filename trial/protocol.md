@@ -73,6 +73,10 @@ Reviewers judge only SURVIVED mutants, and only after step 3 shows real survivor
 - Each SURVIVED mutant gets one label: "real test gap" or "equivalent mutant", with a one-line reason.
 - If a reviewer cannot label a survivor in under two minutes, it goes into an "unclear" bucket, counted separately, and not counted as a gap.
 
+### Task Control and Reviewer Evaluation Scope
+
+Bugfix is a control task (all mutants killed). Reviewer labeling runs on whichever of endpoint or refactor produce survivors in step 2 or subsequent participant evaluation.
+
 ## Data Collection
 
 - Every task attempt is logged in `record_template.csv`.
