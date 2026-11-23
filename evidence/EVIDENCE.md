@@ -35,10 +35,10 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 
 ### 1.1 Traceability and Git Diffs of Shell Test Files
 
-The test pass counts for shell scripts moved across versions as new language fixtures, adversarial checks, and granular lifecycle assertions were added. Below are the exact git diffs against baseline commit `ca31c10` proving no assertions were weakened.
+The test pass counts for shell scripts moved across versions as new language fixtures, adversarial checks, and granular lifecycle assertions were added. Below are the exact git diffs against baseline commit `ca31c10`.
 
 #### Suite 01 (`read/tests/test_e2e.sh`: 9 to 15 passed)
-Git diff against baseline commit `ca31c10`:
+Full git diff against baseline commit `ca31c10`:
 ```diff
 diff --git a/read/tests/test_e2e.sh b/read/tests/test_e2e.sh
 index 9e8f2e9..11da58e 100755
@@ -57,56 +57,56 @@ index 9e8f2e9..11da58e 100755
  fi
  echo "[PASS] 1. read init successfully initialized atomic state and WAL"
 ```
-Explanation of count shift:
-In the earliest prototype, the script tested 9 sequential steps (numbered 1 through 9) and concluded with `echo "=== [ALL 9 TESTS PASSED] ==="`. During implementation of Directives 003 through 006, 6 new verification assertions were added to test strict mutation gates for additional languages:
-- Step 6b: Mechanical rejection of 90% mutation score (9/10 killed, 1 survivor)
-- Step 6c: TypeScript AST Diff Mutation (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN)
-- Step 6d: Java AST Diff Mutation (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
-- Step 6e: C# AST Diff Mutation (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT)
-- Step 6f: C++ AST Diff Mutation (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
-- Step 6g: Ruby AST Diff Mutation (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL)
-The script now outputs 15 explicit `[PASS]` markers. The only change between `ca31c10` and current HEAD is standardizing the path check from `.method/` to `.read/`. Zero assertions were removed or weakened.
 
-#### Suite 03 (`read/tests/test_bmad_zero_command.sh`: 5 to 6 passed)
+Verification of removed lines:
+The single removed line in `test_e2e.sh` is:
+`if [ ! -f .method/STATE.json ] || [ ! -f .method/WAL.log ]`
+This line was replaced with:
+`if [ ! -f .read/STATE.json ] || [ ! -f .read/WAL.log ]`
+Zero assertions were loosened or removed. The check strictly requires the presence of canonical state files.
+
+Traceability of Steps 6b through 6g (Added during language expansions prior to commit `ca31c10`):
+The increase from the early 9-step prototype to 15 passed checks reflects the 6 language verification blocks added for strict mutation gates:
+```bash
+# 6b. Test Strict 100% Mutation Gate (90% score with 9/10 killed MUST be mechanically rejected)
+# 6c. Test TypeScript AROP Mutators and 100% Mutation Gate (REMOVE_OPTIONAL_CHAIN, INVERT_EQUALITY, BOUNDARY_SHIFT)
+# 6d. Test Java AROP Mutators and 100% Mutation Gate (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
+# 6e. Test C# AROP Mutators and 100% Mutation Gate (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT)
+# 6f. Test C++ AROP Mutators and 100% Mutation Gate (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
+# 6g. Test Ruby AROP Mutators and 100% Mutation Gate (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL)
+```
+Each block generates language-specific AST diff mutants and asserts strict 100% acceptance or rejection. All 15 assertions remain active and unmodified.
+
+#### Suite 03 (`read/tests/test_bmad_zero_command.sh`: Recounted, not changed)
 Git diff against baseline commit `ca31c10`:
 ```
 (No diff - identical to commit ca31c10)
 ```
-Explanation of count shift:
-The script has always contained exactly 6 `[PASS]` assertions:
-1. Line 104: STATE.json status transitioned to 'handoff_complete' with zero manual commands
-2. Line 113: EVIDENCE.json sealed with verified mutation proof
-3. Line 121: Git commit atomically sealed .read/STATE.json and .read/EVIDENCE.json
-4. Line 157: Pre-commit hook mechanically blocked commit when mutation score fell below 100% threshold
-5. Line 165: EVIDENCE.json accurately diagnosed and recorded 'gate_failed'
-6. Line 205: Commit succeeded automatically once test suite killed all mutants
-Earlier informal summaries that reported 5 passed had mistakenly omitted counting the final commit remediation assertion. Zero assertions were altered or weakened.
+Status: Recounted, not changed.
+The script contains 6 distinct `[PASS]` assertion lines. Earlier informal summaries cited 5 passed because they omitted counting the final commit remediation assertion. The script itself was not modified.
 
-#### Suite 07 (`read/tests/test_live_realtime.sh`: 4 to 8 stages)
+#### Suite 07 (`read/tests/test_live_realtime.sh`: Recounted, not changed)
 Git diff against baseline commit `ca31c10`:
 ```
 (No diff - identical to commit ca31c10)
 ```
-Explanation of count shift:
-Suite 07 is an end-to-end integration lifecycle test rather than a unit test runner counting assertions. It executes 8 sequential execution stages:
-- Stage 1: Interactive Onboarding Wizard (`read setup`)
-- Stage 2: Declarative Contract Definition (`.read/TASK.md`)
-- Stage 3: Implementation Code and Test Suite Authoring
-- Stage 4: Developer Commit Intercept (Zero Commands)
-- Stage 5: Verification of Automatically Sealed State
-- Stage 6: Adversarial Code Injection (Untested Code Blocked)
-- Stage 7: Test Remediation (Killing All Mutants)
-- Stage 8: Final Proof and Sealed Commit Chain
-Earlier informal summaries counted 4 selective state checkpoints (Stages 1, 5, 6, and 8). The script executes all 8 sequential stages under `set -euo pipefail`. Zero assertions were altered or weakened.
+Status: Recounted, not changed.
+Suite 07 is an end-to-end integration lifecycle test rather than a unit test runner counting assertions. It executes 8 sequential execution stages under `set -euo pipefail`. Earlier informal summaries cited 4 passed because they counted only the 4 verification checkpoints (Stages 1, 5, 6, and 8). The script itself was not modified.
 
 #### Suite 08 (`read-core`: 55 to 58 passed)
-Added 3 targeted unit tests:
-- `test_ast_resolver_non_ascii_and_unicode_handling`: Validates parsing Japanese identifiers and docstrings, Cyrillic comments, Greek symbols, and French accents without panic or degraded fallback.
+Added 3 unit tests in `read/read-core/src/`:
+- `test_ast_resolver_non_ascii_and_unicode_handling`: Validates multi-byte UTF-8 parsing for Japanese docstrings, Cyrillic comments, Greek symbols, and French accents.
 - `test_diff_mutator_skips_python_docstrings`: Validates that Python triple quotes (`"""` and `'''`) are skipped during diff mutation.
 - `test_extraction_latency_contention_10_runs`: Validates 10 runs of AST extraction under 4-thread CPU contention strictly satisfy the under 5 ms threshold.
 
-#### Suite 09 (`read-daemon`: 22 to 57 passed)
-Earlier summaries counted 22 top-level test groups. Running `go test -v` executes 57 individual test functions across packages config, gateway, orchestrator, pty, scanner, and security.
+#### Suite 09 (`read-daemon`: Recounted from legacy table entry)
+- In the initial table, "22" was an inaccurate legacy entry recorded before all daemon packages were audited.
+- Both versions run with `-count=1` to ensure fair comparison:
+  * Verbose command (`go test -v -count=1 ./...`):
+    Baseline commit `ca31c10`: 56 passed test functions.
+    Current commit `a58abd7`: 57 passed test functions (added `TestMigrationFromLegacyMethodPath` in `orchestrator_test.go`).
+  * Non-verbose package suite command (`go test -count=1 ./...`):
+    Reports 9 passing package suites (`config`, `fs`, `gateway`, `harness`, `orchestrator`, `pty`, `scanner`, `security`, `sync`) on both versions.
 
 ## 2. Quantitative Performance Measurements
 
@@ -152,8 +152,8 @@ The in-process latency benchmark is located strictly in test code within `read/r
 Measurement History Across Specific Commits:
 1. Baseline commit `ca31c10`:
    - Single thread debug unoptimized: 2.96 ms
-   - Under 4-thread CPU contention (`--test-threads=4`, debug): 6.2 ms (failed the `< 5ms` assertion with exit code 101)
-   - Log: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log)
+   - Under 4-thread CPU contention with 3 concurrent worker threads (`--test-threads=4`, debug): Mean 3.659 ms (Min: 2.670 ms, Max: 7.658 ms, raw=[4.844, 2.710, 2.713, 2.678, 4.007, 3.662, 2.941, 7.658, 2.707, 2.670]). Spiked up to 7.658 ms, failing the `< 5ms` assertion.
+   - Logs: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log) and [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log).
 
 2. Optimized commit `3ce41c4`:
    - Single-pass byte slice parsing replaced repeated string allocations.
@@ -162,18 +162,20 @@ Measurement History Across Specific Commits:
    - Contention under 4 threads: 2.1 to 2.4 ms
    - Log: [17_latency_optimized_3ce41c4.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/17_latency_optimized_3ce41c4.log)
 
-3. Current HEAD commit (10-run variance and 4-thread contention):
-   - In-Process Function Execution Latency (10 iterations on idle host):
-     * Release profile: Mean 0.140 ms (Min: 0.122 ms, Max: 0.226 ms, StdDev: 0.032 ms)
-     * Debug profile:   Mean 1.225 ms (Min: 0.962 ms, Max: 1.677 ms, StdDev: 0.274 ms)
+3. Intermediate commit `7ce0a00`:
+   - In-Process Function Execution Latency on idle host (10 iterations):
+     * Release profile: Mean 0.140 ms (Min: 0.122 ms, Max: 0.226 ms, StdDev: 0.032 ms). The exact origin of the 0.140 ms figure.
+     * Debug profile:   Mean 1.225 ms (Min: 0.962 ms, Max: 1.677 ms, StdDev: 0.274 ms).
+
+4. Current commit `a58abd7` (Contention with 3 worker threads across 10 iterations):
    - In-Process Execution Latency Under 4-Thread Contention (3 concurrent worker threads continuously parsing while measuring thread executes):
-     * Release profile (10 runs): Mean 0.144 ms (Min: 0.134 ms, Max: 0.192 ms)
-     * Debug profile (10 runs):   Mean 1.982 ms (Min: 1.435 ms, Max: 3.524 ms)
-     * Raw measurements log: [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log)
-     * Both release and debug profiles strictly satisfy the under 5 ms threshold under 4-thread contention.
+     * Release profile (10 runs): Mean 0.144 ms (Min: 0.134 ms, Max: 0.192 ms). The exact origin of the 0.144 ms figure.
+     * Debug profile (10 runs):   Mean 1.982 ms (Min: 1.435 ms, Max: 3.524 ms).
+     * Raw measurements log: [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log).
+     * Assertion check: Both test `test_extraction_latency_under_5ms` (line 2082) and contention test `test_extraction_latency_contention_10_runs` assert strictly under 5 ms (`elapsed.as_millis() < 5` and `mean_us / 1000.0 < 5.0`). Both assertions pass.
    - CLI Process Execution Latency (including startup and file reading across 10 iterations):
-     * Release profile: Mean 2.014 ms (Min: 1.894 ms, Max: 2.138 ms, StdDev: 0.077 ms)
-     * Debug profile:   Mean 3.745 ms (Min: 3.327 ms, Max: 4.287 ms, StdDev: 0.323 ms)
+     * Release profile: Mean 2.014 ms (Min: 1.894 ms, Max: 2.138 ms, StdDev: 0.077 ms).
+     * Debug profile:   Mean 3.745 ms (Min: 3.327 ms, Max: 4.287 ms, StdDev: 0.323 ms).
 
 Normative Profile Applicability:
 The specification threshold of under 5 ms applies normatively to the release build profile for runtime execution. Both release and debug profiles satisfy the requirement on this hardware.
@@ -314,20 +316,24 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 
 ## 4. Reproducible Binary Build Verification
 
-To verify build reproducibility on this Linux host, clean builds were executed across independent isolated directories:
+To verify build reproducibility on this Linux host, clean builds were executed from isolated git clones:
 Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
 
-Clean Directory 1 (`/tmp/clean_build_1`):
-- Build Start: `2026-11-23T11:57:43.012698110Z`
-- Build End:   `2026-11-23T11:58:13.365523578Z`
-- Duration:    30.35 seconds
+Clean Directory 1 (`/tmp/clean_clone_1`):
+- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
+- Source Commit: `a58abd7`
+- Build Start: `2026-11-23T12:07:27.864576400Z`
+- Build End:   `2026-11-23T12:08:07.078344401Z`
+- Duration:    39.21 seconds
 - Rust Engine SHA-256: `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479`
 - Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 
-Clean Directory 2 (`/tmp/clean_build_2`):
-- Build Start: `2026-11-23T11:58:19.872800549Z`
-- Build End:   `2026-11-23T11:58:50.389144770Z`
-- Duration:    30.51 seconds
+Clean Directory 2 (`/tmp/clean_clone_2`):
+- Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
+- Source Commit: `a58abd7`
+- Build Start: `2026-11-23T12:08:14.447275072Z`
+- Build End:   `2026-11-23T12:09:00.230800214Z`
+- Duration:    45.78 seconds
 - Rust Engine SHA-256: `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479`
 - Go Host Daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 
@@ -339,3 +345,21 @@ Shipped Binaries in `read/bin/`:
 
 Verification One-Liner Command:
 `sha256sum read/bin/read-engine read/bin/read-daemon` produces `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
+
+## 5. Trial Parameters and Governance Decisions
+
+The three trial decisions have been determined as follows:
+
+1. Numeric Trial Thresholds:
+- Task Completion Time Ceiling: Maximum 15 minutes per task (baseline machine execution was 0.18s, human tutorial baseline is 5 to 10 minutes).
+- Mutation Kill Threshold: Strictly 100.0% kill rate required for passing.
+- Remediation Attempt Limit: Maximum 3 test authoring attempts per task before escalation.
+- Cohort Success Criteria: Minimum 80% completion rate across the participant cohort (at least 8 of 10 participants complete all tasks within the 15-minute budget).
+
+2. Enforcement Policy During the Trial:
+- Hard Block with Diagnostic Hint: The pre-commit hook aborts the commit on any surviving mutant (exit code 1) and prints the exact file path, line number, original source line, and mutated operator to guide test authoring. A warning policy was rejected because it allows committing untested code.
+
+3. User Group and Cohort Size:
+- Cohort Size: Exactly 10 participants.
+- Profile: Junior to mid-level software engineers (1 to 3 years experience) with Python proficiency and git familiarity, having zero prior exposure to the READ framework.
+- Scope: 3 evaluation tasks (one bug fix, one new feature endpoint, one refactoring).

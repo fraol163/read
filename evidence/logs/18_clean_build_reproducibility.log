@@ -3,26 +3,30 @@ Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
 Rust Toolchain: rustc 1.99.1, cargo 1.99.1
 Go Toolchain: go version go1.24.0 linux/amd64
 Build Profile: Release (Rust: cargo build --release; Go: go build -trimpath cmd/read-daemon/main.go)
+Source Commit: a58abd7
 
-Directory 1: /tmp/clean_build_1
-Build Start: 2026-11-23T11:57:43.012698110Z
-Build End:   2026-11-23T11:58:13.365523578Z
-Duration:    30.35 seconds
+Clone 1: /tmp/clean_clone_1
+Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1
+Commit: a58abd7
+Build Start: 2026-11-23T12:07:27.864576400Z
+Build End:   2026-11-23T12:08:07.078344401Z
+Duration:    39.21 seconds
 Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
 Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Directory 2: /tmp/clean_build_2
-Build Start: 2026-11-23T11:58:19.872800549Z
-Build End:   2026-11-23T11:58:50.389144770Z
-Duration:    30.51 seconds
+Clone 2: /tmp/clean_clone_2
+Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2
+Commit: a58abd7
+Build Start: 2026-11-23T12:08:14.447275072Z
+Build End:   2026-11-23T12:09:00.230800214Z
+Duration:    45.78 seconds
 Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
 Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Shipped Repository Binaries in read/bin/:
+Committed Binaries in read/bin/ at Commit a58abd7:
 read/bin/read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
 read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Comparison Verification:
-read-engine match: IDENTICAL (75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479)
-read-daemon match: IDENTICAL (dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59)
-Conclusion: Bitwise identical build reproducibility is verified across clean isolated directories on this Linux host.
+Verification Result:
+read-engine: IDENTICAL across git clone 1, git clone 2, and read/bin (75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479)
+read-daemon: IDENTICAL across git clone 1, git clone 2, and read/bin (dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59)

@@ -84,15 +84,22 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - Ruby: Mean 1.927 ms
 - 200 Functions Fixture Variance and Contention:
   - Benchmark Location: Located strictly in test code within `read/read-core/src/ast/mod.rs` inside `#[cfg(test)] mod tests`. Zero benchmark code exists in production paths.
-  - Measurement History Across Commits: Single-run release in-process extraction was 0.375 ms on commit `3ce41c4`. Across 10 repeated runs on commit `7ce0a00`, release in-process extraction averaged 0.140 ms mean (Min 0.122 ms, Max 0.226 ms, StdDev 0.032 ms) and debug in-process averaged 1.225 ms mean.
-  - Contention Under 4 Active Threads: Release profile across 10 runs averaged 0.144 ms mean (Min 0.134 ms, Max 0.192 ms). Debug profile across 10 runs averaged 1.982 ms mean (Min 1.435 ms, Max 3.524 ms). Both strictly satisfy the under 5 ms threshold, improving over baseline commit `ca31c10` which measured 6.2 ms under 4-thread contention and failed.
+  - Measurement History Across Commits: Single-run release in-process extraction was 0.375 ms on commit `3ce41c4`. Across 10 repeated runs on commit `7ce0a00`, release in-process extraction on an idle host averaged 0.140 ms mean (Min 0.122 ms, Max 0.226 ms, StdDev 0.032 ms) and debug in-process averaged 1.225 ms mean.
+  - Baseline Contention on Commit `ca31c10`: Under 4-thread CPU contention (3 concurrent worker threads), baseline unoptimized extraction averaged 3.659 ms mean (Min 2.670 ms, Max 7.658 ms), spiking to 7.658 ms and failing the under 5 ms assertion.
+  - Optimized Contention on Current Commit `a58abd7`: Under 4-thread CPU contention (3 concurrent worker threads), release profile averaged 0.144 ms mean (Min 0.134 ms, Max 0.192 ms) and debug profile averaged 1.982 ms mean (Min 1.435 ms, Max 3.524 ms). Both assertions in `test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs` strictly require under 5 ms and pass.
   - CLI Process: Mean 2.014 ms in release profile (StdDev 0.077 ms) and Mean 3.745 ms in debug profile (StdDev 0.323 ms).
   - Normative Threshold: The under 5 ms threshold applies normatively to the release build profile for runtime execution.
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
 - PTY Stream Allocation: 56,628 ns/op, 974 B/op, 4 allocs/op.
 - Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED. Empirical line coverage (`pytest --cov`) proves lines 258-259 had zero executions during the test run, proving the survivors represent genuine test gaps.
 - Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `75b0e382...` and Go daemon binary with `-trimpath` `dcecffce...`.
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean git clones from commit `a58abd7` on this Linux host for Rust release binary `75b0e382...` and Go daemon binary with `-trimpath` `dcecffce...`.
+
+### Trial Parameters and Governance Decisions
+
+1. Numeric Trial Thresholds: 15-minute task completion ceiling, strictly 100.0% mutation kill rate, maximum 3 remediation retries, 80% cohort completion rate.
+2. Enforcement Policy: Hard block with diagnostic hint (pre-commit hook aborts on surviving mutants with line, file, and operator details).
+3. User Group and Cohort Size: 10 participants, junior to mid-level engineers (1 to 3 years experience) with Python proficiency and git familiarity who have zero prior exposure to READ. 3 evaluation tasks.
 
 ---
 
