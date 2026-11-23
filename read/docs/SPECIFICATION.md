@@ -82,6 +82,13 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 - Implementation: `read-core/src/ast/mod.rs` (method `extract_symbols_and_imports`).
 - Enforcing Test: `read-core/src/ast/mod.rs` (`test_graceful_degradation_on_malformed_syntax`).
 
+4.4 Latency Threshold and Build Profile:
+- The AST engine MUST extract deterministic symbol signatures and dependencies with an in-process execution latency of under 5 ms per file on release builds.
+- Normative Applicability: The under 5 ms latency threshold applies normatively to the release build profile (`read-engine`), which executes in 0.14 ms to 0.18 ms.
+- Test Profile Configuration: The unit test suite in `read/read-core/Cargo.toml` executes under `[profile.test] opt-level = 1` to ensure basic compiler optimizations (inlining, register allocation) are active during concurrent test runner execution on 2-core hardware.
+- Implementation: `read-core/src/ast/mod.rs` (`extract_symbols_and_imports`).
+- Enforcing Test: `read-core/src/ast/mod.rs` (`test_extraction_latency_under_5ms` and `test_extraction_latency_contention_10_runs`).
+
 ## 5. AROP Mutation Verification Gate
 
 5.1 Target Scope:
@@ -106,12 +113,14 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 - Implementation: `read-core/src/mutation/` (`mod.rs`, `python.rs`, `ts_js.rs`, `java.rs`, `csharp.rs`, `cpp.rs`, `ruby.rs`).
 - Enforcing Test: `read-core/src/mutation/` unit test suites.
 
-5.4 Outcome Rules and Evaluation:
-- A mutant is KILLED if executing the test suite results in a non-zero exit code (including test assertion failure, exception, crash, or timeout).
-- A mutant SURVIVES if executing the test suite returns exit code 0.
-- Compilation errors count as KILLED because the mutant broke the build contract and could not silently introduce defective behavior. However, uncompilable mutants do not test assertion strength.
-- Implementation: `read-daemon/orchestrator/orchestrator.go` (`evaluateMutant`).
-- Enforcing Test: `read-daemon/orchestrator/orchestrator_test.go` (`TestPipelineVerificationGateFailureAndOverride`).
+5.4 Compile-Error-is-Invalid Rule and Outcome Evaluation:
+- A mutant is KILLED if executing the target project test suite produces a non-zero exit code caused by test assertion failures, exceptions, crashes, or timeouts.
+- A mutant SURVIVES if executing the target project test suite returns exit code 0.
+- Compile-Error-is-Invalid Rule: Mutants that fail compiler type-checking or syntax validation are INVALID mutants, not kills or survivors. Generating uncompilable mutants tests compiler diagnostics rather than test suite assertion coverage. Therefore, mutator operators MUST suppress invalid mutants:
+  1. Java: `RETURN_NULL` MUST be suppressed for primitive return types (`boolean`, `int`, etc.) and relational expressions.
+  2. TypeScript: `RETURN_UNDEFINED` MUST be suppressed for functions returning boolean literals under `strictNullChecks`.
+- Implementation: `read-core/src/mutation/java.rs` and `read-core/src/mutation/ts_js.rs`.
+- Enforcing Test: `read-core/src/mutation/java.rs` (`test_java_diff_mutator_skips_primitive_boolean_return_null`) and `read-core/src/mutation/ts_js.rs` (`test_ts_diff_mutator_skips_boolean_return_undefined`).
 
 5.5 Pass Threshold Invariant:
 - The verification gate MUST require a strictly 100.0% mutation kill score (all generated mutants must be killed).

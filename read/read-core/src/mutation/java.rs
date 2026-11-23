@@ -300,4 +300,20 @@ mod tests {
         assert!(m2.iter().any(|x| x.operator == "REMOVE_NULL_CHECK" && x.mutated_line.contains("if (true && order.getRole().equals(\"ADMIN\")) {")));
         assert!(m2.iter().any(|x| x.operator == "INVERT_EQUALITY" && x.mutated_line.contains("!order.getRole().equals(\"ADMIN\")")));
     }
+
+    #[test]
+    fn test_java_diff_mutator_skips_primitive_boolean_return_null() {
+        // Enforce Compile-Error-is-Invalid rule:
+        // Returning null for a primitive boolean or relational comparison produces a javac compile error.
+        // The mutator must suppress RETURN_NULL on boolean/relational expressions while allowing it for reference objects.
+        let bool_return = "    return remaining > 0;";
+        let mutants = generate_java_line_mutants(bool_return, 13, Some("OrderService.java"), 0);
+        assert!(!mutants.iter().any(|m| m.operator == "RETURN_NULL"), "RETURN_NULL must be suppressed for primitive boolean expressions");
+        assert!(mutants.iter().any(|m| m.operator == "BOUNDARY_SHIFT"));
+
+        // Reference return must still emit RETURN_NULL
+        let ref_return = "    return order.getCustomer();";
+        let ref_mutants = generate_java_line_mutants(ref_return, 14, Some("OrderService.java"), 0);
+        assert!(ref_mutants.iter().any(|m| m.operator == "RETURN_NULL"));
+    }
 }

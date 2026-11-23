@@ -319,4 +319,20 @@ mod tests {
         let opt_mutant = m.iter().find(|x| x.operator == "REMOVE_OPTIONAL_CHAIN").unwrap();
         assert_eq!(opt_mutant.mutated_line, "const name = req.user.profile?.name;");
     }
+
+    #[test]
+    fn test_ts_diff_mutator_skips_boolean_return_undefined() {
+        // Enforce Compile-Error-is-Invalid rule:
+        // Returning undefined for a boolean-annotated function fails under strictNullChecks.
+        // The mutator must suppress RETURN_UNDEFINED on boolean literals where FLIP_BOOL handles it cleanly.
+        let bool_return = "        return true;";
+        let mutants = generate_ts_js_line_mutants(bool_return, 13, Some("auth_service.ts"), 0);
+        assert!(!mutants.iter().any(|m| m.operator == "RETURN_UNDEFINED"), "RETURN_UNDEFINED must be suppressed on boolean return literals");
+        assert!(mutants.iter().any(|m| m.operator == "FLIP_BOOL_TRUE"));
+
+        // Expression return must still emit RETURN_UNDEFINED
+        let obj_return = "    return session.user;";
+        let obj_mutants = generate_ts_js_line_mutants(obj_return, 14, Some("auth_service.ts"), 0);
+        assert!(obj_mutants.iter().any(|m| m.operator == "RETURN_UNDEFINED"));
+    }
 }
