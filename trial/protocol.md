@@ -65,7 +65,7 @@ To prevent participants from tampering with enforcement mode during the trial:
    - The audit covers committed changes only.
    - The hook enforces the working-tree config during active development.
    - Residual Risk: A participant who owns the directory can delete and recreate `.read/config.json` in their local working tree during task work without committing the altered file.
-   - Supervisor-Side Check: To mitigate this residual risk, the supervisor-side grading pipeline performs an automated clean clone check. The pipeline pulls the participant branch, verifies that `.read/config.json` matches the canonical baseline hash, and runs the pre-commit gate against the canonical configuration in an isolated sandbox. Any submission exhibiting divergent behavior or tampered configuration is flagged for manual review.
+   - Supervisor-Side Check: To mitigate this residual risk, the supervisor-side grading pipeline executes `trial/supervisor_check.sh <repo> <canonical_config>`. The script performs an automated clean clone check, verifies that `.read/config.json` matches the canonical baseline hash, and runs the test suite against the canonical configuration in an isolated sandbox. Any submission exhibiting divergent behavior or tampered configuration is rejected and flagged for manual review.
 
 ## Reviewer Protocol for Surviving Mutants
 

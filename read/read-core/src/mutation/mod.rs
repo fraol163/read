@@ -100,6 +100,171 @@ impl Default for BoundedMutator {
     }
 }
 
+/// Masks text inside string literals (single, double, triple quoted) and comments with spaces,
+/// preserving exact byte length and character offsets for AST-safe operator scanning.
+pub fn mask_strings_and_comments(line: &str) -> String {
+    let bytes = line.as_bytes();
+    let mut masked = bytes.to_vec();
+    let len = bytes.len();
+    let mut i = 0;
+
+    enum State {
+        Code,
+        InSingleQuote,
+        InDoubleQuote,
+        InTripleSingleQuote,
+        InTripleDoubleQuote,
+        InBlockComment,
+    }
+
+    let mut state = State::Code;
+
+    while i < len {
+        match state {
+            State::Code => {
+                if i + 2 < len && &bytes[i..i + 3] == b"\"\"\"" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    masked[i + 2] = b' ';
+                    i += 3;
+                    state = State::InTripleDoubleQuote;
+                } else if i + 2 < len && &bytes[i..i + 3] == b"'''" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    masked[i + 2] = b' ';
+                    i += 3;
+                    state = State::InTripleSingleQuote;
+                } else if bytes[i] == b'"' {
+                    masked[i] = b' ';
+                    i += 1;
+                    state = State::InDoubleQuote;
+                } else if bytes[i] == b'\'' {
+                    masked[i] = b' ';
+                    i += 1;
+                    state = State::InSingleQuote;
+                } else if i + 1 < len && &bytes[i..i + 2] == b"//" {
+                    for j in i..len {
+                        masked[j] = b' ';
+                    }
+                    break;
+                } else if bytes[i] == b'#' {
+                    for j in i..len {
+                        masked[j] = b' ';
+                    }
+                    break;
+                } else if i + 1 < len && &bytes[i..i + 2] == b"/*" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    i += 2;
+                    state = State::InBlockComment;
+                } else {
+                    i += 1;
+                }
+            }
+            State::InDoubleQuote => {
+                if bytes[i] == b'\\' {
+                    masked[i] = b' ';
+                    i += 1;
+                    if i < len {
+                        masked[i] = b' ';
+                        i += 1;
+                    }
+                } else if bytes[i] == b'"' {
+                    masked[i] = b' ';
+                    i += 1;
+                    state = State::Code;
+                } else {
+                    masked[i] = b' ';
+                    i += 1;
+                }
+            }
+            State::InSingleQuote => {
+                if bytes[i] == b'\\' {
+                    masked[i] = b' ';
+                    i += 1;
+                    if i < len {
+                        masked[i] = b' ';
+                        i += 1;
+                    }
+                } else if bytes[i] == b'\'' {
+                    masked[i] = b' ';
+                    i += 1;
+                    state = State::Code;
+                } else {
+                    masked[i] = b' ';
+                    i += 1;
+                }
+            }
+            State::InTripleDoubleQuote => {
+                if i + 2 < len && &bytes[i..i + 3] == b"\"\"\"" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    masked[i + 2] = b' ';
+                    i += 3;
+                    state = State::Code;
+                } else {
+                    masked[i] = b' ';
+                    i += 1;
+                }
+            }
+            State::InTripleSingleQuote => {
+                if i + 2 < len && &bytes[i..i + 3] == b"'''" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    masked[i + 2] = b' ';
+                    i += 3;
+                    state = State::Code;
+                } else {
+                    masked[i] = b' ';
+                    i += 1;
+                }
+            }
+            State::InBlockComment => {
+                if i + 1 < len && &bytes[i..i + 2] == b"*/" {
+                    masked[i] = b' ';
+                    masked[i + 1] = b' ';
+                    i += 2;
+                    state = State::Code;
+                } else {
+                    masked[i] = b' ';
+                    i += 1;
+                }
+            }
+        }
+    }
+
+    String::from_utf8(masked).unwrap_or_else(|_| line.to_string())
+}
+
+/// Applies a targeted mutation only if the target exists outside strings and comments.
+pub fn apply_mutation(
+    line: &str,
+    masked: &str,
+    target: &str,
+    replacement: &str,
+    operator: &str,
+    line_num: usize,
+    file_path: Option<&str>,
+    next_id: &mut usize,
+    candidates: &mut Vec<Mutant>,
+) -> bool {
+    if let Some(idx) = masked.find(target) {
+        let mutated_line = format!("{}{}{}", &line[..idx], replacement, &line[idx + target.len()..]);
+        candidates.push(Mutant {
+            id: *next_id,
+            original_line: line.to_string(),
+            mutated_line,
+            line_number: line_num,
+            operator: operator.to_string(),
+            file_path: file_path.map(|s| s.to_string()),
+        });
+        *next_id += 1;
+        true
+    } else {
+        false
+    }
+}
+
 impl BoundedMutator {
     pub fn new() -> Self {
         Self {
@@ -288,257 +453,70 @@ impl BoundedMutator {
             return candidates;
         }
 
+        let masked = mask_strings_and_comments(line);
+        if masked.trim().is_empty() {
+            return candidates;
+        }
+
         // --------------------------------------------------------------------
         // Operator Group 1: Relational & Equality Operator Flips
         // --------------------------------------------------------------------
         // JS/TS strict equality flips
-        if line.contains(" === ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" === ", " !== ", 1),
-                line_number: line_num,
-                operator: "STRICT_EQ_TO_NEQ".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" !== ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" !== ", " === ", 1),
-                line_number: line_num,
-                operator: "STRICT_NEQ_TO_EQ".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " === ", " !== ", "STRICT_EQ_TO_NEQ", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, " !== ", " === ", "STRICT_NEQ_TO_EQ", line_num, file_path, &mut next_id, &mut candidates);
         }
 
         // Standard equality flips (Python, Rust, Go, JS)
-        if line.contains(" == ") && !line.contains(" === ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" == ", " != ", 1),
-                line_number: line_num,
-                operator: "INVERT_EQ".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" != ") && !line.contains(" !== ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" != ", " == ", 1),
-                line_number: line_num,
-                operator: "INVERT_NEQ".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !masked.contains(" === ") && !masked.contains(" !== ") {
+            if !apply_mutation(line, &masked, " == ", " != ", "INVERT_EQ", line_num, file_path, &mut next_id, &mut candidates) {
+                apply_mutation(line, &masked, " != ", " == ", "INVERT_NEQ", line_num, file_path, &mut next_id, &mut candidates);
+            }
         }
 
         // Relational comparators (<, >, <=, >=)
-        if line.contains(" <= ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" <= ", " > ", 1),
-                line_number: line_num,
-                operator: "INVERT_LE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" >= ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" >= ", " < ", 1),
-                line_number: line_num,
-                operator: "INVERT_GE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" < ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" < ", " >= ", 1),
-                line_number: line_num,
-                operator: "INVERT_LT".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" > ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" > ", " <= ", 1),
-                line_number: line_num,
-                operator: "INVERT_GT".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " <= ", " > ", "INVERT_LE", line_num, file_path, &mut next_id, &mut candidates) {
+            if !apply_mutation(line, &masked, " >= ", " < ", "INVERT_GE", line_num, file_path, &mut next_id, &mut candidates) {
+                if !apply_mutation(line, &masked, " < ", " >= ", "INVERT_LT", line_num, file_path, &mut next_id, &mut candidates) {
+                    apply_mutation(line, &masked, " > ", " <= ", "INVERT_GT", line_num, file_path, &mut next_id, &mut candidates);
+                }
+            }
         }
 
         // --------------------------------------------------------------------
         // Operator Group 2: Boolean Literal & Logical Operator Flips
         // --------------------------------------------------------------------
-        if line.contains("True") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("True", "False", 1),
-                line_number: line_num,
-                operator: "FLIP_BOOL_TRUE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains("False") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("False", "True", 1),
-                line_number: line_num,
-                operator: "FLIP_BOOL_FALSE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, "True", "False", "FLIP_BOOL_TRUE", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, "False", "True", "FLIP_BOOL_FALSE", line_num, file_path, &mut next_id, &mut candidates);
         }
 
-        if line.contains("true") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("true", "false", 1),
-                line_number: line_num,
-                operator: "FLIP_BOOL_TRUE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains("false") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("false", "true", 1),
-                line_number: line_num,
-                operator: "FLIP_BOOL_FALSE".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, "true", "false", "FLIP_BOOL_TRUE", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, "false", "true", "FLIP_BOOL_FALSE", line_num, file_path, &mut next_id, &mut candidates);
         }
 
         // Logical AND / OR
-        if line.contains(" && ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" && ", " || ", 1),
-                line_number: line_num,
-                operator: "LOGICAL_AND_TO_OR".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" || ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" || ", " && ", 1),
-                line_number: line_num,
-                operator: "LOGICAL_OR_TO_AND".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " && ", " || ", "LOGICAL_AND_TO_OR", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, " || ", " && ", "LOGICAL_OR_TO_AND", line_num, file_path, &mut next_id, &mut candidates);
         }
 
-        if line.contains(" and ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" and ", " or ", 1),
-                line_number: line_num,
-                operator: "LOGICAL_AND_TO_OR".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" or ") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" or ", " and ", 1),
-                line_number: line_num,
-                operator: "LOGICAL_OR_TO_AND".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " and ", " or ", "LOGICAL_AND_TO_OR", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, " or ", " and ", "LOGICAL_OR_TO_AND", line_num, file_path, &mut next_id, &mut candidates);
         }
 
         // --------------------------------------------------------------------
         // Operator Group 3: Boundary Offsets
         // --------------------------------------------------------------------
-        if line.contains(" + 1") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" + 1", " - 1", 1),
-                line_number: line_num,
-                operator: "OFF_BY_ONE_ADD".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" - 1") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" - 1", " + 1", 1),
-                line_number: line_num,
-                operator: "OFF_BY_ONE_SUB".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " + 1", " - 1", "OFF_BY_ONE_ADD", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, " - 1", " + 1", "OFF_BY_ONE_SUB", line_num, file_path, &mut next_id, &mut candidates);
         }
 
-        if line.contains("++") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("++", "--", 1),
-                line_number: line_num,
-                operator: "BOUNDARY_INC".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains("--") && !line.starts_with("---") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen("--", "++", 1),
-                line_number: line_num,
-                operator: "BOUNDARY_DEC".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, "++", "--", "BOUNDARY_INC", line_num, file_path, &mut next_id, &mut candidates) {
+            if !line.starts_with("---") {
+                apply_mutation(line, &masked, "--", "++", "BOUNDARY_DEC", line_num, file_path, &mut next_id, &mut candidates);
+            }
         }
 
-        if line.contains(" > 0") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" > 0", " >= 0", 1),
-                line_number: line_num,
-                operator: "BOUNDARY_GT_ZERO".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
-        } else if line.contains(" < 0") {
-            candidates.push(Mutant {
-                id: next_id,
-                original_line: line.to_string(),
-                mutated_line: line.replacen(" < 0", " <= 0", 1),
-                line_number: line_num,
-                operator: "BOUNDARY_LT_ZERO".to_string(),
-                file_path: file_path.map(|s| s.to_string()),
-            });
-            next_id += 1;
+        if !apply_mutation(line, &masked, " > 0", " >= 0", "BOUNDARY_GT_ZERO", line_num, file_path, &mut next_id, &mut candidates) {
+            apply_mutation(line, &masked, " < 0", " <= 0", "BOUNDARY_LT_ZERO", line_num, file_path, &mut next_id, &mut candidates);
         }
 
         // --------------------------------------------------------------------
@@ -914,5 +892,63 @@ mod tests {
 
         assert_eq!(mutants.len(), 10);
         assert!(elapsed < Duration::from_millis(4500));
+    }
+
+    #[test]
+    fn test_mutant_on_line_whose_only_operator_is_inside_string_literal_not_generated() {
+        let mutator = BoundedMutator::new();
+
+        // Double quoted string literal with logical operator "and"
+        let line_double = r#"raise ValueError("page and page_size must be positive integers")"#;
+        let mutants_double = mutator.generate_line_mutants(line_double, 6, Some("paginate.py"), 0);
+        assert!(
+            mutants_double.is_empty(),
+            "Expected no mutants on double-quoted string literal with operator, got: {:?}",
+            mutants_double
+        );
+
+        // Single quoted string literal with comparison operator " == " and " or "
+        let line_single = r#"msg = 'status == active or count + 1'"#;
+        let mutants_single = mutator.generate_line_mutants(line_single, 1, Some("test.py"), 0);
+        assert!(
+            mutants_single.is_empty(),
+            "Expected no mutants on single-quoted string literal with operator, got: {:?}",
+            mutants_single
+        );
+
+        // Triple double quoted string literal with " == " and " != "
+        let line_triple_double = r#"doc = """check if x == y and z != 0""""#;
+        let mutants_triple_double = mutator.generate_line_mutants(line_triple_double, 1, Some("test.py"), 0);
+        assert!(
+            mutants_triple_double.is_empty(),
+            "Expected no mutants on triple-double-quoted string literal with operator, got: {:?}",
+            mutants_triple_double
+        );
+
+        // Triple single quoted string literal with " or " and " + 1"
+        let line_triple_single = r#"doc = '''retry or attempt + 1'''"#;
+        let mutants_triple_single = mutator.generate_line_mutants(line_triple_single, 1, Some("test.py"), 0);
+        assert!(
+            mutants_triple_single.is_empty(),
+            "Expected no mutants on triple-single-quoted string literal with operator, got: {:?}",
+            mutants_triple_single
+        );
+
+        // Full diff test showing diff with string literal lines only produces zero mutants
+        let diff = r#"
+--- a/test.py
++++ b/test.py
+@@ -1,4 +1,4 @@
++raise ValueError("page and page_size must be positive integers")
++error_msg = "user == admin or role == root"
++summary = 'count + 1 and offset - 1'
++docstring = """status == active and retry or timeout"""
+"#;
+        let mutants = mutator.generate_diff_mutants(diff);
+        assert!(
+            mutants.is_empty(),
+            "Expected no mutants generated for lines with operators exclusively in string literals, got: {:?}",
+            mutants
+        );
     }
 }
