@@ -848,6 +848,40 @@ mod tests {
     }
 
     #[test]
+    fn test_diff_mutator_skips_python_docstrings() {
+        let diff = r#"
+--- a/service.py
++++ b/service.py
+@@ -1,15 +1,15 @@
++def process_payload(data):
++    """
++    This is a docstring with == and != and or and and keywords.
++    It should not produce any mutants.
++    """
++    '''
++    Another docstring with return None or return False
++    '''
++    """Single line docstring with x == y"""
++    if data == "admin":
++        return True
++    return False
++"#;
+        let mutator = BoundedMutator::new();
+        let mutants = mutator.generate_diff_mutants(diff);
+        assert!(!mutants.is_empty());
+        // Verify no mutant was produced from inside docstrings
+        for m in &mutants {
+            assert!(
+                !m.original_line.contains("docstring"),
+                "Mutant generated from docstring: {:?}",
+                m
+            );
+        }
+        // Verify code mutants were generated
+        assert!(mutants.iter().any(|m| m.original_line.contains("data == \"admin\"")));
+    }
+
+    #[test]
     fn test_ruby_diff_mutator() {
         let diff = r#"
 --- a/auth.rb

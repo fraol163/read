@@ -2086,6 +2086,70 @@ export function midEditFn(a: string,
     }
 
     #[test]
+    fn test_extraction_latency_contention_10_runs() {
+        let mut large_file = String::new();
+        large_file.push_str("import math\n\n");
+        for i in 0..200 {
+            large_file.push_str(&format!(
+                "def compute_metric_{}(x: float, y: float) -> float:\n    \"\"\"Docstring for metric {}\"\"\"\n    return x * {} + y\n\n",
+                i, i, i
+            ));
+        }
+
+        use std::sync::atomic::{AtomicBool, Ordering};
+        use std::sync::Arc;
+        use std::thread;
+
+        let stop = Arc::new(AtomicBool::new(false));
+        let mut handles = Vec::new();
+        for _ in 0..3 {
+            let file_clone = large_file.clone();
+            let stop_clone = stop.clone();
+            handles.push(thread::spawn(move || {
+                while !stop_clone.load(Ordering::Relaxed) {
+                    let _ = AstContextResolver::extract_symbols_and_imports(
+                        &file_clone,
+                        "worker.py",
+                        SourceLanguage::Python,
+                    );
+                }
+            }));
+        }
+
+        let mut measurements = Vec::with_capacity(10);
+        for _ in 0..10 {
+            let start = Instant::now();
+            let (symbols, imports, degraded) = AstContextResolver::extract_symbols_and_imports(
+                &large_file,
+                "synthetic.py",
+                SourceLanguage::Python,
+            );
+            let elapsed = start.elapsed();
+            assert!(!degraded);
+            assert_eq!(imports.len(), 1);
+            assert_eq!(symbols.len(), 200);
+            measurements.push(elapsed.as_micros());
+        }
+
+        stop.store(true, Ordering::Relaxed);
+        for h in handles {
+            let _ = h.join();
+        }
+
+        let mean_us = measurements.iter().sum::<u128>() as f64 / 10.0;
+        let min_us = *measurements.iter().min().unwrap();
+        let max_us = *measurements.iter().max().unwrap();
+        println!(
+            "CONTENTION_10_RUNS: mean={:.3}ms min={:.3}ms max={:.3}ms raw={:?}",
+            mean_us / 1000.0,
+            min_us as f64 / 1000.0,
+            max_us as f64 / 1000.0,
+            measurements.iter().map(|&u| u as f64 / 1000.0).collect::<Vec<_>>()
+        );
+        assert!(mean_us / 1000.0 < 5.0, "Mean latency exceeded 5ms under contention");
+    }
+
+    #[test]
     fn test_ast_resolver_non_ascii_and_unicode_handling() {
         // Unicode docstrings, multi-byte identifiers, Greek symbols, and accents
         let unicode_python = "import sys\n\ndef calculate_cafe_metric(x: float, y: float) -> float:\n    \"\"\"計算 metric: café & résumé (π = 3.14159, коментар)\"\"\"\n    return x + y\n";

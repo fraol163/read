@@ -59,7 +59,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Distribution | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
 | 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 8 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
-| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 56 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
+| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 58 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
 | 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 57 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
@@ -82,15 +82,17 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - C#: Mean 2.374 ms
   - C++: Mean 1.962 ms
   - Ruby: Mean 1.927 ms
-- 200 Functions Fixture Variance (10 Iterations):
-  - Pure In-Process: Mean 0.140 ms in release profile (StdDev 0.032 ms) and Mean 1.225 ms in debug profile (StdDev 0.274 ms).
+- 200 Functions Fixture Variance and Contention:
+  - Benchmark Location: Located strictly in test code within `read/read-core/src/ast/mod.rs` inside `#[cfg(test)] mod tests`. Zero benchmark code exists in production paths.
+  - Measurement History Across Commits: Single-run release in-process extraction was 0.375 ms on commit `3ce41c4`. Across 10 repeated runs on commit `7ce0a00`, release in-process extraction averaged 0.140 ms mean (Min 0.122 ms, Max 0.226 ms, StdDev 0.032 ms) and debug in-process averaged 1.225 ms mean.
+  - Contention Under 4 Active Threads: Release profile across 10 runs averaged 0.144 ms mean (Min 0.134 ms, Max 0.192 ms). Debug profile across 10 runs averaged 1.982 ms mean (Min 1.435 ms, Max 3.524 ms). Both strictly satisfy the under 5 ms threshold, improving over baseline commit `ca31c10` which measured 6.2 ms under 4-thread contention and failed.
   - CLI Process: Mean 2.014 ms in release profile (StdDev 0.077 ms) and Mean 3.745 ms in debug profile (StdDev 0.323 ms).
   - Normative Threshold: The under 5 ms threshold applies normatively to the release build profile for runtime execution.
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
 - PTY Stream Allocation: 56,628 ns/op, 974 B/op, 4 allocs/op.
-- Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED.
+- Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED. Empirical line coverage (`pytest --cov`) proves lines 258-259 had zero executions during the test run, proving the survivors represent genuine test gaps.
 - Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `454813b5...` and Go daemon binary with `-trimpath` `dcecffce...`.
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `75b0e382...` and Go daemon binary with `-trimpath` `dcecffce...`.
 
 ---
 

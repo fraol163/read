@@ -1,15 +1,28 @@
-=== BITWISE REPRODUCIBLE BUILD VERIFICATION IN ISOLATED DIRECTORIES ===
-Host: Linux 7.2.15-1-omarchy x86_64
-Date: 2026-11-23T11:32:21.370872+00:00
+=== READ FRAMEWORK CLEAN BUILD REPRODUCIBILITY AUDIT ===
+Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
+Rust Toolchain: rustc 1.99.1, cargo 1.99.1
+Go Toolchain: go version go1.24.0 linux/amd64
+Build Profile: Release (Rust: cargo build --release; Go: go build -trimpath cmd/read-daemon/main.go)
 
---- Directory: /tmp/clean_build_1 ---
-Build Start: 2026-11-23T11:32:21.674246+00:00
-Build End:   2026-11-23T11:33:36.364143+00:00
-Rust Engine SHA-256: 454813b594a02bc8995543f142ca653e8e26863d5dd17ddebde979d561d38735
-Go Daemon   SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Directory 1: /tmp/clean_build_1
+Build Start: 2026-11-23T11:57:43.012698110Z
+Build End:   2026-11-23T11:58:13.365523578Z
+Duration:    30.35 seconds
+Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
+Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
---- Directory: /tmp/clean_build_2 ---
-Build Start: 2026-11-23T11:33:36.441206+00:00
-Build End:   2026-11-23T11:34:27.792999+00:00
-Rust Engine SHA-256: 454813b594a02bc8995543f142ca653e8e26863d5dd17ddebde979d561d38735
-Go Daemon   SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Directory 2: /tmp/clean_build_2
+Build Start: 2026-11-23T11:58:19.872800549Z
+Build End:   2026-11-23T11:58:50.389144770Z
+Duration:    30.51 seconds
+Rust read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
+Go read-daemon SHA-256:   dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+
+Shipped Repository Binaries in read/bin/:
+read/bin/read-engine SHA-256: 75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479
+read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+
+Comparison Verification:
+read-engine match: IDENTICAL (75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479)
+read-daemon match: IDENTICAL (dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59)
+Conclusion: Bitwise identical build reproducibility is verified across clean isolated directories on this Linux host.

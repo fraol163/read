@@ -71,7 +71,7 @@ Analysis:
 - Network Binding: Rejecting `0.0.0.0` bindings when TLS certificates are missing protects local workspaces from accidental network exposure.
 - Authentication: Token comparison uses constant-time comparison, preventing timing side-channel attacks. However, the bearer token is static, has no rotation mechanism, and does not support granular permission scopes.
 - Reverse Proxy Flaw: Trusting `X-Forwarded-For` unconditionally allows external clients to spoof `127.0.0.1` and bypass rate limiting. Deployments must enforce header stripping at the reverse proxy layer.
-- Git Hook Bypass: Developers can bypass client-side pre-commit hooks using `git commit --no-verify`. Adding `.github/workflows/read-gate.yml` provides necessary server-side gate enforcement.
+- Git Hook Bypass: Developers can bypass client-side pre-commit hooks using `git commit --no-verify`. Adding `.github/workflows/read-gate.yml` provides a server-side gate pattern, but it remains UNTESTED on cloud runners because no git remote is configured.
 
 ---
 
