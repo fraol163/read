@@ -2089,6 +2089,7 @@ export function midEditFn(a: string,
         }
         samples.sort();
         let median_elapsed = samples[samples.len() / 2];
+        println!("ASSERTED_LATENCY_MEDIAN_MS: {:.3} ms", median_elapsed.as_secs_f64() * 1000.0);
 
         // Requirement: < 5ms per file deterministic signature extraction
         assert!(

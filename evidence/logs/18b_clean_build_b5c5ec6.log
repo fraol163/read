@@ -1,42 +1,146 @@
-=== REPRODUCIBLE BINARY BUILD VERIFICATION (TASK 2) ===
-Source Commit: b5c5ec6 (b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72) on branch report-review-v0.7.1
-Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U
+================================================================================
+=== Clean Clone 1: /tmp/clean_clone_1 ===
+================================================================================
+Cloning into '/tmp/clean_clone_1'...
+Note: switching to 'b5c5ec6'.
 
---- Clean Clone 1: /tmp/clean_clone_1 ---
-Clone Command: git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1
-Checkout Command: git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72
-Rust Build Command: cd read/read-core && cargo build --release --bin read-engine
-Rust Build Start Time: 2026-11-23T14:17:52.880836+00:00
-Rust Build End Time:   2026-11-23T14:18:01.695613+00:00
-Rust Build Exit Code:  0
-read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
-Go Build Command: cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go
-Go Build Start Time: 2026-11-23T14:18:01.741282+00:00
-Go Build End Time:   2026-11-23T14:18:02.244717+00:00
-Go Build Exit Code:  0
-read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
 
---- Clean Clone 2: /tmp/clean_clone_2 ---
-Clone Command: git clone --no-local /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2
-Checkout Command: git checkout b5c5ec62a85df671e8ea73c1bc0cf9cbcd889d72
-Rust Build Command: cd read/read-core && cargo build --release --bin read-engine
-Rust Build Start Time: 2026-11-23T14:18:13.749098+00:00
-Rust Build End Time:   2026-11-23T14:18:19.921078+00:00
-Rust Build Exit Code:  0
-read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
-Go Build Command: cd ../read-daemon && go build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go
-Go Build Start Time: 2026-11-23T14:18:19.955372+00:00
-Go Build End Time:   2026-11-23T14:18:20.056066+00:00
-Go Build Exit Code:  0
-read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
 
---- Task 1 Reference Hashes ---
-read/bin/read-engine SHA-256: 5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774
-read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+  git switch -c <new-branch-name>
 
---- Hash Verification Summary ---
-Clean Clone 1 read-engine Match: True (PASS)
-Clean Clone 2 read-engine Match: True (PASS)
-Clean Clone 1 read-daemon Match: True (PASS)
-Clean Clone 2 read-daemon Match: True (PASS)
-Status: PASS (All clean clone binary hashes match Task 1 reference hashes bitwise identically)
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at b5c5ec6 docs: remove unlogged starvation claims, restore original logs, and add latency test logs
+GOCACHE=/tmp/tmp.wHXbpKnyOQ
+CARGO_TARGET_DIR=/tmp/clean_clone_1/target
+removed 'read/bin/read-engine'
+removed 'read/bin/read-daemon'
+--- Building Rust (read-core) ---
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling generic-array v0.14.7
+   Compiling autocfg v1.5.1
+   Compiling memchr v2.8.3
+   Compiling num-traits v0.2.19
+   Compiling syn v3.0.10
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling aho-corasick v1.1.5
+   Compiling libc v0.2.191
+   Compiling regex-syntax v0.8.12
+   Compiling serde_derive v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling regex-automata v0.4.19
+   Compiling digest v0.10.7
+   Compiling iana-time-zone v0.1.65
+   Compiling itoa v1.0.19
+   Compiling cfg-if v1.0.5
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling regex v1.13.2
+   Compiling chrono v0.4.45
+   Compiling read-core v0.7.0 (/tmp/clean_clone_1/read/read-core)
+    Finished `release` profile [optimized] target(s) in 43.63s
+EXIT=0
+Rust build duration: 43.685s
+-rwxr-xr-x 2 renan renan 3675640 Nov 23 18:41 /tmp/clean_clone_1/target/release/read-engine
+5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774  /tmp/clean_clone_1/target/release/read-engine
+--- Building Go (read-daemon) ---
+EXIT=0
+Go build duration: 20.488s
+dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  /tmp/clean_clone_1/read/bin/read-daemon
+--- Timing confirmation ---
+Rust build duration: 43.685s (non-zero)
+Go build duration:   20.488s (non-zero)
+--- Final Clone Verification Hashes ---
+dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon
+5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774  target/release/read-engine
+
+================================================================================
+=== Clean Clone 2: /tmp/clean_clone_2 ===
+================================================================================
+Cloning into '/tmp/clean_clone_2'...
+Note: switching to 'b5c5ec6'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at b5c5ec6 docs: remove unlogged starvation claims, restore original logs, and add latency test logs
+GOCACHE=/tmp/tmp.uMsrGLEcrD
+CARGO_TARGET_DIR=/tmp/clean_clone_2/target
+removed 'read/bin/read-engine'
+removed 'read/bin/read-daemon'
+--- Building Rust (read-core) ---
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling generic-array v0.14.7
+   Compiling autocfg v1.5.1
+   Compiling memchr v2.8.3
+   Compiling syn v3.0.10
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling aho-corasick v1.1.5
+   Compiling regex-syntax v0.8.12
+   Compiling serde_derive v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling libc v0.2.191
+   Compiling regex-automata v0.4.19
+   Compiling digest v0.10.7
+   Compiling itoa v1.0.19
+   Compiling cfg-if v1.0.5
+   Compiling cpufeatures v0.2.17
+   Compiling iana-time-zone v0.1.65
+   Compiling sha2 v0.10.9
+   Compiling chrono v0.4.45
+   Compiling regex v1.13.2
+   Compiling read-core v0.7.0 (/tmp/clean_clone_2/read/read-core)
+    Finished `release` profile [optimized] target(s) in 29.39s
+EXIT=0
+Rust build duration: 29.466s
+-rwxr-xr-x 2 renan renan 3675640 Nov 23 18:42 /tmp/clean_clone_2/target/release/read-engine
+5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774  /tmp/clean_clone_2/target/release/read-engine
+--- Building Go (read-daemon) ---
+EXIT=0
+Go build duration: 19.426s
+dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  /tmp/clean_clone_2/read/bin/read-daemon
+--- Timing confirmation ---
+Rust build duration: 29.466s (non-zero)
+Go build duration:   19.426s (non-zero)
+--- Final Clone Verification Hashes ---
+dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon
+5ffb8559c7d2d0d976c6e0b06fa4ca72903c9b56bedb6e2a21a1a24f81156774  target/release/read-engine
+
