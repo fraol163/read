@@ -49,20 +49,21 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 
 | Suite # | Target Component | Command | Exit Code | Pass Count | Fail Count | Evidence Log Link |
 |---|---|---|---|---|---|---|
-| 01 | Lifecycle Verification | `bash read/tests/test_e2e.sh` | 0 | 9 | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
+| 01 | Lifecycle Verification | `bash read/tests/test_e2e.sh` | 0 | 15 | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
 | 02 | Adversarial Chaos Suite | `bash read/tests/test_chaos.sh` | 0 | 10 | 0 | [02_test_chaos.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/02_test_chaos.log) |
-| 03 | BMAD Zero-Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | 5 | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
+| 03 | BMAD Zero-Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | 6 | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
 | 04 | Full System Integration | `bash read/tests/test_full_system.sh` | 0 | 9 | 0 | [04_test_full_system.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/04_test_full_system.log) |
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Distribution | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
-| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 4 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
+| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 8 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
 | 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 56 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
-| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 22 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
+| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 57 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
 | 12 | CI Gate Local Scenario (untested on cloud runners) | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
-| 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 0 | 6 | 4 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 3 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
+| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 14a | Outside Repo Integration Check (colorama) | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
 ### Measured Benchmark Metrics (10 Runs Each)
@@ -78,12 +79,12 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
   - C#: Mean 2.374 ms
   - C++: Mean 1.962 ms
   - Ruby: Mean 1.927 ms
-  - Latency test on 200 functions fixture: 1.65 ms in unoptimized debug and 0.375 ms in release on dual-core hardware (spikes to 2.4 ms under 4-thread CPU contention, strictly below 5 ms limit). Multi-byte UTF-8 handling verified with non-ASCII test cases.
+  - 200 functions fixture across 10 runs: Mean 2.014 ms in release profile (StdDev 0.077 ms) and Mean 3.745 ms in debug profile (StdDev 0.323 ms). The specification threshold of under 5 ms applies normatively to the release profile. Multi-byte UTF-8 handling verified with non-ASCII test cases.
 - Large Test Suite Hook (500 tests): Mean 127.431 ms.
-- PTY Stream Allocation: 42,422 ns/op, 993 B/op, 4 allocs/op.
-- Real External Repo Mutation Test: Tested against genuine public repository `veloce-acceptance/github-repo` on `backend/resources/preview.py`. Reverted a past bug fix, generated 10 bounded AROP mutants on the staged diff, evaluated with `pytest`. Result: 6 killed, 4 survived (60.0% score) on unasserted branches and docstrings.
-- Tutorial Completion Timing: Machine execution 301.36 ms (0.30 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.30s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across independent clean clone builds for Rust release binary `fd925ce1...` and Go daemon binary with `-trimpath` `dcecffce...`.
+- PTY Stream Allocation: 56,628 ns/op, 974 B/op, 4 allocs/op.
+- Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions, zero test file changes), and evaluated mutants against `pytest tests/test_m7_vector_preview.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: FAILED.
+- Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean build directories on this Linux host for Rust release binary `d1504e35...` and Go daemon binary with `-trimpath` `dcecffce...`.
 
 ---
 
@@ -92,10 +93,11 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 The empirical status of all technical claims is tracked in [evidence/CLAIM_AUDIT.md](file:///home/renan/Downloads/me/methodology_session/evidence/CLAIM_AUDIT.md).
 Key claim adjustments include:
 - Refuted: BMAD acronym was corrected from "Break, Measure, Adapt, Deliver" to "Breakthrough Method for Agile AI-Driven Development".
-- Refuted: "Zero allocation PTY streaming" was refuted by microbenchmarks (993 B/op, 4 allocs/op) and removed.
+- Refuted: "Zero allocation PTY streaming" was refuted by microbenchmarks (974 B/op, 4 allocs/op) and removed.
 - Refuted for Managed Runtimes: Dynamic `RLIMIT_AS` (30% RAM ceiling) causes 64-bit JVM and .NET CoreCLR to abort on startup because it restricts virtual memory address space.
 - Narrowed: Crash recovery claims were narrowed from "under 10 ms" to 7.5 ms through 16.5 ms based on empirical measurements.
 - Refuted: "Master Override provides non-repudiation" was corrected to "provides cryptographic integrity and auditability via SHA-256 hash chaining".
+- Refuted: "Outside codebase achieves 100% mutation kill score" was refuted by testing on `veloce-acceptance/github-repo` (75.0% score, gate failed on unexercised error path).
 
 ---
 
@@ -118,3 +120,11 @@ Key findings:
 - System Gaps and Roadmap: [read/docs/GAPS.md](file:///home/renan/Downloads/me/methodology_session/read/docs/GAPS.md).
 - Student Onboarding Guide: [read/docs/TUTORIAL.md](file:///home/renan/Downloads/me/methodology_session/read/docs/TUTORIAL.md).
 - Detailed Version History: [CHANGELOG.md](file:///home/renan/Downloads/me/methodology_session/CHANGELOG.md).
+
+---
+
+## 7. Accepted Decisions
+
+1. Human Student Trial Thresholds: Setup under 10 minutes for at least 4 of 5 students, at least 4 of 5 finish all 20 tasks, and READ catches at least 20 percent more seeded bugs than a plain test run.
+2. Target Initial Audience: Undergraduate students learning test-first development.
+3. CI Gate Infrastructure Status: Labeled as local shell scenario until remote repository push enables cloud GitHub Actions runners.

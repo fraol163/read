@@ -1,6 +1,6 @@
 === TEST: Cryptographic WAL Git Tag Anchoring and Rewritten Chain Attack ===
 Target Command: read-engine verify-wal-anchor & recover
-Date: 2026-11-23T13:35:31+03:00
+Date: 2026-11-23T14:20:23+03:00
 [READ] Initialized state engine in .read/
 [READ] Task defined. State revision: 1
 [READ] Build started. Status: Executing
@@ -8,7 +8,7 @@ Date: 2026-11-23T13:35:31+03:00
 [READ] CAS Handoff successful. State: HandoffComplete
 
 [STEP 1] Valid State and Anchored Git Tag
-Git Tag read-wal-head contains: d235e7a696c0c9a746e75cf6403893fe325b215cb3fed24226dd00e25b3595dd
+Git Tag read-wal-head contains: 18c765748673bacf2f0c239844e58a416b85e0af340624d8103c1bf033533af4
 [STEP 2] Running initial anchor verification...
 [READ] WAL git tag anchor verified successfully
 [PASS] Initial anchor verification succeeded.
@@ -19,10 +19,10 @@ Rewritten WAL entry_hash: feab1bbb58f78136514407190e23f65b0f1915a90162420d2aa501
 
 [STEP 4] Executing read-engine verify-wal-anchor against rewritten WAL...
 [PASS] verify-wal-anchor correctly detected rewritten chain! Exit code: 1
-[ERROR] WAL git anchor mismatch: git tag read-wal-head (d235e7a696c0c9a746e75cf6403893fe325b215cb3fed24226dd00e25b3595dd) does not match WAL head hash (feab1bbb58f78136514407190e23f65b0f1915a90162420d2aa5017f41e718d6)
+[ERROR] WAL git anchor mismatch: git tag read-wal-head (18c765748673bacf2f0c239844e58a416b85e0af340624d8103c1bf033533af4) does not match WAL head hash (feab1bbb58f78136514407190e23f65b0f1915a90162420d2aa5017f41e718d6)
 
 [STEP 5] Executing read-engine recover against rewritten WAL...
 [PASS] read-engine recover correctly aborted on anchor mismatch! Exit code: 1
-[ERROR] WAL git anchor mismatch: git tag read-wal-head (d235e7a696c0c9a746e75cf6403893fe325b215cb3fed24226dd00e25b3595dd) does not match WAL head hash (feab1bbb58f78136514407190e23f65b0f1915a90162420d2aa5017f41e718d6)
+[ERROR] WAL git anchor mismatch: git tag read-wal-head (18c765748673bacf2f0c239844e58a416b85e0af340624d8103c1bf033533af4) does not match WAL head hash (feab1bbb58f78136514407190e23f65b0f1915a90162420d2aa5017f41e718d6)
 
 === WAL ANCHOR AND REWRITTEN CHAIN TEST PASSED ===

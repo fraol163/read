@@ -1,13 +1,13 @@
 === RUN   TestPipelineStage1AndStage2
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_2727580116
+Workspace:    /tmp/read_orch_test_3792232811
 Prompt:       Implement is_even function
 Timeout:      10s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795429692, ContractHash=2670415edb6849d58624ac99a7d04e0150c4ca7f7abda12e578a1dfe2638b0d3
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432797, ContractHash=2670415edb6849d58624ac99a7d04e0150c4ca7f7abda12e578a1dfe2638b0d3
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -19,7 +19,7 @@ AutoApprove:  false
 FAIL: test_boolean_return (test_math.TestMath.test_boolean_return)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_2727580116/test_math.py", line 12, in test_boolean_return
+  File "/tmp/read_orch_test_3792232811/test_math.py", line 12, in test_boolean_return
     self.assertIs(is_even(2), True)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 AssertionError: False is not True
@@ -28,7 +28,7 @@ AssertionError: False is not True
 FAIL: test_even (test_math.TestMath.test_even)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_2727580116/test_math.py", line 6, in test_even
+  File "/tmp/read_orch_test_3792232811/test_math.py", line 6, in test_even
     self.assertTrue(is_even(4))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: False is not true
@@ -37,13 +37,13 @@ AssertionError: False is not true
 FAIL: test_odd (test_math.TestMath.test_odd)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_2727580116/test_math.py", line 9, in test_odd
+  File "/tmp/read_orch_test_3792232811/test_math.py", line 9, in test_odd
     self.assertFalse(is_even(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: True is not false
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.003s
+Ran 3 tests in 0.002s
 
 FAILED (failures=3)
 )
@@ -52,7 +52,7 @@ FAILED (failures=3)
 FAIL: test_boolean_return (test_math.TestMath.test_boolean_return)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_2727580116/test_math.py", line 12, in test_boolean_return
+  File "/tmp/read_orch_test_3792232811/test_math.py", line 12, in test_boolean_return
     self.assertIs(is_even(2), True)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 AssertionError: None is not True
@@ -61,13 +61,13 @@ AssertionError: None is not True
 FAIL: test_even (test_math.TestMath.test_even)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_2727580116/test_math.py", line 6, in test_even
+  File "/tmp/read_orch_test_3792232811/test_math.py", line 6, in test_even
     self.assertTrue(is_even(4))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: None is not true
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.002s
+Ran 3 tests in 0.001s
 
 FAILED (failures=2)
 )
@@ -75,19 +75,19 @@ FAILED (failures=2)
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: c80e3716926a008c8ecc6bd82316438731eb35d132eb929d587203c243a8014e)
 ================================================================
-[READ PIPELINE] Execution finished in 616ms, Success=true, State=handoff_complete
+[READ PIPELINE] Execution finished in 968ms, Success=true, State=handoff_complete
 ================================================================
---- PASS: TestPipelineStage1AndStage2 (1.70s)
+--- PASS: TestPipelineStage1AndStage2 (2.02s)
 === RUN   TestPipelineVerificationGateFailureAndOverride
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_3474655686
+Workspace:    /tmp/read_orch_test_2068148202
 Prompt:       Add threshold check logic
 Timeout:      10s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795429694, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432799, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -98,7 +98,7 @@ AutoApprove:  false
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -125,7 +125,7 @@ OK
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -140,13 +140,13 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.002s
+Ran 1 test in 0.001s
 
 FAILED (failures=1)
 )
@@ -155,7 +155,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: None is not true
@@ -170,7 +170,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -190,17 +190,17 @@ OK
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] FAILED: verification gate failed (mutation score: 62.5% < 100.0%)
 ================================================================
-[READ PIPELINE] Execution finished in 1467ms, Success=false, State=executing
+[READ PIPELINE] Execution finished in 879ms, Success=false, State=executing
 ================================================================
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_3474655686
+Workspace:    /tmp/read_orch_test_2068148202
 Prompt:       Add threshold check logic with auto approve
 Timeout:      10s
 AutoApprove:  true
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795429694, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432799, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -211,7 +211,7 @@ AutoApprove:  true
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -238,7 +238,7 @@ OK
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -253,7 +253,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -268,7 +268,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: None is not true
@@ -283,7 +283,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_3474655686/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_2068148202/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -302,27 +302,27 @@ OK
 [Stage 4: Diff & Mutation Verification] GATE FAILED: Mutation score 62.5% is below strictly required 100.0% threshold (Killed 5/8)
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] Verification score < 100% but --auto-approve enabled: Applying Master Override...
-[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: OVR-48635a6fbe02ef5fe7022d62eb055e1dc5d2cca554ad5d94ea4cb42a1863bd28)
+[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: OVR-b8f4346f49f19056ea26754684f1541eea3d9be48227c64582b50326ddeeff6a)
 ================================================================
-[READ PIPELINE] Execution finished in 1308ms, Success=true, State=handoff_complete
+[READ PIPELINE] Execution finished in 1469ms, Success=true, State=handoff_complete
 ================================================================
---- PASS: TestPipelineVerificationGateFailureAndOverride (4.86s)
+--- PASS: TestPipelineVerificationGateFailureAndOverride (4.39s)
 === RUN   TestPipelineHarnessTimeout
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_686831232
+Workspace:    /tmp/read_orch_test_2634401667
 Prompt:       Long running task
 Timeout:      1s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795429698, ContractHash=e5c6549487955a58b9153e40de48fef0538d1d2ce7f7e1c27c33e76a0d77eebe
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432803, ContractHash=e5c6549487955a58b9153e40de48fef0538d1d2ce7f7e1c27c33e76a0d77eebe
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 0 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
 [Stage 3: Harness Dispatch] FAILED: task exceeded timeout limit of 1s
---- PASS: TestPipelineHarnessTimeout (2.13s)
+--- PASS: TestPipelineHarnessTimeout (2.18s)
 === RUN   TestLegacyMethodDirectoryMigration
---- PASS: TestLegacyMethodDirectoryMigration (0.03s)
+--- PASS: TestLegacyMethodDirectoryMigration (0.02s)
 PASS
-ok  	read-daemon/orchestrator	8.729s
+ok  	read-daemon/orchestrator	8.622s

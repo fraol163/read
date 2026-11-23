@@ -56,7 +56,7 @@ build:
 		echo "[ERROR] Could not find compiled read-engine binary" >&2; exit 1; \
 	fi
 	@echo "[READ] Building Go host daemon (read-daemon)..."
-	cd read-daemon && $(GO) build -o ../bin/read-daemon ./cmd/read-daemon
+	cd read-daemon && $(GO) build -trimpath -o ../bin/read-daemon cmd/read-daemon/main.go
 	chmod +x bin/read bin/read-engine bin/read-daemon
 	@echo "[READ] Build complete: bin/read, bin/read-engine, bin/read-daemon"
 

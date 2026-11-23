@@ -1,6 +1,6 @@
 === [TEST SUITE] Starting READ Full System & Gateway Tests ===
-Sandbox: /tmp/read-system-sandbox-bjsEdl
-[READ] Initialized state engine in .method/
+Sandbox: /tmp/read-system-sandbox-d9ra3L
+[READ] Initialized state engine in .read/
 [PASS] 1. Native Rust Engine initialized atomic WAL & STATE
 [READ] Task defined. State revision: 1
 [PASS] 2. Deterministic AST & Contract Hash sealed: f09620f3f34b4c6854d41b93b3e534ca9982e3292beccec7f2faba96089ec6ff
@@ -9,6 +9,6 @@ Sandbox: /tmp/read-system-sandbox-bjsEdl
 [PASS] 5. 3-Way Storage policy switched dynamically to 'phone_only'
 [PASS] 6. Remote Workspace File Explorer listed active codebase with SHA-256
 [PASS] 7. Remote Master Override executed & recorded to WAL with SHA-256 rationale
-[PASS] 8. Master Override sealed state with cryptographic proof: OVR-702c7ef6ffefa430b4e24957de6f55f95350f846ea6ac0e337fbeee04ee1d6dc
+[PASS] 8. Master Override sealed state with cryptographic proof: OVR-1d544b0a3ae6b5d75d5b1b1874e3152735a670cde6964cf2c549619228adb9a8
 [PASS] 9. CAS Handoff completed via Gateway Daemon to handoff_complete
 === [ALL 9 SYSTEM TESTS PASSED]: READ Framework & Gateway are 100% Operational ===

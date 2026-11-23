@@ -13,20 +13,21 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 
 | Suite # | Test Target | Command Executed | Exit Code | Pass Count | Fail Count | Raw Evidence Log |
 |---|---|---|---|---|---|---|
-| 01 | End-to-End Lifecycle | `bash read/tests/test_e2e.sh` | 0 | 9 | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
+| 01 | End-to-End Lifecycle | `bash read/tests/test_e2e.sh` | 0 | 15 | 0 | [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log) |
 | 02 | Chaos and Stress Suite | `bash read/tests/test_chaos.sh` | 0 | 10 | 0 | [02_test_chaos.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/02_test_chaos.log) |
-| 03 | BMAD Zero-Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | 5 | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
+| 03 | BMAD Zero-Command Parity | `bash read/tests/test_bmad_zero_command.sh` | 0 | 6 | 0 | [03_test_bmad_zero_command.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/03_test_bmad_zero_command.log) |
 | 04 | Full System Integration | `bash read/tests/test_full_system.sh` | 0 | 9 | 0 | [04_test_full_system.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/04_test_full_system.log) |
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Installation | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
-| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 4 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
+| 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 8 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
 | 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 56 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
-| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 22 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
+| 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 57 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
 | 12 | CI Gate Local Scenario (untested on cloud runners) | `bash evidence/test_ci_workflow.sh` | 0 | 3 | 0 | [12_ci_gate_workflow.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/12_ci_gate_workflow.log) |
-| 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 5 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
-| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 0 | 6 | 4 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 13 | WAL Tamper Local Scenario (local shell simulation) | `bash evidence/test_wal_tamper.sh` | 0 | 3 | 0 | [13_wal_tamper_test.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/13_wal_tamper_test.log) |
+| 14 | Outside Repo Mutation Gate (veloce-acceptance) | `read-engine mutate staged diff + pytest` | 1 | 6 | 2 | [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log) |
+| 14a | Outside Repo Integration Check (colorama) | `python3 scratch/generate_colorama_log.py` | 0 | 10 | 0 | [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log) |
 | 15 | Tutorial Machine Timing | `python3 evidence/time_tutorial.py` | 0 | 8 | 0 | [15_tutorial_timing.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/15_tutorial_timing.log) |
 
 ## 2. Quantitative Performance Measurements
@@ -64,50 +65,52 @@ Measures `read-engine ast-context` across 8 supported programming languages (10 
 - Python (100 functions fixture): Mean 2.033 ms (Min: 1.731 ms, Max: 3.012 ms, StdDev: 0.484 ms)
 - Verdict: All 8 languages satisfy the under 5ms latency threshold on single files.
 
-### 2.4 Diagnostic Explanation of AST Latency Test Thread Runs
-During test development, `cargo test test_extraction_latency_under_5ms` was run alone and with `--test-threads=2`.
-Reason for those runs:
-Under full parallel test execution across the workspace (`cargo test --workspace`), 4 threads ran concurrently on a 2-core AMD Ryzen 3 3250U host. In unoptimized debug compilation, thread preemption during CPU contention caused the 200-function Python AST test to run in 6.2 ms, exceeding the 5 ms limit. Running the test with limited thread concurrency isolated whether the delay was caused by CPU scheduling saturation or quadratic algorithmic complexity. Profiling revealed that character scanning via `chars().nth()` was allocating repeatedly. The parser was refactored to single-pass UTF-8 byte slice indexing (`as_bytes()`), dropping the 200-function extraction time to under 0.5 ms even under CPU contention.
-The assertion in `read/read-core/src/ast/mod.rs` was updated from `<= 10` to `< 5` so the test strictly matches the specification claim of under 5 ms.
+### 2.4 Diagnostic Explanation of AST Latency Variance and Thread Contention
+Target fixture: Synthetic Python file containing 200 functions (800 lines).
+Measured across 10 repeated benchmark iterations on an AMD Ryzen 3 3250U host:
+- CLI process execution (including binary startup and file reading):
+  - Debug profile (10 runs): Mean 3.745 ms (Min 3.327 ms, Max 4.287 ms, StdDev 0.323 ms).
+  - Release profile (10 runs): Mean 2.014 ms (Min 1.894 ms, Max 2.138 ms, StdDev 0.077 ms).
+- Pure in-process function execution:
+  - Debug unoptimized: 1.65 ms.
+  - Release optimized: 0.375 ms.
+  - Baseline commit `ca31c10` unoptimized: 2.96 ms single thread, 6.2 ms under 4-thread CPU contention (`--test-threads=4`).
+- Profile applicability: The specification threshold of under 5 ms applies normatively to the release build profile for runtime use. The optimized implementation satisfies the threshold in both release and debug profiles.
+- Raw logs:
+  - Baseline log: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log).
+  - Optimized log: [17_latency_optimized_3ce41c4.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/17_latency_optimized_3ce41c4.log).
 
-Empirical before and after measurements:
-- Baseline commit `ca31c10`:
-  - Single thread (no contention): 2.96 ms (2962 us).
-  - Four worker threads under CPU contention (`--test-threads=4`): 6.2 ms (6200 us). Fails 5 ms assertion.
-  - Raw log: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log).
-- Optimized commit `3ce41c4`:
-  - Single thread debug unoptimized: 1.65 ms (1651 us).
-  - Single thread release optimized: 0.375 ms (375 us).
-  - Four worker threads under CPU contention (`--test-threads=4`, debug): 2.1 to 2.4 ms. Passes 5 ms assertion.
-  - Raw log: [17_latency_optimized_3ce41c4.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/17_latency_optimized_3ce41c4.log).
+UTF-8 Handling Verification:
+Test `test_ast_resolver_non_ascii_and_unicode_handling` in `read/read-core/src/ast/mod.rs` validates parsing Japanese identifiers and docstrings, Cyrillic comments, Greek symbols, and French accents without panics or degraded fallback states.
 
-Correction Note:
-An earlier summary reported an unverified projection of 0.05 ms in debug and 0.01 ms in release. Real measured execution times on this hardware are 1.65 ms in debug and 0.375 ms in release.
+### 2.5 Root Cause Analysis of Previous Test Timeout
+During optimization development, `test_learn_lifecycle` timed out with exit code 124.
+Root cause:
+In `read/read-core/src/ast/mod.rs` inside `extract_python`, when checking for an optional function docstring, the loop `while k < lines.len()` inspected candidate lines. If the first non-comment and non-empty line was ordinary Python code rather than a triple-quoted docstring, the loop failed to advance `k` and lacked an exit break. This caused an infinite loop when analyzing functions without docstrings.
+Remediation:
+Added an unconditional loop exit break after evaluating the first candidate line. The test now finishes in under 0.01 seconds. All 56 tests in `read-core` pass cleanly in 1.11 seconds.
 
-UTF-8 Safety Verification:
-To confirm that byte indexing does not panic or corrupt multi-byte UTF-8 streams, test `test_ast_resolver_non_ascii_and_unicode_handling` was added to `read/read-core/src/ast/mod.rs`. The test validates docstrings and identifiers containing Japanese characters, Cyrillic comments, Greek mathematical symbols, and French accents. The test passes without degradation across all 56 tests in `read-core`.
-
-### 2.5 PTY Streaming Allocation Verification
+### 2.6 PTY Streaming Allocation Verification
 Microbenchmark `BenchmarkPtyStreaming` in `read-daemon/pty`:
-- Execution speed: 42,422 ns/op
-- Heap memory allocated: 993 B/op
+- Execution speed: 56,628 ns/op
+- Heap memory allocated: 974 B/op
 - Allocations per frame: 4 allocs/op
 - Verdict: The claim of zero allocation PTY streaming is false. Memory is allocated for byte slice buffers and WebSocket frame encapsulation. The claim has been removed from all documentation.
 
-### 2.6 Large Test Suite Hook Latency
+### 2.7 Large Test Suite Hook Latency
 Measured executing a synthetic 500-assertion Python test suite under the harness:
 - Mean: 127.431 ms
 - Min: 108.445 ms
 - Max: 136.777 ms
 
-### 2.7 Tutorial Execution Timing and Student Completion
+### 2.8 Tutorial Execution Timing and Student Completion
 Measured running all 8 steps of `TUTORIAL.md` in a fresh clean directory via `evidence/time_tutorial.py`:
-- Start Timestamp UTC: `2026-11-23T09:59:13.124315+00:00`
-- End Timestamp UTC: `2026-11-23T09:59:13.390945+00:00`
+- Start Timestamp UTC: `2026-11-23T11:21:37.256742+00:00`
+- End Timestamp UTC: `2026-11-23T11:21:37.433474+00:00`
 - Total Step Count: 8
-- Machine Execution Time: 266.62 ms (0.27 seconds)
-- Human Completion Time: Not measured (machine execution: 0.27s, human trial unconducted)
-All 8 commands executed with exit code 0. Prior estimates of 5 to 10 minutes for human students were unverified projections and have been designated as not measured.
+- Machine Execution Time: 176.72 ms (0.18 seconds)
+- Human Completion Time: Not measured (machine execution: 0.18s, human trial unconducted)
+All 8 commands executed with exit code 0.
 
 ## 3. Security and Vulnerability Empirical Verifications
 
@@ -129,24 +132,19 @@ Tested Java and .NET process execution under virtual memory constraints:
 ### 3.3 Mutation Testing on External Public Repository
 Tested AROP mutation engine against genuine public repository `veloce-acceptance/github-repo`:
 - Target File: `backend/resources/preview.py`
-- Methodology: Reverted past bug fix commit `7a34571` on a scratch branch, staged the diff, and ran `read-engine mutate` on the staged diff.
-- Mutants generated: 10 bounded AROP mutants:
-  1. Mutant #1 [L259 FLIP_BOOL_FALSE]: SURVIVED (tests passed without detecting mutant)
-  2. Mutant #2 [L259 RETURN_NONE]: SURVIVED (tests passed without detecting mutant)
-  3. Mutant #3 [L260 FLIP_BOOL_TRUE]: KILLED (test failure)
-  4. Mutant #4 [L260 RETURN_NONE]: KILLED (test failure)
-  5. Mutant #5 [L264 LOGICAL_OR_TO_AND]: SURVIVED (tests passed without detecting mutant)
-  6. Mutant #6 [L267 LOGICAL_AND_TO_OR]: SURVIVED (tests passed without detecting mutant)
-  7. Mutant #7 [L272 LOGICAL_OR_TO_AND]: KILLED (test failure)
-  8. Mutant #8 [L285 INVERT_LT]: KILLED (test failure)
-  9. Mutant #9 [L294 INVERT_NEQ]: KILLED (test failure)
-  10. Mutant #10 [L296 RETURN_NONE]: KILLED (test failure)
-- Evaluation:
-  Evaluated against the target repository test suite via `pytest tests/test_m7_vector_preview.py`.
-- Mutation Score: 6/10 killed, 4/10 survived (60.0% score).
-- Observation:
-  Mutants in unasserted code branches or docstring comments survived. This empirical test confirms that real codebases contain coverage gaps where mutants survive.
+- Methodology: Reverted past bug fix commit `7a34571` on a scratch branch, staged the diff, and ran `read-engine mutate` on the staged diff. Staged diff stat confirmed 33 insertions, 13 deletions across `backend/resources/preview.py` only. Zero test files were staged.
+- Mutants evaluated:
+  - Initial run: Generated 10 mutants with 4 survivors (60.0% score).
+    - Survivor 1 [L259 FLIP_BOOL_FALSE]: Real test gap. The test suite does not exercise `ascii_from_png` with corrupted pixel input that triggers `ValueError`.
+    - Survivor 2 [L259 RETURN_NONE]: Real test gap. Same unexercised error handling path.
+    - Survivor 3 [L264 LOGICAL_OR_TO_AND]: Equivalent mutant from an operator design flaw. Mutated "or" to "and" inside a triple-quoted Python docstring.
+    - Survivor 4 [L267 LOGICAL_AND_TO_OR]: Equivalent mutant from an operator design flaw. Mutated "and" to "or" inside a triple-quoted Python docstring.
+  - Corrected run (with docstrings skipped): Generated 8 mutants.
+    - 6 mutants killed by `pytest tests/test_m7_vector_preview.py`.
+    - 2 mutants survived on line 259 (the unasserted `ValueError` handling path).
+- Gate Status: FAILED. The score of 75.0% (6/8 killed) fails the strictly required 100.0% threshold.
 - Raw log: [14_external_repo_mutation.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14_external_repo_mutation.log).
+- Integration check log: [14a_colorama_integration_check.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/14a_colorama_integration_check.log).
 
 ### 3.4 WAL Tag Anchoring Security Boundary
 Git tag anchoring links the latest WAL entry hash to the git tag `read-wal-head`.
@@ -159,18 +157,18 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 
 ## 4. Reproducible Binary Build Verification
 
-To verify build reproducibility, commit `3ce41c48ce2894edbb08d7413380f443e835e426` was cloned into two isolated directories (`/tmp/reproduce_1` and `/tmp/reproduce_2`).
+To verify build reproducibility on this Linux host, clean builds were executed across independent isolated directories:
 
 ### 4.1 Rust Engine Reproducibility (`read-engine`)
 Built using `cargo build --release --manifest-path read/read-core/Cargo.toml`.
-- Binary 1 SHA-256: `fd925ce1ff618ef27ae04916a59993ab598c31ee0d8c6ad39281a37d8655210d`
-- Binary 2 SHA-256: `fd925ce1ff618ef27ae04916a59993ab598c31ee0d8c6ad39281a37d8655210d`
-- Result: SHA-256 hashes match identically. Rust release builds are bitwise reproducible across clean directories.
+- Binary SHA-256 in `read/bin/read-engine`: `d1504e35fa9ad89b32a531331a258ed0ebc28e76b68cbb101fec1c0887a990c0`
+- Clean isolated build SHA-256 (`/tmp/reproduce_clean1`): `d1504e35fa9ad89b32a531331a258ed0ebc28e76b68cbb101fec1c0887a990c0`
+- Result: SHA-256 hashes match identically. Rust release builds are bitwise reproducible on this Linux host.
 
-### 4.2 Go Daemon Reproducibility (`read-daemon`)
+### 4.2 Go Host Daemon Reproducibility (`read-daemon`)
 Built using `go build -trimpath -o bin/read-daemon cmd/read-daemon/main.go`.
 - Standard `go build` embeds local directory paths into debug symbols, producing different hashes across different directories.
-- With `-trimpath`, file system paths are stripped from the compiled binary.
-- Binary 1 SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Binary 2 SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Result: SHA-256 hashes match identically. With `-trimpath`, Go daemon builds are bitwise reproducible across clean directories.
+- With `-trimpath` and building `cmd/read-daemon/main.go`, file system paths are stripped from the compiled binary.
+- Binary SHA-256 in `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
+- Clean isolated build SHA-256 (`/tmp/reproduce_clean1`): `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
+- Result: SHA-256 hashes match identically. With `-trimpath`, Go daemon builds are bitwise reproducible on this Linux host.

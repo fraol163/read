@@ -4,23 +4,23 @@
 === RUN   TestLocalConfigOverride
 --- PASS: TestLocalConfigOverride (0.00s)
 PASS
-ok  	read-daemon/config	0.005s
+ok  	read-daemon/config	0.006s
 === RUN   TestFsManagerTraversalRejection
 --- PASS: TestFsManagerTraversalRejection (0.00s)
 PASS
-ok  	read-daemon/fs	0.011s
+ok  	read-daemon/fs	0.009s
 === RUN   TestGatewayFsTraversalRejection
---- PASS: TestGatewayFsTraversalRejection (1.35s)
+--- PASS: TestGatewayFsTraversalRejection (1.10s)
 === RUN   TestGatewayTokenRedactionInTaskCommand
---- PASS: TestGatewayTokenRedactionInTaskCommand (1.28s)
+--- PASS: TestGatewayTokenRedactionInTaskCommand (1.06s)
 === RUN   TestGatewayPipelineRunEndpoint
---- PASS: TestGatewayPipelineRunEndpoint (1.38s)
+--- PASS: TestGatewayPipelineRunEndpoint (1.10s)
 === RUN   TestGatewayBearerTokenAuth
---- PASS: TestGatewayBearerTokenAuth (1.06s)
+--- PASS: TestGatewayBearerTokenAuth (1.15s)
 === RUN   TestGatewayRateLimitingAndWhitelist
---- PASS: TestGatewayRateLimitingAndWhitelist (1.10s)
+--- PASS: TestGatewayRateLimitingAndWhitelist (1.06s)
 PASS
-ok  	read-daemon/gateway	6.178s
+ok  	read-daemon/gateway	5.486s
 === RUN   TestDetectTestHarness
 --- PASS: TestDetectTestHarness (0.00s)
 === RUN   TestDetectJavaHarness
@@ -52,25 +52,25 @@ ok  	read-daemon/gateway	6.178s
 === RUN   TestParseRSpecJSON
 --- PASS: TestParseRSpecJSON (0.00s)
 === RUN   TestRunnerProcessGroupCleanup
---- PASS: TestRunnerProcessGroupCleanup (0.35s)
+--- PASS: TestRunnerProcessGroupCleanup (0.38s)
 === RUN   TestRunnerTimeout
 --- PASS: TestRunnerTimeout (1.11s)
 === RUN   TestRunnerMemoryGuard
 --- PASS: TestRunnerMemoryGuard (0.10s)
 === RUN   TestRunnerKeyRedactionInEvents
---- PASS: TestRunnerKeyRedactionInEvents (0.20s)
+--- PASS: TestRunnerKeyRedactionInEvents (0.10s)
 PASS
-ok  	read-daemon/harness	1.786s
+ok  	read-daemon/harness	1.716s
 === RUN   TestPipelineStage1AndStage2
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_1119064139
+Workspace:    /tmp/read_orch_test_3187092121
 Prompt:       Implement is_even function
 Timeout:      10s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795430097, ContractHash=2670415edb6849d58624ac99a7d04e0150c4ca7f7abda12e578a1dfe2638b0d3
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432747, ContractHash=2670415edb6849d58624ac99a7d04e0150c4ca7f7abda12e578a1dfe2638b0d3
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -82,7 +82,7 @@ AutoApprove:  false
 FAIL: test_boolean_return (test_math.TestMath.test_boolean_return)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1119064139/test_math.py", line 12, in test_boolean_return
+  File "/tmp/read_orch_test_3187092121/test_math.py", line 12, in test_boolean_return
     self.assertIs(is_even(2), True)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 AssertionError: False is not True
@@ -91,7 +91,7 @@ AssertionError: False is not True
 FAIL: test_even (test_math.TestMath.test_even)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1119064139/test_math.py", line 6, in test_even
+  File "/tmp/read_orch_test_3187092121/test_math.py", line 6, in test_even
     self.assertTrue(is_even(4))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: False is not true
@@ -100,13 +100,13 @@ AssertionError: False is not true
 FAIL: test_odd (test_math.TestMath.test_odd)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1119064139/test_math.py", line 9, in test_odd
+  File "/tmp/read_orch_test_3187092121/test_math.py", line 9, in test_odd
     self.assertFalse(is_even(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: True is not false
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.002s
+Ran 3 tests in 0.001s
 
 FAILED (failures=3)
 )
@@ -115,7 +115,7 @@ FAILED (failures=3)
 FAIL: test_boolean_return (test_math.TestMath.test_boolean_return)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1119064139/test_math.py", line 12, in test_boolean_return
+  File "/tmp/read_orch_test_3187092121/test_math.py", line 12, in test_boolean_return
     self.assertIs(is_even(2), True)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 AssertionError: None is not True
@@ -124,13 +124,13 @@ AssertionError: None is not True
 FAIL: test_even (test_math.TestMath.test_even)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1119064139/test_math.py", line 6, in test_even
+  File "/tmp/read_orch_test_3187092121/test_math.py", line 6, in test_even
     self.assertTrue(is_even(4))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: None is not true
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.003s
+Ran 3 tests in 0.002s
 
 FAILED (failures=2)
 )
@@ -138,19 +138,19 @@ FAILED (failures=2)
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: c80e3716926a008c8ecc6bd82316438731eb35d132eb929d587203c243a8014e)
 ================================================================
-[READ PIPELINE] Execution finished in 950ms, Success=true, State=handoff_complete
+[READ PIPELINE] Execution finished in 477ms, Success=true, State=handoff_complete
 ================================================================
---- PASS: TestPipelineStage1AndStage2 (2.17s)
+--- PASS: TestPipelineStage1AndStage2 (1.67s)
 === RUN   TestPipelineVerificationGateFailureAndOverride
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_1663412103
+Workspace:    /tmp/read_orch_test_772164313
 Prompt:       Add threshold check logic
 Timeout:      10s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795430099, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432749, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -161,7 +161,7 @@ AutoApprove:  false
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -188,7 +188,7 @@ OK
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -203,7 +203,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -218,7 +218,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: None is not true
@@ -233,13 +233,13 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.002s
+Ran 1 test in 0.001s
 
 FAILED (failures=1)
 )
@@ -253,17 +253,17 @@ OK
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] FAILED: verification gate failed (mutation score: 62.5% < 100.0%)
 ================================================================
-[READ PIPELINE] Execution finished in 1558ms, Success=false, State=executing
+[READ PIPELINE] Execution finished in 1199ms, Success=false, State=executing
 ================================================================
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_1663412103
+Workspace:    /tmp/read_orch_test_772164313
 Prompt:       Add threshold check logic with auto approve
 Timeout:      10s
 AutoApprove:  true
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795430099, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432749, ContractHash=0ed48a3a49bd06fa014e59347dd707bf2191e1f946c88e7b2ee5f9e3b748579e
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
@@ -274,7 +274,7 @@ AutoApprove:  true
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -301,7 +301,7 @@ OK
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -316,7 +316,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: False is not true
@@ -331,7 +331,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 6, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 6, in test_pass
     self.assertTrue(check_threshold(15))
     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 AssertionError: None is not true
@@ -346,7 +346,7 @@ FAILED (failures=1)
 FAIL: test_pass (test_weak.TestWeak.test_pass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/tmp/read_orch_test_1663412103/test_weak.py", line 7, in test_pass
+  File "/tmp/read_orch_test_772164313/test_weak.py", line 7, in test_pass
     self.assertFalse(check_threshold(5))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -365,48 +365,48 @@ OK
 [Stage 4: Diff & Mutation Verification] GATE FAILED: Mutation score 62.5% is below strictly required 100.0% threshold (Killed 5/8)
 [Stage 5: Sealing] Evaluating verification gate and sealing state...
 [Stage 5: Sealing] Verification score < 100% but --auto-approve enabled: Applying Master Override...
-[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: OVR-e45ea0fb775f153fa461f8fb27cef115f299b9391f70ee145dd561907a8b3006)
+[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: OVR-e6082abbdd67202b0b7082fdc4066f424d2134b9aa9360f74fa573dec1e7f794)
 ================================================================
-[READ PIPELINE] Execution finished in 969ms, Success=true, State=handoff_complete
+[READ PIPELINE] Execution finished in 828ms, Success=true, State=handoff_complete
 ================================================================
---- PASS: TestPipelineVerificationGateFailureAndOverride (4.86s)
+--- PASS: TestPipelineVerificationGateFailureAndOverride (4.55s)
 === RUN   TestPipelineHarnessTimeout
 ================================================================
 [READ PIPELINE] Starting autonomous agent execution
-Workspace:    /tmp/read_orch_test_440349205
+Workspace:    /tmp/read_orch_test_483240183
 Prompt:       Long running task
 Timeout:      1s
 AutoApprove:  false
 ================================================================
 [Stage 1: Contract Freeze] Freezing task contract into STATE.json...
-[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795430104, ContractHash=e5c6549487955a58b9153e40de48fef0538d1d2ce7f7e1c27c33e76a0d77eebe
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795432753, ContractHash=e5c6549487955a58b9153e40de48fef0538d1d2ce7f7e1c27c33e76a0d77eebe
 [Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
 [Stage 2: Deterministic Context] PASSED: Resolved signatures across 0 file(s) with $0.00 token cost
 [Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
 [Stage 3: Harness Dispatch] FAILED: task exceeded timeout limit of 1s
---- PASS: TestPipelineHarnessTimeout (2.15s)
+--- PASS: TestPipelineHarnessTimeout (2.12s)
 === RUN   TestLegacyMethodDirectoryMigration
 --- PASS: TestLegacyMethodDirectoryMigration (0.02s)
 PASS
-ok  	read-daemon/orchestrator	9.211s
+ok  	read-daemon/orchestrator	8.366s
 === RUN   TestPtySessionManager
---- PASS: TestPtySessionManager (0.14s)
+--- PASS: TestPtySessionManager (0.12s)
 === RUN   TestPtyWebSocketLifecycleAndCleanup
 --- PASS: TestPtyWebSocketLifecycleAndCleanup (0.31s)
 PASS
-ok  	read-daemon/pty	0.454s
+ok  	read-daemon/pty	0.437s
 === RUN   TestHarnessRegistry
 --- PASS: TestHarnessRegistry (0.00s)
 === RUN   TestCLIAgentDiscovery
---- PASS: TestCLIAgentDiscovery (1.03s)
+--- PASS: TestCLIAgentDiscovery (1.20s)
 === RUN   TestServerProbing_Ollama
---- PASS: TestServerProbing_Ollama (0.00s)
+--- PASS: TestServerProbing_Ollama (0.01s)
 === RUN   TestServerProbing_VLLM
---- PASS: TestServerProbing_VLLM (0.00s)
+--- PASS: TestServerProbing_VLLM (0.01s)
 === RUN   TestServerProbing_LlamaCpp
---- PASS: TestServerProbing_LlamaCpp (0.00s)
+--- PASS: TestServerProbing_LlamaCpp (0.03s)
 === RUN   TestServerProbing_LocalAI
---- PASS: TestServerProbing_LocalAI (0.00s)
+--- PASS: TestServerProbing_LocalAI (0.01s)
 === RUN   TestServerProbing_TGI
 --- PASS: TestServerProbing_TGI (0.00s)
 === RUN   TestServerProbing_Tabby
@@ -418,39 +418,39 @@ ok  	read-daemon/pty	0.454s
 === RUN   TestContainerParsing
 --- PASS: TestContainerParsing (0.00s)
 === RUN   TestCustomConfigLoading
---- PASS: TestCustomConfigLoading (0.01s)
+--- PASS: TestCustomConfigLoading (0.00s)
 === RUN   TestScanHost_Live
-    scanner_test.go:463: ScanHost completed in 1.21167802s. Detected 27 harnesses:
-    scanner_test.go:465: - [cli] Kiro CLI (kiro) at /home/renan/.local/share/mise/shims/kiro-cli [status: configured, version: 3.5.0]
-    scanner_test.go:465: - [cli] MiniMax AI Code CLI (mcode) at /home/renan/.local/share/mise/shims/mcode [status: configured, version: 0.7.9]
-    scanner_test.go:465: - [cli] Ori AI (ori) at /home/renan/.local/share/mise/shims/ori [status: configured, version: 0.17.3-81bcf49]
+    scanner_test.go:463: ScanHost completed in 1.185544288s. Detected 27 harnesses:
     scanner_test.go:465: - [cli] Hunk AI (hunk) at /home/renan/.local/share/mise/shims/hunk [status: configured, version: 0.25.0]
-    scanner_test.go:465: - [cli] Alibaba Qwen CLI (qwen) at /home/renan/.local/share/mise/shims/qwen [status: configured, version: 0.28.3]
-    scanner_test.go:465: - [cli] KiloCode CLI (kilo) at /home/renan/.local/share/mise/shims/kilo [status: configured, version: 7.8.32]
-    scanner_test.go:465: - [cli] Oh-My-Pi CLI (omp) (oh_my_pi) at /home/renan/.local/share/mise/shims/omp [status: configured, version: 19.1.0]
-    scanner_test.go:465: - [cli] Google DeepMind Antigravity CLI (antigravity) at /home/renan/.local/share/mise/installs/antigravity-cli/1.5.2/antigravity [status: available, version: 1.5.2]
-    scanner_test.go:465: - [cli] GitHub Agent UI (ghui) at /home/renan/.local/share/mise/shims/ghui [status: configured, version: 0.9.1]
-    scanner_test.go:465: - [cli] Cursor Agent CLI (cursor_agent) at /home/renan/.local/share/mise/installs/cursor-agent/2026.11.22-e9042b2/bin/cursor-agent [status: available, version: 2026.11.22-e9042b2]
-    scanner_test.go:465: - [cli] Moonshot Kimi Code CLI (kimi) at /home/renan/.local/share/mise/shims/kimi [status: configured, version: 2.7.2]
-    scanner_test.go:465: - [cli] Muse AI (muse) at /home/renan/.local/share/mise/shims/muse [status: configured, version: 1.4.25-R9361.1]
-    scanner_test.go:465: - [cli] Freebuff AI (freebuff) at /home/renan/.local/share/mise/shims/freebuff [status: configured, version: 0.2.36]
-    scanner_test.go:465: - [cli] Devin / OpenHands Agent (devin_wrapper) at /home/renan/.local/share/mise/shims/devin [status: configured, version: 3000.14.30821]
-    scanner_test.go:465: - [cli] Pi CLI (pi) at /home/renan/.local/share/mise/shims/pi [status: available, version: 1.6.0]
-    scanner_test.go:465: - [cli] Crush CLI (crush) at /home/renan/.local/share/mise/shims/crush [status: configured, version: 0.102.0]
     scanner_test.go:465: - [cli] OpenCode CLI (opencode) at /home/renan/.local/share/mise/shims/opencode [status: configured, version: 2.3.2]
+    scanner_test.go:465: - [cli] MiniMax AI Code CLI (mcode) at /home/renan/.local/share/mise/shims/mcode [status: configured, version: 0.7.9]
     scanner_test.go:465: - [cli] GitHub Copilot CLI (copilot) at /home/renan/.local/share/mise/installs/copilot/1.0.114/copilot [status: available, version: 1.0.114]
-    scanner_test.go:465: - [cli] Claude Code CLI (claude_code) at /home/renan/.local/share/mise/installs/claude/2.1.330/claude [status: available, version: 2.1.330]
+    scanner_test.go:465: - [cli] Cursor Agent CLI (cursor_agent) at /home/renan/.local/share/mise/installs/cursor-agent/2026.11.22-e9042b2/bin/cursor-agent [status: available, version: 2026.11.22-e9042b2]
+    scanner_test.go:465: - [cli] Crush CLI (crush) at /home/renan/.local/share/mise/shims/crush [status: configured, version: 0.102.0]
     scanner_test.go:465: - [cli] Hey AI CLI (hey_ai) at /home/renan/.local/share/mise/shims/hey [status: configured, version: 1.13.1]
-    scanner_test.go:465: - [cli] OpenAI Codex CLI (codex) at /home/renan/.local/share/mise/installs/codex/0.171.0/bin/codex [status: available, version: 0.171.0]
-    scanner_test.go:465: - [cli] xAI Grok CLI (grok) at /home/renan/.local/share/mise/command-wrappers/bin/grok [status: configured, version: 1.0.92]
+    scanner_test.go:465: - [cli] Moonshot Kimi Code CLI (kimi) at /home/renan/.local/share/mise/shims/kimi [status: configured, version: 2.7.2]
+    scanner_test.go:465: - [cli] Ori AI (ori) at /home/renan/.local/share/mise/shims/ori [status: configured, version: 0.17.3-81bcf49]
+    scanner_test.go:465: - [cli] Google DeepMind Antigravity CLI (antigravity) at /home/renan/.local/share/mise/installs/antigravity-cli/1.5.2/antigravity [status: available, version: 1.5.2]
+    scanner_test.go:465: - [cli] Claude Code CLI (claude_code) at /home/renan/.local/share/mise/installs/claude/2.1.330/claude [status: available, version: 2.1.330]
+    scanner_test.go:465: - [cli] Oh-My-Pi CLI (omp) (oh_my_pi) at /home/renan/.local/share/mise/shims/omp [status: configured, version: 19.1.0]
     scanner_test.go:465: - [cli] DeepSeek Harness (dsh) (deepseek_harness) at /home/renan/.local/share/mise/installs/npm-deepseek-ai-dsh/0.2.2-rc.5/node_modules/.bin/dsh [status: available, version: 0.2.2-rc.5]
+    scanner_test.go:465: - [cli] Muse AI (muse) at /home/renan/.local/share/mise/shims/muse [status: configured, version: 1.4.25-R9361.1]
+    scanner_test.go:465: - [cli] GitHub Agent UI (ghui) at /home/renan/.local/share/mise/shims/ghui [status: configured, version: 0.9.1]
+    scanner_test.go:465: - [cli] xAI Grok CLI (grok) at /home/renan/.local/share/mise/command-wrappers/bin/grok [status: configured, version: 1.0.92]
+    scanner_test.go:465: - [cli] OpenAI Codex CLI (codex) at /home/renan/.local/share/mise/installs/codex/0.171.0/bin/codex [status: available, version: 0.171.0]
+    scanner_test.go:465: - [cli] Alibaba Qwen CLI (qwen) at /home/renan/.local/share/mise/shims/qwen [status: configured, version: 0.28.3]
+    scanner_test.go:465: - [cli] Kiro CLI (kiro) at /home/renan/.local/share/mise/shims/kiro-cli [status: configured, version: 3.5.0]
+    scanner_test.go:465: - [cli] Pi CLI (pi) at /home/renan/.local/share/mise/shims/pi [status: available, version: 1.6.0]
+    scanner_test.go:465: - [cli] KiloCode CLI (kilo) at /home/renan/.local/share/mise/shims/kilo [status: configured, version: 7.8.32]
+    scanner_test.go:465: - [cli] Devin / OpenHands Agent (devin_wrapper) at /home/renan/.local/share/mise/shims/devin [status: configured, version: 3000.14.30821]
+    scanner_test.go:465: - [cli] Freebuff AI (freebuff) at /home/renan/.local/share/mise/shims/freebuff [status: configured, version: 0.2.36]
+    scanner_test.go:465: - [cli] Basecamp AI (basecamp) at /home/renan/.local/share/mise/shims/basecamp [status: available, version: unknown]
     scanner_test.go:465: - [cli] Cloudflare Workers AI CLI (cf_ai) at /home/renan/.local/share/mise/shims/cf [status: available, version: unknown]
     scanner_test.go:465: - [cli] Command Code CLI (commandcode) at /home/renan/.local/share/mise/shims/commandcode [status: available, version: unknown]
     scanner_test.go:465: - [cli] Amp AI Agent (amp) at /home/renan/.local/share/mise/shims/amp [status: available, version: unknown]
-    scanner_test.go:465: - [cli] Basecamp AI (basecamp) at /home/renan/.local/share/mise/shims/basecamp [status: available, version: unknown]
---- PASS: TestScanHost_Live (1.21s)
+--- PASS: TestScanHost_Live (1.19s)
 PASS
-ok  	read-daemon/scanner	2.287s
+ok  	read-daemon/scanner	2.477s
 === RUN   TestPathTraversalRejection
 === RUN   TestPathTraversalRejection/valid_file
 === RUN   TestPathTraversalRejection/valid_empty_root
@@ -475,7 +475,7 @@ ok  	read-daemon/scanner	2.287s
 === RUN   TestPathTraversalRejection/null_byte_injection
 === RUN   TestPathTraversalRejection/null_byte_simple
 === RUN   TestPathTraversalRejection/windows_backslash_traversal
---- PASS: TestPathTraversalRejection (0.00s)
+--- PASS: TestPathTraversalRejection (0.01s)
     --- PASS: TestPathTraversalRejection/valid_file (0.00s)
     --- PASS: TestPathTraversalRejection/valid_empty_root (0.00s)
     --- PASS: TestPathTraversalRejection/valid_slash_root (0.00s)
@@ -510,7 +510,7 @@ ok  	read-daemon/scanner	2.287s
 === RUN   TestKeyRedaction/HuggingFace_token
 === RUN   TestKeyRedaction/JSON_secret_key
 === RUN   TestKeyRedaction/Harmless_output_unchanged
---- PASS: TestKeyRedaction (0.00s)
+--- PASS: TestKeyRedaction (0.01s)
     --- PASS: TestKeyRedaction/OpenAI_standard_key (0.00s)
     --- PASS: TestKeyRedaction/Anthropic_API_key (0.00s)
     --- PASS: TestKeyRedaction/DeepSeek_API_key (0.00s)
@@ -524,17 +524,17 @@ ok  	read-daemon/scanner	2.287s
 === RUN   TestSanitizeArgsAndEnv
 --- PASS: TestSanitizeArgsAndEnv (0.00s)
 === RUN   TestProcessGroupCleanup
---- PASS: TestProcessGroupCleanup (0.33s)
+--- PASS: TestProcessGroupCleanup (0.32s)
 === RUN   TestProcessGroupMemoryCheck
 --- PASS: TestProcessGroupMemoryCheck (0.03s)
 === RUN   TestSignalParsing
 --- PASS: TestSignalParsing (0.00s)
 === RUN   TestDynamicRLIMITCalibration
-2026/11/23 13:34:58 [WARN] Dynamic memory detection failed from /nonexistent_path/fake_meminfo_9999: open /nonexistent_path/fake_meminfo_9999: no such file or directory; falling back to 512MB default limit
-2026/11/23 13:34:58 [WARN] Dynamic memory detection failed: no MemAvailable or MemTotal found in /tmp/meminfo_empty_1206340961; falling back to 512MB default limit
+2026/11/23 14:19:08 [WARN] Dynamic memory detection failed from /nonexistent_path/fake_meminfo_9999: open /nonexistent_path/fake_meminfo_9999: no such file or directory; falling back to 512MB default limit
+2026/11/23 14:19:08 [WARN] Dynamic memory detection failed: no MemAvailable or MemTotal found in /tmp/meminfo_empty_4237987270; falling back to 512MB default limit
 --- PASS: TestDynamicRLIMITCalibration (0.00s)
 PASS
-ok  	read-daemon/security	0.373s
+ok  	read-daemon/security	0.379s
 === RUN   TestComputeFileHash_EmptyFile
 --- PASS: TestComputeFileHash_EmptyFile (0.00s)
 === RUN   TestScanProjectManifest_EdgeCases
@@ -544,4 +544,4 @@ ok  	read-daemon/security	0.373s
 === RUN   TestStoragePolicies_DeterministicBehavior
 --- PASS: TestStoragePolicies_DeterministicBehavior (0.00s)
 PASS
-ok  	read-daemon/sync	0.005s
+ok  	read-daemon/sync	0.004s

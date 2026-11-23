@@ -1,8 +1,10 @@
-=== [TEST] Starting READ End-to-End Test in /tmp/read-sandbox-1ic2O1 ===
-[READ] Initialized state engine in .method/
+=== [TEST] Starting READ End-to-End Test in /tmp/read-sandbox-YcXN4D ===
+[READ] Initialized state engine in .read/
+[READ] Initialized declarative methodology contracts in .read/
+[READ] Activated declarative zero-command pre-commit hook (core.hooksPath=.read/hooks)
 [PASS] 1. read init successfully initialized atomic state and WAL
 [PASS] 2. C0 AST Context Resolver extracted dependencies & symbols deterministically
-[READ] Task defined. State revision: 1
+[READ] Task defined. State revision: 2
 [PASS] 3. read define froze contract hash into STATE.json
 [READ] Build started. Status: Executing
 [PASS] 4. read build transitioned state to executing

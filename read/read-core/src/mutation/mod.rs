@@ -131,6 +131,7 @@ impl BoundedMutator {
         let mut mutants = Vec::with_capacity(self.max_mutants);
         let mut current_line_num = 0;
         let mut current_file: Option<String> = None;
+        let mut in_py_docstring = false;
 
         for line in bounded_diff.lines() {
             // Hard timeout protection: prevent infinite loops or CPU exhaustion
@@ -154,12 +155,14 @@ impl BoundedMutator {
                 };
                 if clean_path != "/dev/null" {
                     current_file = Some(clean_path.to_string());
+                    in_py_docstring = false;
                 }
                 continue;
             }
 
             // Track hunk header for line numbers (e.g. @@ -1,4 +10,5 @@)
             if line.starts_with("@@") {
+                in_py_docstring = false;
                 if let Some(plus_idx) = line.find('+') {
                     let sub = &line[plus_idx + 1..];
                     let comma_or_space = sub.find([',', ' ']).unwrap_or(sub.len());
@@ -168,6 +171,43 @@ impl BoundedMutator {
                     }
                 }
                 continue;
+            }
+
+            // Track Python docstring delimiters to avoid mutating text within docstrings
+            let is_py = current_file.as_deref().map_or(false, |f| f.ends_with(".py"));
+            if is_py && !line.starts_with("---") && !line.starts_with("+++") && !line.starts_with("@@") {
+                let check_line = if line.starts_with('+') || line.starts_with('-') || line.starts_with(' ') {
+                    &line[1..]
+                } else {
+                    line
+                };
+                let trip_count = check_line.matches("\"\"\"").count() + check_line.matches("'''").count();
+                if in_py_docstring {
+                    if trip_count % 2 != 0 {
+                        in_py_docstring = false;
+                    }
+                    if line.starts_with('+') && !line.starts_with("+++") {
+                        current_line_num += 1;
+                    } else if !line.starts_with('-') {
+                        current_line_num += 1;
+                    }
+                    continue;
+                } else if trip_count % 2 != 0 {
+                    in_py_docstring = true;
+                    if line.starts_with('+') && !line.starts_with("+++") {
+                        current_line_num += 1;
+                    } else if !line.starts_with('-') {
+                        current_line_num += 1;
+                    }
+                    continue;
+                } else if trip_count >= 2 {
+                    if line.starts_with('+') && !line.starts_with("+++") {
+                        current_line_num += 1;
+                    } else if !line.starts_with('-') {
+                        current_line_num += 1;
+                    }
+                    continue;
+                }
             }
 
             // Only mutate added/modified lines in the diff (starting with '+' but not '+++')
@@ -242,6 +282,8 @@ impl BoundedMutator {
             || trimmed.starts_with('#')
             || trimmed.starts_with("/*")
             || trimmed.starts_with('*')
+            || trimmed.starts_with("\"\"\"")
+            || trimmed.starts_with("'''")
         {
             return candidates;
         }

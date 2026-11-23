@@ -290,7 +290,7 @@ build_binaries() {
     log_info "Building READ host daemon (read-daemon)..."
     (
         cd "${SCRIPT_DIR}/read-daemon"
-        go build -o "${SCRIPT_DIR}/bin/read-daemon" ./cmd/read-daemon
+        go build -trimpath -o "${SCRIPT_DIR}/bin/read-daemon" cmd/read-daemon/main.go
     )
     chmod +x "${SCRIPT_DIR}/bin/read-daemon"
     chmod +x "${SCRIPT_DIR}/bin/read"
