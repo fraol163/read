@@ -1,19 +1,30 @@
-=== CLEAN BUILD REPRODUCIBILITY VERIFICATION ===
-Host Platform: Linux 7.2.15-1-omarchy x86_64
-Toolchains: rustc 1.95.0, go 1.26.0
+=== REPRODUCIBLE BINARY BUILD VERIFICATION ===
+Source Commit: 9942fb7 (9942fb71fbc1a17756e5163c0359e0349a8fb376) on branch report-review-v0.7.1
+Host: Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U
 
-Isolated Directory 1 (/tmp/clean_clone_1_1u5g5nxi):
-  read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
-  read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+--- Clean Clone 1: /tmp/clean_clone_1 ---
+Build Start Time: 2026-11-23T13:32:39.636580+00:00
+Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1
+Rust Build Command: cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target
+read-engine SHA-256: f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f
+Go Build Command: cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go
+read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Build End Time:   2026-11-23T13:33:24.750943+00:00
 
-Isolated Directory 2 (/tmp/clean_clone_2_wop10amk):
-  read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
-  read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+--- Clean Clone 2: /tmp/clean_clone_2 ---
+Build Start Time: 2026-11-23T13:33:24.804871+00:00
+Clone Command: git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2
+Rust Build Command: cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target
+read-engine SHA-256: f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f
+Go Build Command: cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go
+read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+Build End Time:   2026-11-23T13:34:02.050598+00:00
 
-Committed Binaries in read/bin/:
-  read/bin/read-engine SHA256: 8c94f223b98bb683a50682b3c6a1e47bbd35c833abdea111d3e1742cca001614
-  read/bin/read-daemon SHA256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
+--- Shipped Repository Binaries in read/bin/ ---
+read/bin/read-engine SHA-256: f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f
+read/bin/read-daemon SHA-256: dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59
 
-Reproducibility Status:
-  read-engine bitwise identical across clean builds: True
-  read-daemon bitwise identical across clean builds: True
+--- Verification Summary ---
+Rust read-engine Bitwise Match: True
+Go read-daemon Bitwise Match:   True
+Status: 100% BITWISE IDENTICAL REPRODUCIBILITY VERIFIED
