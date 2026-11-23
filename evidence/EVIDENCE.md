@@ -43,6 +43,9 @@ Summary of changes against baseline commit `ca31c10`:
 2. Expanded mutation verification in Step 6 to include Steps 6b through 6g: dynamic parsing of mutator output counts, assertion of targeted operator tokens, dynamic acceptance of 100% kill score, and dynamic arithmetic rejection when a survivor is simulated (`$READ eval-mutation-score $((COUNT - 1)) $COUNT`).
 3. Updated summary line from `ALL 9 TESTS PASSED` to `=== [ALL 15 ASSERTION CHECKS PASSED]: READ Framework Core is 100% Operational (9 Lifecycle Stages) ===`.
 
+Known Labeling Issue in Original Log:
+In the original log [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log), the script summary header printed `=== [ALL 9 TESTS PASSED]: READ Framework Core is 100% Operational ===` while the body executed 15 `[PASS]` lines across the 9 numbered lifecycle stages. Both the original header and the 15 pass lines are preserved as a known labeling issue. A fresh rerun reflecting the updated header is recorded in [24_test_e2e_rerun.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/24_test_e2e_rerun.log) with 15 pass lines and exit code 0.
+
 Verification of removed lines:
 The single removed line in the path check was:
 `if [ ! -f .method/STATE.json ] || [ ! -f .method/WAL.log ]`
@@ -262,7 +265,7 @@ opt-level = 1
 ```
 
 Why it was added:
-Default Rust test profiles run at `opt-level = 0` (unoptimized). When all 60 unit tests run concurrently across worker threads on a host with 2 physical cores (AMD Ryzen 3 3250U), running `test_extraction_latency_contention_10_runs` (which spawns 3 continuous worker threads) alongside other concurrent tests creates 7 concurrent threads competing for 2 physical cores. Under Linux CFS CPU scheduling, unoptimized debug code suffered from thread starvation and context switch delays. Recorded runs in [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log) measured spikes up to 7.658 ms under 4-thread CPU contention on baseline ca31c10, while unrecorded scheduler starvation spikes up to 10 ms were observed during concurrent test runs prior to test serialization mutex locking. Adding `[profile.test] opt-level = 1` enables basic compiler optimization (inlining, register allocation, loop unrolling) for the test binary, dropping in-process extraction to 0.18 ms and eliminating test flakiness.
+Default Rust test profiles run at `opt-level = 0` (unoptimized). When all 60 unit tests run concurrently across worker threads on a host with 2 physical cores (AMD Ryzen 3 3250U), running `test_extraction_latency_contention_10_runs` (which spawns 3 continuous worker threads) alongside other concurrent tests creates 7 concurrent threads competing for 2 physical cores. Under Linux CFS CPU scheduling, unoptimized debug code suffered from context switch delays. Recorded runs in [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log) measured spikes up to 7.658 ms under 4-thread CPU contention on baseline ca31c10. Adding `[profile.test] opt-level = 1` enables basic compiler optimization (inlining, register allocation, loop unrolling) for the test binary, dropping in-process extraction to 0.18 ms and eliminating test flakiness.
 
 Latency Methodology Change:
 The latency test methodology was updated from a single unbuffered timing to an unmeasured warm-up run followed by calculating the median duration of 10 runs under a serialized mutex lock (`LATENCY_TEST_LOCK`). This guards against operating system CPU scheduler context-switch jitter on multi-threaded hosts while avoiding the bias of minimum-of-three filtering.

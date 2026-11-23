@@ -1,0 +1,16 @@
+    Finished `test` profile [optimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_core-2221cf18b40d7c62)
+
+running 2 tests
+CONTENTION_10_RUNS: mean=0.633ms min=0.496ms max=1.170ms raw=[0.497, 0.537, 1.17, 0.503, 0.496, 0.503, 0.51, 0.509, 0.501, 1.103]
+test ast::tests::test_extraction_latency_contention_10_runs ... ok
+test ast::tests::test_extraction_latency_under_5ms ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.02s
+
+     Running unittests src/main.rs (/home/renan/.cache/cargo-shared-target/debug/deps/read_engine-677a493bf045712f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
