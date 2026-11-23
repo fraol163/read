@@ -85,9 +85,9 @@ A compile error counts as an invalid mutant, not a kill or a survivor. An engine
 
 #### TypeScript (`auth_service.ts`)
 Input patch touched lines:
-- L11: `const verified = session?.profile?.verified;`
+- L11: `const verified = session?.profile?.verified`
 - L12: `if (session.role === "admin" && session.quota > 0) {`
-- L13: `return true;`
+- L13: `return true`
 
 Patch file: [diff_ts_sample.patch](file:///home/renan/Downloads/me/methodology_session/evidence/patches/diff_ts_sample.patch)
 Mutants generated (6 total):
@@ -96,56 +96,56 @@ Mutants generated (6 total):
 3. L12 `BOUNDARY_SHIFT` (`session.quota <= 0`): Changes behavior. Inverts relational comparison `>` to `<=`. Compiles cleanly.
 4. L12 `BOUNDARY_SHIFT` (`session.quota >= 0`): Changes behavior. Off-by-one boundary shift on zero boundary condition (`> 0` to `>= 0`). Compiles cleanly.
 5. L12 `LOGICAL_AND_TO_OR` (`session.role === "admin" || session.quota > 0`): Changes behavior. Replaces boolean conjunction `&&` with disjunction `||`. Compiles cleanly.
-6. L13 `FLIP_BOOL_TRUE` (`return false;`): Changes behavior. Inverts boolean return literal `true` to `false`, adhering strictly to the `: boolean` return type annotation. Compiles cleanly.
+6. L13 `FLIP_BOOL_TRUE` (`return false`): Changes behavior. Inverts boolean return literal `true` to `false`, adhering strictly to the `: boolean` return type annotation. Compiles cleanly.
 
 Suppressed under compile error rule:
-`RETURN_UNDEFINED` (`return undefined;`) on line 13 was filtered out. Under TypeScript strict null checks (`strictNullChecks: true`), returning undefined for a function declared with `: boolean` return type triggers a compilation error (`Type 'undefined' is not assignable to type 'boolean'`). Under the compile error rule, this is an invalid mutant. Filtering it dropped the expected TypeScript mutant count from 7 to 6.
+`RETURN_UNDEFINED` (`return undefined`) on line 13 was filtered out. Under TypeScript strict null checks (`strictNullChecks is true`), returning undefined for a function declared with `: boolean` return type triggers a compilation error (`Type 'undefined' is not assignable to type 'boolean'`). Under the compile error rule, this is an invalid mutant. Filtering it dropped the expected TypeScript mutant count from 7 to 6.
 
 #### Java (`OrderService.java`)
 Input patch touched lines:
 - L11: `if (order != null && order.getRole().equals("ADMIN")) {`
-- L12: `int remaining = order.getQuota() - 1;`
-- L13: `return remaining > 0;`
+- L12: `int remaining = order.getQuota() - 1`
+- L13: `return remaining > 0`
 
 Patch file: [diff_java_sample.patch](file:///home/renan/Downloads/me/methodology_session/evidence/patches/diff_java_sample.patch)
 Mutants generated (4 total):
 1. L11 `REMOVE_NULL_CHECK` (`true && order.getRole().equals("ADMIN")`): Changes behavior. Strips the null guard, triggering NullPointerException when `order` is null. Compiles cleanly.
 2. L11 `INVERT_EQUALITY` (`!order.getRole().equals("ADMIN")`): Changes behavior. Inverts String equality method call with logical NOT prefix. Compiles cleanly.
 3. L12 `BOUNDARY_SHIFT` (`order.getQuota() + 1`): Changes behavior. Mutates arithmetic decrement `- 1` to increment `+ 1`. Compiles cleanly.
-4. L13 `BOUNDARY_SHIFT` (`return remaining >= 0;`): Changes behavior. Mutates relational operator `>` to `>=`. Compiles cleanly.
+4. L13 `BOUNDARY_SHIFT` (`return remaining >= 0`): Changes behavior. Mutates relational operator `>` to `>=`. Compiles cleanly.
 
 Suppressed under compile error rule:
-`RETURN_NULL` (`return null;`) on line 13 was filtered out. The enclosing method `public boolean process(Order order)` returns primitive `boolean`. In Java, returning null for a primitive type triggers javac compile error (`incompatible types: <null> cannot be converted to boolean`). Under the compile error rule, this is an invalid mutant. Filtering it dropped the expected Java mutant count from 5 to 4.
+`RETURN_NULL` (`return null`) on line 13 was filtered out. The enclosing method `public boolean process(Order order)` returns primitive `boolean`. In Java, returning null for a primitive type triggers javac compile error (`incompatible types: <null> cannot be converted to boolean`). Under the compile error rule, this is an invalid mutant. Filtering it dropped the expected Java mutant count from 5 to 4.
 
 #### C# (`TokenService.cs`)
 Input patch touched lines:
-- L11: `var role = user?.Role;`
+- L11: `var role = user?.Role`
 - L12: `if (role != null && role.Equals("ADMIN")) {`
-- L13: `int remaining = user.Retries + 1;`
-- L14: `return remaining <= 3;`
+- L13: `int remaining = user.Retries + 1`
+- L14: `return remaining <= 3`
 
 Patch file: [diff_csharp_sample.patch](file:///home/renan/Downloads/me/methodology_session/evidence/patches/diff_csharp_sample.patch)
 Mutants generated (6 total):
-1. L11 `REMOVE_NULL_CONDITIONAL` (`var role = user.Role;`): Changes behavior. Strips null-conditional operator `?.`, triggering NullReferenceException when `user` is null. Compiles cleanly.
+1. L11 `REMOVE_NULL_CONDITIONAL` (`var role = user.Role`): Changes behavior. Strips null-conditional operator `?.`, triggering NullReferenceException when `user` is null. Compiles cleanly.
 2. L12 `INVERT_EQUALITY` (`!role.Equals("ADMIN")`): Changes behavior. Inverts method call with logical NOT. Compiles cleanly.
 3. L12 `INVERT_EQUALITY` (`role == null`): Changes behavior. Inverts null check `!= null` to `== null`. Compiles cleanly.
 4. L13 `BOUNDARY_SHIFT` (`user.Retries - 1`): Changes behavior. Mutates addition `+ 1` to subtraction `- 1`. Compiles cleanly.
-5. L14 `RETURN_DEFAULT` (`return default;`): Changes behavior. In C#, `default` for type `bool` is `false`. Compiles cleanly and changes return value.
-6. L14 `BOUNDARY_SHIFT` (`return remaining > 3;`): Changes behavior. Inverts relational operator `<=` to `>`. Compiles cleanly.
+5. L14 `RETURN_DEFAULT` (`return default`): Changes behavior. In C#, `default` for type `bool` is `false`. Compiles cleanly and changes return value.
+6. L14 `BOUNDARY_SHIFT` (`return remaining > 3`): Changes behavior. Inverts relational operator `<=` to `>`. Compiles cleanly.
 
 #### C++ (`BufferPool.cpp`)
 Input patch touched lines:
 - L11: `if (ptr != nullptr) {`
-- L12: `int next = current + 1;`
+- L12: `int next = current + 1`
 - L13: `if (size <= max_capacity) {`
-- L14: `return ptr;`
+- L14: `return ptr`
 
 Patch file: [diff_cpp_sample.patch](file:///home/renan/Downloads/me/methodology_session/evidence/patches/diff_cpp_sample.patch)
 Mutants generated (4 total):
 1. L11 `REMOVE_NULLPTR_CHECK` (`if (true) {`): Changes behavior. Replaces pointer null check with boolean literal `true`. Compiles cleanly.
-2. L12 `BOUNDARY_SHIFT` (`int next = current - 1;`): Changes behavior. Mutates arithmetic addition `+ 1` to subtraction `- 1`. Compiles cleanly.
+2. L12 `BOUNDARY_SHIFT` (`int next = current - 1`): Changes behavior. Mutates arithmetic addition `+ 1` to subtraction `- 1`. Compiles cleanly.
 3. L13 `INVERT_EQUALITY` (`if (size > max_capacity) {`): Changes behavior. Inverts relational comparison `<=` to `>`. Compiles cleanly.
-4. L14 `RETURN_DEFAULT` (`return nullptr;`): Changes behavior. Replaces pointer return with `nullptr`, matching return type `void*`. Compiles cleanly.
+4. L14 `RETURN_DEFAULT` (`return nullptr`): Changes behavior. Replaces pointer return with `nullptr`, matching return type `void*`. Compiles cleanly.
 
 #### Ruby (`auth_service.rb`)
 Input patch touched lines:
@@ -453,7 +453,7 @@ Verification One-Liner Command:
 The following 5 parameters remain open draft proposals awaiting explicit user confirmation before any trial begins. Trial execution is held until the user explicitly sets each value:
 
 1. Time limit per task, in minutes (Draft proposal: 15 minutes per task, based on 5 to 10 minute human tutorial baseline).
-2. Minimum cohort completion rate (Draft proposal: 80 percent completion rate, meaning at least 8 of 10 participants complete all tasks).
+2. Minimum cohort completion rate (Draft proposal: 80 percent cohort success rate, meaning at least 8 of 10 participants finish all tasks).
 3. Remediation retry cap (Draft proposal: maximum 3 test authoring attempts per task before escalation).
 4. Cohort size and profile (Draft proposal: exactly 10 junior to mid-level software engineers with 1 to 3 years experience and zero prior exposure to the READ framework).
 5. Enforcement mode for the first cohort: Hard block or warning mode.

@@ -148,7 +148,7 @@ Key findings:
 The following 5 parameters remain open draft proposals awaiting explicit user confirmation before any trial begins. Trial execution is held until the user explicitly sets each value:
 
 1. Time limit per task, in minutes (Draft proposal: 15 minutes per task, based on 5 to 10 minute human tutorial baseline).
-2. Minimum cohort completion rate (Draft proposal: 80 percent completion rate, meaning at least 8 of 10 participants complete all tasks).
+2. Minimum cohort completion rate (Draft proposal: 80 percent cohort success rate, meaning at least 8 of 10 participants finish all tasks).
 3. Remediation retry cap (Draft proposal: maximum 3 test authoring attempts per task before escalation).
 4. Cohort size and profile (Draft proposal: exactly 10 junior to mid-level software engineers with 1 to 3 years experience and zero prior exposure to the READ framework).
 5. Enforcement mode for the first cohort: Hard block or warning mode.
