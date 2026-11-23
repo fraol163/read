@@ -1,0 +1,10 @@
+id: bugfix
+title: Fix Pagination Offset Bug
+objective: >
+  The pagination helper function in paginate.py has an off-by-one bug in offset calculation for 1-based page indexing.
+  Fix the calculation in paginate.py so that 1-based indexing correctly returns slices from the beginning of the list without out-of-bounds or slice distortion errors.
+affected_files:
+  - paginate.py
+  - test_paginate.py
+test_command: python3 -m unittest test_paginate.py
+timeout_minutes: 20

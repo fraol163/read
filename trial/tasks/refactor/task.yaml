@@ -1,0 +1,10 @@
+id: refactor
+title: Refactor and Complete Invoice Pricing Calculator
+objective: >
+  Refactor and complete calculate_total in invoice.py.
+  Implement tiered customer discounts, additive coupon application, unknown coupon validation, and empty list handling rounded to two decimal places.
+affected_files:
+  - invoice.py
+  - test_invoice.py
+test_command: python3 -m unittest test_invoice.py
+timeout_minutes: 20
