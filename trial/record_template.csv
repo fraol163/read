@@ -1,0 +1,7 @@
+participant_id,task_id,start_time,end_time,minutes,retries,gate_warnings,warnings_resolved,final_tests_pass,escalated,notes
+P01,bugfix,,,,,,,,,
+P01,endpoint,,,,,,,,,
+P01,refactor,,,,,,,,,
+P02,bugfix,,,,,,,,,
+P02,endpoint,,,,,,,,,
+P02,refactor,,,,,,,,,
