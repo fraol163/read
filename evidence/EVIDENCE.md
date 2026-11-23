@@ -270,6 +270,10 @@ Default Rust test profiles run at `opt-level = 0` (unoptimized). When all 60 uni
 Latency Methodology Change:
 The latency test methodology was updated from a single unbuffered timing to an unmeasured warm-up run followed by calculating the median duration of 10 runs under a serialized mutex lock (`LATENCY_TEST_LOCK`). This guards against operating system CPU scheduler context-switch jitter on multi-threaded hosts while avoiding the bias of minimum-of-three filtering. The latency test diff against baseline commit ca31c10 is recorded in [22_latency_test_diff.patch](file:///home/renan/Downloads/me/methodology_session/evidence/logs/22_latency_test_diff.patch). A fresh execution of the latency test is recorded in [23_latency_test_run.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/23_latency_test_run.log) with exit code 0.
 
+Latency Profile Figures:
+- Test profile (`[profile.test] opt-level = 1`): Median extraction latency of 0.230 ms, recorded in [23b_latency_median.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/23b_latency_median.log).
+- Release profile (`cargo test --release`): Median extraction latency of 0.123 ms, recorded in [23c_latency_release.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/23c_latency_release.log).
+
 Effect on debug profile latency in the specification:
 The specification under 5 ms latency threshold applies normatively to the runtime release binary (`read-engine`), which is the sole binding requirement and executes in 0.14 ms to 0.18 ms. Binary hashes do not change between builds. Under the test profile with `opt-level = 1`, extraction executes in ~0.18 ms. On unoptimized debug builds (`opt-level = 0`), extraction executes in 1.2 ms to 1.9 ms on an idle host, but can spike up to 7.658 ms under heavy parallel multi-thread load on 2-core hardware. Latency tests in `ast/mod.rs` are synchronized via a static Mutex `LATENCY_TEST_LOCK` to ensure clean measurement.
 
