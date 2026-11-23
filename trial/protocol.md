@@ -92,3 +92,11 @@ Reviewers judge only SURVIVED mutants, and only after step 3 shows real survivor
 
 - Target cohort completion rate: At least 10 of 12 participants passing all three tasks within the 20-minute limit per task. Per-task pass rates are reported as a secondary table.
 - Warning review: Warnings emitted during commits are reviewed using the blinded review protocol in `warning_review.md`.
+
+## Commit Note: Changes in fd913cb
+
+Splitting commit fd913cb is not possible without rewriting Git history. The file breakdown for each component change in commit fd913cb is documented below:
+- (a) Mutator: `read/read-core/src/mutation/mod.rs`
+- (b) Binary: `read/bin/read-engine`
+- (c) Supervisor check: `trial/supervisor_check.sh`
+- (d) Protocol: `trial/protocol.md`
