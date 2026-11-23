@@ -23,7 +23,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Installation | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
 | 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 8 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
-| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 58 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
+| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 60 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
 | 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 57 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
@@ -419,31 +419,31 @@ Explanation: In standard Unix tools, grep returns exit code 1 when zero matches 
 To verify build reproducibility on this Linux host, clean builds were executed from isolated git clones:
 Raw log: [18_clean_build_reproducibility.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/18_clean_build_reproducibility.log)
 
-Source Commit: `9942fb7` on branch `report-review-v0.7.1`
+Source Commit: `2fd292d` on branch `report-review-v0.7.1`
 
 Clean Clone 1 (`/tmp/clean_clone_1`):
-- Build Start Time: `2026-11-23T13:32:39.636580+00:00`
+- Build Start Time: `2026-11-23T13:43:54.399577+00:00`
 - Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_1`
 - Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
 - read-engine SHA-256: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
 - Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T13:33:24.750943+00:00`
+- Build End Time: `2026-11-23T13:44:34.412498+00:00`
 
 Clean Clone 2 (`/tmp/clean_clone_2`):
-- Build Start Time: `2026-11-23T13:33:24.804871+00:00`
+- Build Start Time: `2026-11-23T13:44:34.503954+00:00`
 - Clone Command: `git clone --branch report-review-v0.7.1 /home/renan/Downloads/me/methodology_session /tmp/clean_clone_2`
 - Rust Build Command: `cargo build --release --manifest-path read/read-core/Cargo.toml --target-dir target`
 - read-engine SHA-256: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
 - Go Build Command: `cd read/read-daemon && go build -trimpath -o read-daemon cmd/read-daemon/main.go`
 - read-daemon SHA-256: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
-- Build End Time: `2026-11-23T13:34:02.050598+00:00`
+- Build End Time: `2026-11-23T13:45:15.291277+00:00`
 
 Committed Binaries in `read/bin/`:
 - `read/bin/read-engine`: `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f`
 - `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 - Result: Both binaries match the clean isolated directory builds bitwise identically.
-- Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64) only.
+- Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U) only. Cross-platform or multi-host bitwise reproducibility has not been evaluated.
 
 Verification One-Liner Command:
 `sha256sum read/bin/read-engine read/bin/read-daemon` produces `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.

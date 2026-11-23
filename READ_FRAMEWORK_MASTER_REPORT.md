@@ -3,7 +3,7 @@
 **Framework Identity:** READ (Resource-conscious, Evidence-driven AI Development)  
 **Date of Record:** 2026-11-23  
 **Release Target:** v0.7.1  
-**Working Git Branch:** `report-review-v0.7.1`  
+**Working Git Branch:** `report-review-v0.7.1` at commit `2fd292d` (Zero changes were made or pushed to `main`).  
 **Host Environment:** Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U, 5.7 GiB RAM
 
 CRITICAL GATE STATUS:
@@ -59,7 +59,7 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 | 05 | Autonomous Pipeline | `bash read/tests/test_pipeline.sh` | 0 | 6 | 0 | [05_test_pipeline.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/05_test_pipeline.log) |
 | 06 | Packaging and Distribution | `bash read/tests/test_packaging.sh` | 0 | 8 | 0 | [06_test_packaging.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/06_test_packaging.log) |
 | 07 | Realtime WebSockets | `bash read/tests/test_live_realtime.sh` | 0 | 8 | 0 | [07_test_live_realtime.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/07_test_live_realtime.log) |
-| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 58 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
+| 08 | Rust Core Unit Tests | `cargo test --manifest-path read/read-core/Cargo.toml` | 0 | 60 | 0 | [08_cargo_test_read_core.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/08_cargo_test_read_core.log) |
 | 09 | Go Daemon Unit Tests | `cd read/read-daemon && go test -v -count=1 ./...` | 0 | 57 | 0 | [09_go_test_read_daemon.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/09_go_test_read_daemon.log) |
 | 10 | Go Microbenchmarks | `cd read/read-daemon && go test -bench . -benchmem ./...` | 0 | 2 | 0 | [10_go_test_bench.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/10_go_test_bench.log) |
 | 11 | Orchestrator Test Suite | `cd read/read-daemon && go test -v -count=1 ./orchestrator` | 0 | 4 | 0 | [11_go_test_orchestrator.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/11_go_test_orchestrator.log) |
@@ -95,7 +95,7 @@ Suite 01 note: The 15 passed checks represent assertion lines executed within `r
 - PTY Stream Allocation: 56,628 ns/op, 974 B/op, 4 allocs/op.
 - Real External Repo Mutation Test: Evaluated against `veloce-acceptance/github-repo` (commit `7732578`) on `backend/resources/preview.py`. Reverted bug fix commit `7a34571`, staged the diff (33 additions, 13 deletions across preview.py only, zero test file changes), and evaluated mutants using `python3 evidence/eval_outside_mutation.py`. Result: 6 killed, 2 survived on line 259 error handling path (75.0% score). Gate status: strictly FAILED. Empirical line coverage (`pytest --cov`) proves lines 258-259 had zero executions during the test run, proving the survivors represent genuine test gaps.
 - Tutorial Completion Timing: Machine execution 176.72 ms (0.18 seconds across 8 steps). Human student trial completion time: Not measured (machine execution: 0.18s, human trial unconducted).
-- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean git clones from commit `9942fb7` on this Linux host for Rust release binary `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f` and Go daemon binary with `-trimpath` `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`.
+- Reproducible Binary Builds: Verified identical SHA-256 hashes across clean git clones from commit `2fd292d` on this Linux host (Linux 7.2.15-1-omarchy x86_64, AMD Ryzen 3 3250U) only for Rust release binary `f7d627fae9e742e83abdf7ba95c9fc7c3fe13c5790780b215adfc4f00e3ba52f` and Go daemon binary with `-trimpath` `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`. Cross-platform or multi-host bitwise reproducibility has not been evaluated.
 - Build Profile Disclosure: `read/read-core/Cargo.toml` sets `[profile.test] opt-level = 1` to eliminate scheduling jitter during parallel test runs under multi-thread contention on 2-core hardware. Latency benchmarks in `ast/mod.rs` are serialized via a Mutex. Release runtime execution executes in 0.14 ms to 0.18 ms, satisfying the under 5 ms threshold.
 
 ### Trial Parameters and Governance Draft Proposals (Awaiting User Decisions)
