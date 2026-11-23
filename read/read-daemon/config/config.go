@@ -107,9 +107,9 @@ func DefaultConfig() *Config {
 			},
 		},
 		Core: CoreConfig{
-			StateDir:               ".method",
-			StateFile:              ".method/STATE.json",
-			WalFile:                ".method/WAL.log",
+			StateDir:               ".read",
+			StateFile:              ".read/STATE.json",
+			WalFile:                ".read/WAL.log",
 			StrictCas:              true,
 			WalCompactionThreshold: 1000,
 		},

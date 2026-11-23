@@ -127,10 +127,10 @@ func (o *Orchestrator) Run(ctx context.Context) (*PipelineResult, error) {
 	o.logMessage("AutoApprove:  %v", o.cfg.AutoApprove)
 	o.logMessage("================================================================")
 
-	// Ensure .method directory exists
-	methodDir := filepath.Join(o.cfg.Workspace, ".method")
+	// Ensure .read directory exists
+	methodDir := filepath.Join(o.cfg.Workspace, ".read")
 	if err := os.MkdirAll(methodDir, 0755); err != nil {
-		res.Error = fmt.Sprintf("failed to create .method directory: %v", err)
+		res.Error = fmt.Sprintf("failed to create .read directory: %v", err)
 		return res, err
 	}
 
@@ -272,18 +272,26 @@ func (o *Orchestrator) Run(ctx context.Context) (*PipelineResult, error) {
 	return res, nil
 }
 
-// stage1ContractFreeze ensures .method state is initialized, defines task contract and transitions to executing.
+// stage1ContractFreeze ensures .read state is initialized, defines task contract and transitions to executing.
 func (o *Orchestrator) stage1ContractFreeze() (string, string, string, error) {
-	stateFile := filepath.Join(o.cfg.Workspace, ".method", "STATE.json")
+	stateFile := filepath.Join(o.cfg.Workspace, ".read", "STATE.json")
 
-	// Ensure .method/STATE.json exists
+	// Ensure .read/STATE.json exists (with backward-compatible .method fallback)
 	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
-		cmdInit := exec.Command(o.cfg.EngineBin, "init")
-		cmdInit.Dir = o.cfg.Workspace
-		security.SetProcessGroup(cmdInit)
-		out, err := cmdInit.CombinedOutput()
-		if err != nil {
-			return "", "", "", fmt.Errorf("read-engine init failed: %s (%w)", string(out), err)
+		legacyState := filepath.Join(o.cfg.Workspace, ".method", "STATE.json")
+		if _, err2 := os.Stat(legacyState); err2 == nil {
+			stateFile = legacyState
+		} else {
+			cmdInit := exec.Command(o.cfg.EngineBin, "init")
+			cmdInit.Dir = o.cfg.Workspace
+			security.SetProcessGroup(cmdInit)
+			out, err := cmdInit.CombinedOutput()
+			if err != nil {
+				return "", "", "", fmt.Errorf("read-engine init failed: %s (%w)", string(out), err)
+			}
+			if _, err3 := os.Stat(stateFile); os.IsNotExist(err3) {
+				stateFile = legacyState
+			}
 		}
 	}
 
@@ -584,24 +592,29 @@ func (o *Orchestrator) stage3HarnessDispatch(ctx context.Context, taskLog io.Wri
 
 // stage4MutationVerification stages changes, computes diff hash, runs bounded mutation and calculates score.
 func (o *Orchestrator) stage4MutationVerification(writeLog func(string)) (string, float64, int, int, []MutantExecutionResult, error) {
-	// 1. Stage changes in git (excluding framework internal metadata in .method)
+	// 1. Stage changes in git (excluding framework internal metadata in .read and .method)
 	gitignorePath := filepath.Join(o.cfg.Workspace, ".gitignore")
 	if data, err := os.ReadFile(gitignorePath); err == nil {
-		if !strings.Contains(string(data), ".method") {
-			_ = os.WriteFile(gitignorePath, []byte(string(data)+"\n.method/\n"), 0644)
+		content := string(data)
+		if !strings.Contains(content, ".read") {
+			content += "\n.read/\n"
 		}
+		if !strings.Contains(content, ".method") {
+			content += "\n.method/\n"
+		}
+		_ = os.WriteFile(gitignorePath, []byte(content), 0644)
 	} else if os.IsNotExist(err) {
-		_ = os.WriteFile(gitignorePath, []byte(".method/\n"), 0644)
+		_ = os.WriteFile(gitignorePath, []byte(".read/\n.method/\n"), 0644)
 	}
 
-	cmdAdd := exec.Command("git", "add", "-A", "--", ":!.method")
+	cmdAdd := exec.Command("git", "add", "-A", "--", ":!.read", ":!.method")
 	cmdAdd.Dir = o.cfg.Workspace
 	if _, err := cmdAdd.CombinedOutput(); err != nil {
 		// Fallback without pathspec if older git version
 		cmdAddFallback := exec.Command("git", "add", "-A")
 		cmdAddFallback.Dir = o.cfg.Workspace
 		_ = cmdAddFallback.Run()
-		_ = exec.Command("git", "reset", ".method").Run()
+		_ = exec.Command("git", "reset", ".read", ".method").Run()
 	}
 
 	// 2. Compute diff hash
@@ -925,7 +938,13 @@ func (o *Orchestrator) stage5Sealing(res *PipelineResult) (string, string, error
 
 // readStateVerifyHash reads the verify_hash field from STATE.json.
 func (o *Orchestrator) readStateVerifyHash() string {
-	stateFile := filepath.Join(o.cfg.Workspace, ".method", "STATE.json")
+	stateFile := filepath.Join(o.cfg.Workspace, ".read", "STATE.json")
+	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
+		legacyFile := filepath.Join(o.cfg.Workspace, ".method", "STATE.json")
+		if _, err2 := os.Stat(legacyFile); err2 == nil {
+			stateFile = legacyFile
+		}
+	}
 	data, err := os.ReadFile(stateFile)
 	if err != nil {
 		return ""

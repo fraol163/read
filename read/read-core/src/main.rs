@@ -25,6 +25,8 @@ COMMANDS:
     recover                          Zero-token crash recovery from WAL.log
     override <OPERATOR> <RATIONALE>  Apply Master Override with hashed rationale
     diff-hash                        Compute SHA-256 of git diff --staged (<0.1ms)
+    anchor-wal                       Anchor WAL head hash into git tag read-wal-head
+    verify-wal-anchor                Verify WAL head hash against git tag read-wal-head
     ast-context <TARGET_FILE>        Deterministically extract C0 AST context ($0.00)
     mutate <DIFF_FILE>               Generate <=10 targeted diff mutants (<4.5s)
     eval-mutation-score <K> <TOTAL>  Evaluate mutation score against strict 100% gate
@@ -143,6 +145,20 @@ fn main() {
         }
         "diff-hash" => match DiffHasher::hash_staged_diff(repo_root) {
             Ok((hash, _)) => println!("{}", hash),
+            Err(e) => {
+                eprintln!("[ERROR] {}", e);
+                std::process::exit(1);
+            }
+        },
+        "anchor-wal" => match engine.anchor_wal_in_git() {
+            Ok(head_hash) => println!("[READ] WAL head anchored to git tag read-wal-head: {}", head_hash),
+            Err(e) => {
+                eprintln!("[ERROR] {}", e);
+                std::process::exit(1);
+            }
+        },
+        "verify-wal-anchor" => match engine.verify_wal_anchor() {
+            Ok(_) => println!("[READ] WAL git tag anchor verified successfully"),
             Err(e) => {
                 eprintln!("[ERROR] {}", e);
                 std::process::exit(1);

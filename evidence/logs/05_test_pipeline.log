@@ -1,0 +1,421 @@
+================================================================
+=== [TEST SUITE] Starting READ Autonomous Pipeline Tests ===
+Sandbox: /tmp/read-pipeline-test-aaB7qi
+================================================================
+[TEST 1] Verifying read run CLI help flags...
+[PASS] 1. read run CLI supports --harness, --auto-approve, --timeout
+[TEST 2] Executing autonomous pipeline: read run --harness mock_agent...
+================================================================
+[READ PIPELINE] Starting autonomous agent execution
+Workspace:    /tmp/read-pipeline-test-aaB7qi
+Prompt:       Implement token verification logic with minimum length 12
+Timeout:      20s
+AutoApprove:  false
+================================================================
+[Stage 1: Contract Freeze] Freezing task contract into STATE.json...
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795425295, ContractHash=28cd7a7332301ee8075d8aedbb5f0682bf9f9cf72a5eb881a94620da2a83ddc6
+[Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
+[Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
+[Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
+[MOCK AGENT] Updated token_service.py
+[Stage 3: Harness Dispatch] PASSED: Harness 'mock_agent' completed with exit code 0
+[Stage 4: Diff & Mutation Verification] Computing git diff SHA-256 and generating AROP mutants...
+  [Mutant #1] L2: INVERT_GE in token_service.py -> KILLED (out: FFF
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 12, in test_boundary
+    self.assertIs(verify_token("123456789012"), True)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not True
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_valid_token (test_tokens.TestTokenService.test_valid_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 9, in test_valid_token
+    self.assertTrue(verify_token("123456789012"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+FAILED (failures=3)
+)
+  [Mutant #2] L2: RETURN_NONE in token_service.py -> KILLED (out: F.F
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 12, in test_boundary
+    self.assertIs(verify_token("123456789012"), True)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None is not True
+
+======================================================================
+FAIL: test_valid_token (test_tokens.TestTokenService.test_valid_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 9, in test_valid_token
+    self.assertTrue(verify_token("123456789012"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None is not true
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+[Stage 4: Diff & Mutation Verification] PASSED: Mutation Score: 100.0% (Killed 2/2, DiffHash: 05d8e365f937dd71b2c5f0566f049f5a90556dcdc70e084286ddd718b674667c)
+[Stage 5: Sealing] Evaluating verification gate and sealing state...
+[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: c80e3716926a008c8ecc6bd82316438731eb35d132eb929d587203c243a8014e)
+================================================================
+[READ PIPELINE] Execution finished in 1064ms, Success=true, State=handoff_complete
+================================================================
+[PASS] 2. read run CLI completed 5 stages: sealed handoff_complete (verify_hash: c80e3716926a008c8ecc6bd82316438731eb35d132eb929d587203c243a8014e)
+[TEST 3] Verifying cryptographic WAL audit trail...
+[PASS] 3. Cryptographic WAL audit chain intact (DEFINE, BUILD_START, VERIFIED, HANDOFF)
+[TEST 4] Testing verification gate failure on inadequate test suite...
+================================================================
+[READ PIPELINE] Starting autonomous agent execution
+Workspace:    /tmp/read-pipeline-test-aaB7qi
+Prompt:       Add backdoor token check
+Timeout:      15s
+AutoApprove:  false
+================================================================
+[Stage 1: Contract Freeze] Freezing task contract into STATE.json...
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795425298, ContractHash=570e425107b352f85915cf3b73345cc4ac7d20480eb60a14c9c6d0f02592cca4
+[Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
+[Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
+[Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
+[Stage 3: Harness Dispatch] PASSED: Harness 'mock_agent' completed with exit code 0
+[Stage 4: Diff & Mutation Verification] Computing git diff SHA-256 and generating AROP mutants...
+  [Mutant #1] L2: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+  [Mutant #2] L3: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #3] L3: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #4] L4: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+  [Mutant #5] L5: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #6] L5: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #7] L6: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+  [Mutant #8] L7: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #9] L7: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #10] L8: INVERT_GE in token_service.py -> KILLED (out: FFF
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 12, in test_boundary
+    self.assertIs(verify_token("123456789012"), True)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not True
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_valid_token (test_tokens.TestTokenService.test_valid_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 9, in test_valid_token
+    self.assertTrue(verify_token("123456789012"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=3)
+)
+[Stage 4: Diff & Mutation Verification] GATE FAILED: Mutation score 40.0% is below strictly required 100.0% threshold (Killed 4/10)
+[Stage 5: Sealing] Evaluating verification gate and sealing state...
+[Stage 5: Sealing] FAILED: verification gate failed (mutation score: 40.0% < 100.0%)
+================================================================
+[READ PIPELINE] Execution finished in 1729ms, Success=false, State=executing
+================================================================
+[ERROR] Pipeline verification gate failed: Mutation score 40.0% is below strictly required 100.0% threshold (Killed 4/10)
+[PASS] 4. Verification gate blocked premature handoff (status: executing, exit: 1)
+[TEST 5] Testing Master Override application with --auto-approve...
+================================================================
+[READ PIPELINE] Starting autonomous agent execution
+Workspace:    /tmp/read-pipeline-test-aaB7qi
+Prompt:       Add backdoor token check with auto approve
+Timeout:      15s
+AutoApprove:  true
+================================================================
+[Stage 1: Contract Freeze] Freezing task contract into STATE.json...
+[Stage 1: Contract Freeze] PASSED: TaskID=TASK-1795425298, ContractHash=570e425107b352f85915cf3b73345cc4ac7d20480eb60a14c9c6d0f02592cca4
+[Stage 2: Deterministic Context] Invoking read-engine ast-context on workspace files (0 tokens)...
+[Stage 2: Deterministic Context] PASSED: Resolved signatures across 2 file(s) with $0.00 token cost
+[Stage 3: Harness Dispatch] Selecting active AI harness and launching execution...
+[Stage 3: Harness Dispatch] PASSED: Harness 'mock_agent' completed with exit code 0
+[Stage 4: Diff & Mutation Verification] Computing git diff SHA-256 and generating AROP mutants...
+  [Mutant #1] L2: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+FAILED (failures=2)
+)
+  [Mutant #2] L3: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #3] L3: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #4] L4: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+  [Mutant #5] L5: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #6] L5: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #7] L6: INVERT_EQ in token_service.py -> KILLED (out: FF.
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 13, in test_boundary
+    self.assertIs(verify_token("12345678901"), False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=2)
+)
+  [Mutant #8] L7: FLIP_BOOL_TRUE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #9] L7: RETURN_NONE in token_service.py -> SURVIVED (out: ...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+)
+  [Mutant #10] L8: INVERT_GE in token_service.py -> KILLED (out: FFF
+======================================================================
+FAIL: test_boundary (test_tokens.TestTokenService.test_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 12, in test_boundary
+    self.assertIs(verify_token("123456789012"), True)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not True
+
+======================================================================
+FAIL: test_short_token (test_tokens.TestTokenService.test_short_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 6, in test_short_token
+    self.assertFalse(verify_token("short"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_valid_token (test_tokens.TestTokenService.test_valid_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/read-pipeline-test-aaB7qi/test_tokens.py", line 9, in test_valid_token
+    self.assertTrue(verify_token("123456789012"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=3)
+)
+[Stage 4: Diff & Mutation Verification] GATE FAILED: Mutation score 40.0% is below strictly required 100.0% threshold (Killed 4/10)
+[Stage 5: Sealing] Evaluating verification gate and sealing state...
+[Stage 5: Sealing] Verification score < 100% but --auto-approve enabled: Applying Master Override...
+[Stage 5: Sealing] PASSED: Sealed handoff in STATE.json (State: handoff_complete, VerifyHash: OVR-12b7ba4ec31c29c2b1612a40d615bbbb2f7ccec47d0f6863142d93238ae8ad9a)
+================================================================
+[READ PIPELINE] Execution finished in 2058ms, Success=true, State=handoff_complete
+================================================================
+[PASS] 5. Master Override applied via --auto-approve (sealed: OVR-12b7ba4ec31c29c2b1612a40d615bbbb2f7ccec47d0f6863142d93238ae8ad9a)
+[TEST 6] Testing Daemon REST endpoint /api/v1/pipeline/run...
+[PASS] 6. Daemon REST endpoint /api/v1/pipeline/run successfully executed pipeline (task: TASK-1795425305)
+================================================================
+=== [ALL 6 PIPELINE INTEGRATION TESTS PASSED] ===
+================================================================

@@ -73,11 +73,11 @@ read-engine define TASK-METRICS-001 <CONTRACT_HASH> <BASE_COMMIT>
 ```
 
 Under the hood:
-1. An exclusive POSIX file lock is acquired on `.method/.state.lock`.
-2. `.method/STATE.json` is checked: the task status must be `Idle` or `HandoffComplete`. Attempting to define a new task while an existing task is in progress triggers `CasLockViolation`.
+1. An exclusive POSIX file lock is acquired on `.read/.state.lock`.
+2. `.read/STATE.json` is checked: the task status must be `Idle` or `HandoffComplete`. Attempting to define a new task while an existing task is in progress triggers `CasLockViolation`.
 3. `state_revision` is incremented.
 4. Status transitions to `Defined`.
-5. An entry is appended to `.method/WAL.log` with event type `DEFINE`.
+5. An entry is appended to `.read/WAL.log` with event type `DEFINE`.
 
 ---
 
@@ -93,7 +93,7 @@ The engine validates:
 - Status is strictly `Defined`.
 - The current working directory is clean relative to `base_commit`.
 - Sets status to `Executing` and increments `state_revision`.
-- Appends `BUILD_START` to `.method/WAL.log`.
+- Appends `BUILD_START` to `.read/WAL.log`.
 
 ### 3.2 AST Context Provisioning
 Before the external AI agent or human begins coding, `read-core` provides context via deterministic AST extraction:
@@ -200,7 +200,7 @@ read-engine verify <DIFF_HASH> "<VERIFICATION_LOG_OUTPUT>"
 The engine:
 1. Validates status is `Executing`.
 2. Hashes the verification log using SHA-256 to form `verify_hash`.
-3. Records `staged_diff_hash` and `verify_hash` into `.method/STATE.json`.
+3. Records `staged_diff_hash` and `verify_hash` into `.read/STATE.json`.
 4. Sets status to `Verified`.
 5. Logs `VERIFIED staged_diff_hash=... verify_hash=...` into `WAL.log`.
 

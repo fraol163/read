@@ -14,8 +14,8 @@ cd "$SANDBOX"
 # 1. Initialize git repo and READ framework
 git init -q
 "$READ" init
-if [ ! -f .method/STATE.json ] || [ ! -f .method/WAL.log ]; then
-    echo "[FAIL] .method state files not created" >&2
+if [ ! -f .read/STATE.json ] || [ ! -f .read/WAL.log ]; then
+    echo "[FAIL] .read state files not created" >&2
     exit 1
 fi
 echo "[PASS] 1. read init successfully initialized atomic state and WAL"

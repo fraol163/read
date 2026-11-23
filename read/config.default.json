@@ -22,9 +22,9 @@
     ]
   },
   "core": {
-    "state_dir": ".method",
-    "state_file": ".method/STATE.json",
-    "wal_file": ".method/WAL.log",
+    "state_dir": ".read",
+    "state_file": ".read/STATE.json",
+    "wal_file": ".read/WAL.log",
     "strict_cas": true,
     "wal_compaction_threshold": 1000
   },

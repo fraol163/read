@@ -1,0 +1,116 @@
+================================================================================
+STARTING ADVERSARIAL CHAOS & RED-TEAM TEST SUITE
+Sandbox Directory: /tmp/read-chaos-suite-gGzjfx
+READ Engine: /home/renan/Downloads/me/methodology_session/read/bin/read-engine
+READ Daemon: /home/renan/Downloads/me/methodology_session/read/bin/read-daemon
+================================================================================
+
+=== [SCENARIO 1]: SIGKILL During Atomic State Writes & Crash Recovery ===
+[READ] Initialized state engine in .method/
+[READ] Task defined. State revision: 1
+[READ] Build started. Status: Executing
+[SCENARIO 1] Delivered 15 violent SIGKILL signals mid-execution.
+[SCENARIO 1] Assertion Passed: STATE.json remains 100% valid JSON.
+[SCENARIO 1] Assertion Passed: 'read recover' verified 100% state recovery from WAL.
+[PASS] SCENARIO 1 PASSED: Zero data corruption under violent SIGKILL.
+
+=== [SCENARIO 2]: AST Parser Fuzzing & Resilience ===
+[SCENARIO 2.1] Fuzzing broken syntax...
+[SCENARIO 2.1] Assertion Passed: Broken syntax parsed without panic.
+[SCENARIO 2.2] Fuzzing 10,000 unclosed parentheses...
+[SCENARIO 2.2] Assertion Passed: 10,000 unclosed braces processed without stack overflow.
+[SCENARIO 2.3] Fuzzing 10,000 import declarations...
+[SCENARIO 2.3] Assertion Passed: 10,000 imports bounded deterministically.
+[SCENARIO 2.4] Fuzzing circular dependency loop (A -> B -> C -> A)...
+[SCENARIO 2.4] Assertion Passed: Circular import cycle handled without recursion infinite loop.
+[SCENARIO 2.5] Fuzzing 2MB raw random binary payload...
+[SCENARIO 2.5] Assertion Passed: 2MB binary payload skipped cleanly without panic.
+[SCENARIO 2.6] Fuzzing malformed TSX syntax...
+[SCENARIO 2.6] Assertion Passed: Malformed TSX parsed deterministically without panic.
+[SCENARIO 2.6] Assertion Passed: Malformed TSX diff mutated deterministically without panic.
+[SCENARIO 2.7] Fuzzing malformed Java syntax...
+[SCENARIO 2.7] Assertion Passed: Malformed Java parsed deterministically without panic.
+[SCENARIO 2.7] Assertion Passed: Malformed Java diff mutated deterministically without panic.
+[SCENARIO 2.8] Fuzzing malformed C# syntax...
+[SCENARIO 2.8] Assertion Passed: Malformed C# parsed deterministically without panic.
+[SCENARIO 2.8] Assertion Passed: Malformed C# diff mutated deterministically without panic.
+[SCENARIO 2.9] Fuzzing malformed C++ and advanced template metaprogramming...
+[SCENARIO 2.9] Assertion Passed: Malformed C++ parsed deterministically without panic.
+[SCENARIO 2.9] Assertion Passed: Malformed C++ diff mutated deterministically without panic.
+[SCENARIO 2.10] Fuzzing malformed Ruby syntax and dynamic metaprogramming...
+[SCENARIO 2.10] Assertion Passed: Malformed Ruby parsed deterministically without panic.
+[SCENARIO 2.10] Assertion Passed: Malformed Ruby diff mutated deterministically without panic.
+[PASS] SCENARIO 2 PASSED: AST Parser is 100% crash-proof under adversarial inputs.
+
+=== [SCENARIO 3]: Dead & Hanging Sockets During Dynamic Harness Scan ===
+[SCENARIO 3] Probing daemon /api/v1/harnesses with hanging socket on port 11434...
+[SCENARIO 3] Probe completed in: 239ms (Status Code: 200)
+[SCENARIO 3] Assertion Passed: Hanging socket timed out within 239ms (< 500ms limit).
+[SCENARIO 3] Assertion Passed: Daemon remained online and unblocked.
+[PASS] SCENARIO 3 PASSED: Dynamic scanner strictly bounds network timeouts (<500ms).
+
+=== [SCENARIO 4]: Concurrent CAS Race Condition Audit ===
+[READ] Initialized state engine in .method/
+[READ] Task defined. State revision: 1
+[SCENARIO 4.1] Firing 10 concurrent 'read build' executions simultaneously...
+[SCENARIO 4.1] Results: 1 succeeded, 9 failed.
+[SCENARIO 4.1] Assertion Passed: Exactly 1 succeeded, 9 rejected with CasLockViolation.
+[READ] Verification recorded. verify_hash: 03088d60b1101480d390d660d4df7257350d1806e699a3a0384b032b5265efde
+[SCENARIO 4.2] Firing 10 concurrent 'read handoff' executions simultaneously...
+[SCENARIO 4.2] Results: 1 succeeded, 9 failed.
+[SCENARIO 4.2] Assertion Passed: Exactly 1 succeeded, 9 rejected with CasLockViolation.
+[PASS] SCENARIO 4 PASSED: CAS revision locks mechanically reject stale transitions.
+
+=== [SCENARIO 5]: Unauthorized Gate Bypass Attacks ===
+[READ] Initialized state engine in .method/
+[READ] Task defined. State revision: 1
+[READ] Build started. Status: Executing
+[SCENARIO 5.1] Assertion Passed: Premature handoff blocked by CasLockViolation.
+[SCENARIO 5.2] Assertion Passed: Null verify_hash blocked mechanically.
+[SCENARIO 5.3] Assertion Passed: Forged verify_hash blocked by WAL audit record mismatch.
+[SCENARIO 5.4] Assertion Passed: Malformed STATE.json blocked on load.
+[SCENARIO 5.5] Verifying strict 100% AROP gate rejection on 90% mutation score...
+[SCENARIO 5.5] Assertion Passed: 90% mutation score (9/10 killed) mechanically rejected with code 1.
+[PASS] SCENARIO 5 PASSED: Unauthorized gate bypass is mechanically impossible.
+
+=== [SCENARIO 6]: Dynamic RLIMIT Calibration Under Varying Memory Conditions ===
+[SCENARIO 6.1] Assertion Passed: 16GB available RAM correctly calibrated to 30% (4915200000 bytes).
+[SCENARIO 6.2] Assertion Passed: 2GB available RAM correctly calibrated to 30% (614400000 bytes).
+[SCENARIO 6.3] Assertion Passed: Missing meminfo correctly triggers warning and 512MB fallback.
+[SCENARIO 6.4] Assertion Passed: Corrupt meminfo correctly triggers 512MB fallback.
+[SCENARIO 6.5] Assertion Passed: Live host RAM dynamically calibrated to 670 MB ceiling.
+[PASS] SCENARIO 6 PASSED: Dynamic RLIMIT calibration operates correctly under all memory conditions.
+
+=== [SCENARIO 7]: TLS Enforcement on Non-Loopback Interfaces ===
+[SCENARIO 7.1] Assertion Passed: 0.0.0.0 bind mechanically rejected without TLS (code: 1).
+[SCENARIO 7.2] Assertion Passed: Daemon successfully enforced HTTPS with TLS cert/key.
+[PASS] SCENARIO 7 PASSED: Non-loopback TLS enforcement mechanically verified.
+
+=== [SCENARIO 8]: Constant-Time Bearer Token Authentication ===
+[SCENARIO 8.1] Assertion Passed: /api/v1/status allows unauthenticated public access.
+[SCENARIO 8.2] Assertion Passed: Protected endpoint rejected without token (401 Unauthorized).
+[SCENARIO 8.3] Assertion Passed: Protected endpoint rejected with wrong token (401 Unauthorized).
+[SCENARIO 8.4] Assertion Passed: Protected endpoint granted 200 OK with valid constant-time Bearer token.
+[PASS] SCENARIO 8 PASSED: Bearer token authentication verified.
+
+=== [SCENARIO 9]: Per-IP Token Bucket Rate Limiting ===
+[SCENARIO 9] Assertion Passed: External IP triggered 429 Too Many Requests with Retry-After: 1
+[PASS] SCENARIO 9 PASSED: Per-IP token bucket rate limiting verified.
+
+=== [SCENARIO 10]: Loopback Rate Limit Whitelisting ===
+[SCENARIO 10] Assertion Passed: 25 consecutive loopback requests all returned 200 OK (whitelist active).
+[PASS] SCENARIO 10 PASSED: Localhost whitelisting verified.
+
+================================================================================
+ALL 10 ADVERSARIAL CHAOS SCENARIOS COMPLETED SUCCESSFULLY
+  [PASS] Scenario 1: SIGKILL Resilience and Zero-Token Crash Recovery
+  [PASS] Scenario 2: AST Parser Fuzzing (Syntax, Braces, Imports, Loops, Binary)
+  [PASS] Scenario 3: Dead & Hanging Sockets Dynamic Scanner Latency (<500ms)
+  [PASS] Scenario 4: Concurrent CAS Race (10 parallel workers -> 1 win, 9 CasLockViolation)
+  [PASS] Scenario 5: Unauthorized Gate Bypass & Strict 100% AROP Mutation Enforcement
+  [PASS] Scenario 6: Dynamic RLIMIT Calibration (30% RAM Ceiling & 512MB Fallback)
+  [PASS] Scenario 7: Non-Loopback 0.0.0.0 Rejection & TLS/HTTPS Enforcement
+  [PASS] Scenario 8: Constant-Time Bearer Token Authentication (subtle.ConstantTimeCompare)
+  [PASS] Scenario 9: Per-IP Token Bucket Rate Limiting (10 Burst, 2/sec, 429 Retry-After)
+  [PASS] Scenario 10: Localhost Loopback Whitelisting (Unthrottled Dev Access)
+================================================================================

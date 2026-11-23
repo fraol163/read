@@ -1,0 +1,311 @@
+{
+  "diff_hash": {
+    "runs": 10,
+    "raw_ms": [
+      8.934,
+      8.477,
+      8.821,
+      8.298,
+      10.5,
+      8.454,
+      8.6,
+      8.053,
+      8.703,
+      9.514
+    ],
+    "mean_ms": 8.835,
+    "stddev_ms": 0.706,
+    "min_ms": 8.053,
+    "max_ms": 10.5,
+    "diff_hash": "4b270e4ea2128d78e0237e8beafdabc23d6dd784c9014c13fa4b2dd8e5b84777"
+  },
+  "crash_recovery": {
+    "runs": 10,
+    "raw_ms": [
+      16.455,
+      15.709,
+      12.478,
+      12.766,
+      12.559,
+      11.303,
+      9.853,
+      8.236,
+      7.586,
+      7.959
+    ],
+    "mean_ms": 11.49,
+    "stddev_ms": 3.113,
+    "min_ms": 7.586,
+    "max_ms": 16.455,
+    "sample_recovery_msg": "RECOVER SUCCESS (0 Tokens Re-spent):\n- Status: Verified\n- Task ID: TASK-TEST-001\n- State Revision: 3\n- Last WAL Event: 2026-11-23T09:26:04.285832962+00:00 | prev_hash=d78bd5bf879b6c285bc808093c8799dd412c7b7ee466b7cee760d18d2ce6f212 | VERIFIED | staged_diff_hash=3ec07786ccfdaf80ca05a1049b4d522ce01032264a7f5c2be2088234c3becad0 verify_hash=01749d9493585f7cb574acda83ef157f010dcf32855bf4d64a8f88337651245f | entry_hash=cca1f7e3bc9592dc1da770c63a51498444977e0419fbc6d9ade3c3a02fc075bb"
+  },
+  "ast_extraction": {
+    "Python": {
+      "runs": 10,
+      "raw_ms": [
+        2.453,
+        2.209,
+        1.549,
+        1.955,
+        2.403,
+        3.057,
+        3.297,
+        2.128,
+        1.764,
+        1.614
+      ],
+      "mean_ms": 2.243,
+      "stddev_ms": 0.582,
+      "min_ms": 1.549,
+      "max_ms": 3.297
+    },
+    "TypeScript": {
+      "runs": 10,
+      "raw_ms": [
+        2.115,
+        1.988,
+        1.743,
+        1.649,
+        1.936,
+        2.098,
+        2.764,
+        1.589,
+        1.567,
+        1.765
+      ],
+      "mean_ms": 1.921,
+      "stddev_ms": 0.358,
+      "min_ms": 1.567,
+      "max_ms": 2.764
+    },
+    "Go": {
+      "runs": 10,
+      "raw_ms": [
+        1.655,
+        1.612,
+        1.534,
+        1.624,
+        1.519,
+        1.597,
+        1.521,
+        2.005,
+        2.114,
+        2.436
+      ],
+      "mean_ms": 1.762,
+      "stddev_ms": 0.314,
+      "min_ms": 1.519,
+      "max_ms": 2.436
+    },
+    "Rust": {
+      "runs": 10,
+      "raw_ms": [
+        2.32,
+        1.663,
+        1.774,
+        1.681,
+        1.587,
+        1.755,
+        1.628,
+        2.255,
+        1.884,
+        1.738
+      ],
+      "mean_ms": 1.828,
+      "stddev_ms": 0.256,
+      "min_ms": 1.587,
+      "max_ms": 2.32
+    },
+    "Java": {
+      "runs": 10,
+      "raw_ms": [
+        2.1,
+        2.123,
+        1.9,
+        1.958,
+        1.873,
+        1.892,
+        1.928,
+        2.447,
+        3.195,
+        3.443
+      ],
+      "mean_ms": 2.286,
+      "stddev_ms": 0.574,
+      "min_ms": 1.873,
+      "max_ms": 3.443
+    },
+    "CSharp": {
+      "runs": 10,
+      "raw_ms": [
+        2.268,
+        1.955,
+        2.648,
+        2.639,
+        2.293,
+        2.257,
+        2.215,
+        2.241,
+        2.818,
+        2.41
+      ],
+      "mean_ms": 2.374,
+      "stddev_ms": 0.257,
+      "min_ms": 1.955,
+      "max_ms": 2.818
+    },
+    "Cpp": {
+      "runs": 10,
+      "raw_ms": [
+        2.337,
+        1.773,
+        1.72,
+        1.565,
+        1.518,
+        1.575,
+        2.207,
+        2.954,
+        2.378,
+        1.596
+      ],
+      "mean_ms": 1.962,
+      "stddev_ms": 0.482,
+      "min_ms": 1.518,
+      "max_ms": 2.954
+    },
+    "Ruby": {
+      "runs": 10,
+      "raw_ms": [
+        1.659,
+        1.855,
+        1.672,
+        1.916,
+        2.582,
+        1.978,
+        1.748,
+        2.178,
+        1.77,
+        1.911
+      ],
+      "mean_ms": 1.927,
+      "stddev_ms": 0.278,
+      "min_ms": 1.659,
+      "max_ms": 2.582
+    },
+    "Python_100_funcs": {
+      "runs": 10,
+      "raw_ms": [
+        1.969,
+        1.867,
+        1.77,
+        1.731,
+        1.883,
+        1.767,
+        1.731,
+        1.74,
+        2.86,
+        3.012
+      ],
+      "mean_ms": 2.033,
+      "stddev_ms": 0.484,
+      "min_ms": 1.731,
+      "max_ms": 3.012
+    }
+  },
+  "proxy_and_rate_limit": {
+    "loopback_unlimited": true,
+    "external_ip_rate_limited": true,
+    "spoofed_xff_bypasses_limiter": true,
+    "external_results": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      429,
+      429,
+      429,
+      429,
+      429
+    ],
+    "spoofed_results": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ]
+  },
+  "rlimit_as": {
+    "limit_512mb_bytes": 536870912,
+    "limit_30pct_bytes": 1836098519,
+    "java_512mb": {
+      "exit": 1,
+      "output": "Error occurred during initialization of VM\nCould not reserve enough space for 262144 KB object heap"
+    },
+    "dotnet_512mb": {
+      "exit": 137,
+      "output": "GC: Reserving 268435456 bytes (0 GiB) for the regions range failed, do you have a virtual memory limit set on this process?\nGC heap initialization failed with error 0x8007000E\nFailed to create CoreCLR, HRESULT: 0x8007000E"
+    },
+    "java_30pct": {
+      "exit": 1
+    },
+    "dotnet_30pct": {
+      "exit": -6,
+      "output": "Unhandled exception. System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.DotNet.Cli.Utils, Version=10.0.403.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'. The system cannot find the file specified.\n\nFile name: 'Microsoft.DotNet.Cli.Utils, Version=10.0.403.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'\n   at Microsoft.DotNet.Cli.Program.Main(String[] args)"
+    }
+  },
+  "large_suite_hook": {
+    "runs": 5,
+    "raw_ms": [
+      130.568,
+      108.445,
+      132.764,
+      136.777,
+      128.603
+    ],
+    "mean_ms": 127.431,
+    "stddev_ms": 11.04,
+    "min_ms": 108.445,
+    "max_ms": 136.777
+  },
+  "external_repo_mutation": {
+    "target_file": "backend/version_catalog.py",
+    "mutants_count": 3,
+    "killed": 3,
+    "survived": 0,
+    "mutation_score_pct": 100.0,
+    "mutants": [
+      [
+        1,
+        "INVERT_EQ",
+        "KILLED"
+      ],
+      [
+        2,
+        "FLIP_BOOL_FALSE",
+        "KILLED"
+      ],
+      [
+        3,
+        "RETURN_NONE",
+        "KILLED"
+      ]
+    ]
+  }
+}

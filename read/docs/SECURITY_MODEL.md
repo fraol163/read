@@ -126,13 +126,13 @@ A common flaw in file-based workflow engines is that an agent can simply edit th
 
 READ prevents this mechanically:
 1. **Cryptographic Proof Chaining**:
-   `.method/STATE.json` cannot transition without a valid `verify_hash`.
+   `.read/STATE.json` cannot transition without a valid `verify_hash`.
 2. **WAL Cross-Verification**:
-   During `read-engine handoff`, the engine does not merely trust `STATE.json`. It scans `.method/WAL.log` from genesis to verify:
+   During `read-engine handoff`, the engine does not merely trust `STATE.json`. It scans `.read/WAL.log` from genesis to verify:
    - For regular verifications: an authentic `VERIFIED` event with the exact `verify_hash` exists in the log.
    - For Master Overrides: an authentic `MASTER_OVERRIDE` event with the exact `OVR-...` hash exists.
 3. **Diff Drift Lock**:
    The engine computes `git diff --staged` at the exact moment of handoff. If a single character was altered in staged files after verification ran, the handoff fails with:
    `CasLockViolation: Staged diff hash drift detected! Re-verification required.`
 4. **POSIX Lock Protection**:
-   All state updates are guarded by `libc::flock(LOCK_EX)`. Manual or concurrent write attempts to `.method/STATE.json` fail or block cleanly.
+   All state updates are guarded by `libc::flock(LOCK_EX)`. Manual or concurrent write attempts to `.read/STATE.json` fail or block cleanly.

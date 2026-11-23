@@ -34,13 +34,13 @@ fn default_exclude_patterns() -> Vec<String> {
     ]
 }
 fn default_state_dir() -> String {
-    ".method".to_string()
+    ".read".to_string()
 }
 fn default_state_file() -> String {
-    ".method/STATE.json".to_string()
+    ".read/STATE.json".to_string()
 }
 fn default_wal_file() -> String {
-    ".method/WAL.log".to_string()
+    ".read/WAL.log".to_string()
 }
 fn default_true() -> bool {
     true

@@ -83,17 +83,17 @@
       "properties": {
         "state_dir": {
           "type": "string",
-          "default": ".method",
+          "default": ".read",
           "description": "Directory for persistent CAS state and WAL"
         },
         "state_file": {
           "type": "string",
-          "default": ".method/STATE.json",
+          "default": ".read/STATE.json",
           "description": "Relative path to state JSON"
         },
         "wal_file": {
           "type": "string",
-          "default": ".method/WAL.log",
+          "default": ".read/WAL.log",
           "description": "Relative path to write-ahead log"
         },
         "strict_cas": {

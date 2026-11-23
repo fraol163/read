@@ -8,7 +8,7 @@
   "verify_hash": null,
   "cas_lock": {
     "expected_revision": 1,
-    "locked_by": "declarative_engine",
+    "locked_by": "system",
     "lease_expires": "2099-01-01T00:00:00Z"
   }
 }

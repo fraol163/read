@@ -179,3 +179,30 @@ func TestPtyWebSocketLifecycleAndCleanup(t *testing.T) {
 		t.Fatalf("session pty_test_session was not cleaned up in DefaultManager")
 	}
 }
+
+func BenchmarkPtyStreaming(b *testing.B) {
+	server := httptest.NewServer(http.HandlerFunc(HandleTerminalWs))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "?cmd=/bin/cat&session_id=bench_session"
+	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		b.Fatalf("failed to connect to pty ws: %v", err)
+	}
+	defer wsConn.Close()
+
+	payload := []byte("benchmarking pty data streaming throughput\n")
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err := wsConn.WriteMessage(websocket.BinaryMessage, payload)
+		if err != nil {
+			b.Fatalf("failed to write message: %v", err)
+		}
+		_, _, err = wsConn.ReadMessage()
+		if err != nil {
+			b.Fatalf("failed to read message: %v", err)
+		}
+	}
+}

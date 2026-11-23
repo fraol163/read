@@ -253,7 +253,13 @@ func (s *GatewayServer) handleHarnessTask(w http.ResponseWriter, r *http.Request
 }
 
 func (s *GatewayServer) handleState(w http.ResponseWriter, r *http.Request) {
-	statePath := filepath.Join(s.config.WorkspaceRoot, ".method", "STATE.json")
+	statePath := filepath.Join(s.config.WorkspaceRoot, ".read", "STATE.json")
+	if _, err := os.Stat(statePath); os.IsNotExist(err) {
+		legacyPath := filepath.Join(s.config.WorkspaceRoot, ".method", "STATE.json")
+		if _, err2 := os.Stat(legacyPath); err2 == nil {
+			statePath = legacyPath
+		}
+	}
 	data, err := os.ReadFile(statePath)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")

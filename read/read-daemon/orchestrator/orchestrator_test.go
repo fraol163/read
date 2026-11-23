@@ -210,7 +210,11 @@ if __name__ == '__main__':
 	}
 
 	// Verify STATE.json on disk
-	stateData, err := os.ReadFile(filepath.Join(ws, ".method", "STATE.json"))
+	statePath := filepath.Join(ws, ".read", "STATE.json")
+	if _, err := os.Stat(statePath); os.IsNotExist(err) {
+		statePath = filepath.Join(ws, ".method", "STATE.json")
+	}
+	stateData, err := os.ReadFile(statePath)
 	if err != nil {
 		t.Fatalf("failed to read STATE.json: %v", err)
 	}
@@ -226,7 +230,11 @@ if __name__ == '__main__':
 	}
 
 	// Verify WAL.log contains DEFINE, BUILD_START, VERIFIED, HANDOFF
-	walData, err := os.ReadFile(filepath.Join(ws, ".method", "WAL.log"))
+	walPath := filepath.Join(ws, ".read", "WAL.log")
+	if _, err := os.Stat(walPath); os.IsNotExist(err) {
+		walPath = filepath.Join(ws, ".method", "WAL.log")
+	}
+	walData, err := os.ReadFile(walPath)
 	if err != nil {
 		t.Fatalf("failed to read WAL.log: %v", err)
 	}

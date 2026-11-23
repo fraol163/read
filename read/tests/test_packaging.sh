@@ -120,7 +120,7 @@ mkdir -p "$MOCK_PROJECT"
     git config user.email "user@test.org"
 
     "$MOCK_BIN/read" init
-    if [ ! -d ".method" ] || [ ! -f ".method/STATE.json" ]; then
+    if [ ! -d ".read" ] || [ ! -f ".read/STATE.json" ]; then
         echo "[FAIL] Installed read CLI failed to initialize project" >&2
         exit 1
     fi

@@ -210,7 +210,12 @@ pub struct StateEngine {
 impl StateEngine {
     pub fn new<P: AsRef<Path>>(root: P) -> Self {
         let root = root.as_ref().to_path_buf();
-        let method_dir = root.join(".method");
+        let read_dir = root.join(".read");
+        let method_dir = if !read_dir.exists() && root.join(".method").exists() {
+            root.join(".method")
+        } else {
+            read_dir
+        };
         let state_file = method_dir.join("STATE.json");
         let wal_file = method_dir.join("WAL.log");
         let lock_file = method_dir.join(".state.lock");
@@ -736,6 +741,7 @@ impl StateEngine {
                 st.verify_hash.as_deref().unwrap_or("none")
             ),
         )?;
+        let _ = self.anchor_wal_in_git();
         Ok(st)
     }
 
@@ -789,10 +795,62 @@ impl StateEngine {
         Ok(st)
     }
 
+    /// Anchors the latest WAL head hash into a git tag named 'read-wal-head' if inside a git repository.
+    pub fn anchor_wal_in_git(&self) -> Result<String, String> {
+        let entries = self.verify_wal()?;
+        let last = entries.last().ok_or_else(|| "No WAL entries to anchor".to_string())?;
+        let head_hash = &last.entry_hash;
+        if self.root.join(".git").exists() {
+            // Check if HEAD exists before attempting to tag
+            let head_check = std::process::Command::new("git")
+                .args(["rev-parse", "--verify", "HEAD"])
+                .current_dir(&self.root)
+                .output();
+            if let Ok(out) = head_check {
+                if out.status.success() {
+                    let status = std::process::Command::new("git")
+                        .args(["tag", "-f", "-a", "read-wal-head", "-m", head_hash])
+                        .current_dir(&self.root)
+                        .status()
+                        .map_err(|e| format!("Failed to execute git tag: {}", e))?;
+                    if !status.success() {
+                        return Err("git tag read-wal-head command failed".to_string());
+                    }
+                }
+            }
+        }
+        Ok(head_hash.clone())
+    }
+
+    /// Verifies that the git tag 'read-wal-head' matches the latest WAL entry hash.
+    pub fn verify_wal_anchor(&self) -> Result<(), String> {
+        if self.root.join(".git").exists() {
+            let output = std::process::Command::new("git")
+                .args(["tag", "-l", "--format=%(contents)", "read-wal-head"])
+                .current_dir(&self.root)
+                .output()
+                .map_err(|e| format!("Failed to inspect git tag: {}", e))?;
+            let tag_msg = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !tag_msg.is_empty() {
+                let entries = self.verify_wal()?;
+                if let Some(last) = entries.last() {
+                    if !tag_msg.contains(&last.entry_hash) {
+                        return Err(format!(
+                            "WAL git anchor mismatch: git tag read-wal-head ({}) does not match WAL head hash ({})",
+                            tag_msg, last.entry_hash
+                        ));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Crash recovery: validates WAL cryptographic integrity and STATE.json.
     /// Resumes without re-spending context tokens!
     pub fn recover(&self, current_staged_diff_hash: Option<&str>) -> Result<String, String> {
         let _lock = FileLock::acquire_exclusive(&self.lock_file)?;
+        self.verify_wal_anchor()?;
         let st = self.load()?;
 
         let entries = self.verify_wal()?;
@@ -960,8 +1018,8 @@ mod tests {
         assert_eq!(entries[2].prev_hash, entries[1].entry_hash);
 
         // Tamper with WAL file content
-        let wal_path = dir.path().join(".method").join("WAL.log");
-        let raw = fs::read_to_string(&wal_path).unwrap();
+        let wal_path = &engine.wal_file;
+        let raw = fs::read_to_string(wal_path).unwrap();
         let tampered = raw.replace("c_hash", "corrupted_hash");
         fs::write(&wal_path, tampered).unwrap();
 
@@ -1027,5 +1085,47 @@ mod tests {
         // Handoff succeeds with override
         let st_hnd = engine.transition_handoff().unwrap();
         assert_eq!(st_hnd.status, TaskStatus::HandoffComplete);
+    }
+
+    #[test]
+    fn test_wal_git_anchor_verification_and_rewritten_chain_detection() {
+        let dir = tempdir().unwrap();
+        let path = dir.path();
+
+        // Initialize git repo in tempdir
+        let _ = std::process::Command::new("git").args(["init"]).current_dir(path).output().unwrap();
+        let _ = std::process::Command::new("git").args(["config", "user.email", "test@test.local"]).current_dir(path).output().unwrap();
+        let _ = std::process::Command::new("git").args(["config", "user.name", "Test Worker"]).current_dir(path).output().unwrap();
+        let _ = std::process::Command::new("git").args(["commit", "--allow-empty", "-m", "initial"]).current_dir(path).output().unwrap();
+
+        let engine = StateEngine::new(path);
+        engine.init().unwrap();
+        engine.transition_define("TASK-ANCHOR", "contract_hash", "base_commit").unwrap();
+
+        // Anchor WAL in git tag
+        let head_hash = engine.anchor_wal_in_git().unwrap();
+        assert_eq!(head_hash.len(), 64);
+
+        // Verification passes when anchor matches
+        assert!(engine.verify_wal_anchor().is_ok());
+
+        // Now simulate adversarial attack: forge a valid internal WAL chain that differs from git tag anchor
+        let wal_file = engine.wal_file.clone();
+        let timestamp = "2026-11-23T00:00:00Z";
+        let prev_hash = GENESIS_HASH;
+        let event_type = "FORGED";
+        let payload = "hacked=true";
+        let forged_hash = WalEntry::compute_hash(timestamp, prev_hash, event_type, payload);
+        let forged_line = format!("{} | prev_hash={} | {} | {} | entry_hash={}\n", timestamp, prev_hash, event_type, payload, forged_hash);
+        fs::write(&wal_file, forged_line).unwrap();
+
+        // Internal verify_wal passes because chain is self-consistent
+        assert!(engine.verify_wal().is_ok());
+
+        // But git anchor verification must fail because git tag points to original head_hash
+        let verify_res = engine.verify_wal_anchor();
+        assert!(verify_res.is_err());
+        let err_msg = verify_res.unwrap_err();
+        assert!(err_msg.contains("WAL git anchor mismatch"));
     }
 }

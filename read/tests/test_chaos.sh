@@ -86,7 +86,7 @@ done
 echo "[SCENARIO 1] Delivered $VIOLENT_KILLS violent SIGKILL signals mid-execution."
 
 # Verify STATE.json syntactic integrity
-if ! python3 -m json.tool .method/STATE.json > /dev/null 2>&1; then
+if ! python3 -m json.tool .read/STATE.json > /dev/null 2>&1; then
     echo "[FAIL] STATE.json is corrupt after violent SIGKILL!" >&2
     exit 1
 fi
@@ -587,11 +587,11 @@ echo "[SCENARIO 5.1] Assertion Passed: Premature handoff blocked by CasLockViola
 # 5.2 Tampered STATE.json with null verify_hash
 python3 -c "
 import json
-with open('.method/STATE.json', 'r') as f:
+with open('.read/STATE.json', 'r') as f:
     st = json.load(f)
 st['status'] = 'verified'
 st['verify_hash'] = None
-with open('.method/STATE.json', 'w') as f:
+with open('.read/STATE.json', 'w') as f:
     json.dump(st, f, indent=2)
 "
 
@@ -613,12 +613,12 @@ echo "[SCENARIO 5.2] Assertion Passed: Null verify_hash blocked mechanically."
 # 5.3 Tampered STATE.json with forged / mismatched verify_hash
 python3 -c "
 import json
-with open('.method/STATE.json', 'r') as f:
+with open('.read/STATE.json', 'r') as f:
     st = json.load(f)
 st['status'] = 'verified'
 st['verify_hash'] = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 st['staged_diff_hash'] = 'dummy_staged_diff'
-with open('.method/STATE.json', 'w') as f:
+with open('.read/STATE.json', 'w') as f:
     json.dump(st, f, indent=2)
 "
 
@@ -638,7 +638,7 @@ fi
 echo "[SCENARIO 5.3] Assertion Passed: Forged verify_hash blocked by WAL audit record mismatch."
 
 # 5.4 Syntax Corruption of STATE.json
-echo "CORRUPTED_JSON_INVALID_SYNTAX_{{{{" > .method/STATE.json
+echo "CORRUPTED_JSON_INVALID_SYNTAX_{{{{" > .read/STATE.json
 set +e
 "$READ_ENGINE" status 2> "$SCENARIO5_DIR/syntax_err.txt"
 SYNTAX_EXIT=$?

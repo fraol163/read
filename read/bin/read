@@ -197,8 +197,13 @@ if [ "$1" = "init" ]; then
         fi
     done
 
-    if [ -n "$TEMPLATE_DIR" ] && [ ! -d ".read" ]; then
-        cp -r "$TEMPLATE_DIR" .read
+    if [ -n "$TEMPLATE_DIR" ]; then
+        mkdir -p .read
+        cp -r "$TEMPLATE_DIR"/* .read/ 2>/dev/null || true
+        if [ -d "$TEMPLATE_DIR/hooks" ]; then
+            mkdir -p .read/hooks
+            cp -r "$TEMPLATE_DIR/hooks"/* .read/hooks/ 2>/dev/null || true
+        fi
         echo "[READ] Initialized declarative methodology contracts in .read/"
     fi
 

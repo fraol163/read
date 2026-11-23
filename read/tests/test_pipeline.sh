@@ -105,14 +105,14 @@ echo "[TEST 2] Executing autonomous pipeline: read run --harness mock_agent..."
     "Implement token verification logic with minimum length 12"
 
 # Verify STATE.json sealed handoff
-if [ ! -f .method/STATE.json ]; then
-    echo "FAIL: .method/STATE.json missing" >&2
+if [ ! -f .read/STATE.json ]; then
+    echo "FAIL: .read/STATE.json missing" >&2
     exit 1
 fi
 
-STATE_STATUS=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['status'])")
-VERIFY_HASH=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['verify_hash'])")
-DIFF_HASH=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['staged_diff_hash'])")
+STATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
+VERIFY_HASH=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['verify_hash'])")
+DIFF_HASH=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['staged_diff_hash'])")
 
 if [ "$STATE_STATUS" != "handoff_complete" ]; then
     echo "FAIL: State status is '$STATE_STATUS', expected 'handoff_complete'" >&2
@@ -130,7 +130,7 @@ echo "[PASS] 2. read run CLI completed 5 stages: sealed handoff_complete (verify
 
 # 4. Verify WAL.log contains cryptographic records
 echo "[TEST 3] Verifying cryptographic WAL audit trail..."
-if ! grep -q "DEFINE" .method/WAL.log || ! grep -q "BUILD_START" .method/WAL.log || ! grep -q "VERIFIED" .method/WAL.log || ! grep -q "HANDOFF" .method/WAL.log; then
+if ! grep -q "DEFINE" .read/WAL.log || ! grep -q "BUILD_START" .read/WAL.log || ! grep -q "VERIFIED" .read/WAL.log || ! grep -q "HANDOFF" .read/WAL.log; then
     echo "FAIL: WAL.log missing expected lifecycle transitions" >&2
     exit 1
 fi
@@ -158,11 +158,11 @@ EOF
 # Overwrite STATE.json with idle
 python3 -c "
 import json
-st = json.load(open('.method/STATE.json'))
+st = json.load(open('.read/STATE.json'))
 st['status'] = 'idle'
 st['verify_hash'] = None
 st['staged_diff_hash'] = None
-json.dump(st, open('.method/STATE.json', 'w'))
+json.dump(st, open('.read/STATE.json', 'w'))
 "
 
 # Run without auto-approve: should fail verification gate or fail tests
@@ -176,7 +176,7 @@ set +e
 FAIL_EXIT=$?
 set -e
 
-GATE_STATUS=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['status'])")
+GATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
 if [ "$GATE_STATUS" = "handoff_complete" ]; then
     echo "FAIL: Gate should have blocked handoff when mutants survived!" >&2
     exit 1
@@ -193,8 +193,8 @@ echo "[TEST 5] Testing Master Override application with --auto-approve..."
     --timeout 15 \
     "Add backdoor token check with auto approve"
 
-OVR_STATUS=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['status'])")
-OVR_HASH=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['verify_hash'])")
+OVR_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
+OVR_HASH=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['verify_hash'])")
 
 if [ "$OVR_STATUS" != "handoff_complete" ] || [[ "$OVR_HASH" != OVR-* ]]; then
     echo "FAIL: Master override failed: status=$OVR_STATUS, hash=$OVR_HASH" >&2
@@ -217,11 +217,11 @@ done
 # Reset state to idle
 python3 -c "
 import json
-st = json.load(open('.method/STATE.json'))
+st = json.load(open('.read/STATE.json'))
 st['status'] = 'idle'
 st['verify_hash'] = None
 st['staged_diff_hash'] = None
-json.dump(st, open('.method/STATE.json', 'w'))
+json.dump(st, open('.read/STATE.json', 'w'))
 "
 
 API_RESPONSE=$(curl -s -X POST "http://127.0.0.1:$DAEMON_PORT/api/v1/pipeline/run" \

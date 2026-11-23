@@ -1,0 +1,57 @@
+=== MEASURING 1: Staged Diff Hash Latency (10 runs with git spawn) ===
+Diff Hash: 4b270e4ea2128d78e0237e8beafdabc23d6dd784c9014c13fa4b2dd8e5b84777
+Mean: 8.835 ms, StdDev: 0.706 ms, Min: 8.053 ms, Max: 10.5 ms
+
+=== MEASURING 2: Crash Recovery Time (10 runs) ===
+Mean: 11.49 ms, StdDev: 3.113 ms, Min: 7.586 ms, Max: 16.455 ms
+Sample msg: RECOVER SUCCESS (0 Tokens Re-spent):
+- Status: Verified
+- Task ID: TASK-TEST-001
+- State Revision: 3
+- Last WAL Event: 2026-11-23T09:26:04.285832962+00:00 | prev_hash=d78bd5bf879b6c285bc808093c8799dd412c7b7ee466b7cee760d18d2ce6f212 | VERIFIED | staged_diff_hash=3ec07786ccfdaf80ca05a1049b4d522ce01032264a7f5c2be2088234c3becad0 verify_hash=01749d9493585f7cb574acda83ef157f010dcf32855bf4d64a8f88337651245f | entry_hash=cca1f7e3bc9592dc1da770c63a51498444977e0419fbc6d9ade3c3a02fc075bb
+
+=== MEASURING 3: AST Context Extraction Time per Language (10 runs each) ===
+Python      : Mean:  2.243 ms, StdDev:  0.582 ms, Min:  1.549 ms, Max:  3.297 ms
+TypeScript  : Mean:  1.921 ms, StdDev:  0.358 ms, Min:  1.567 ms, Max:  2.764 ms
+Go          : Mean:  1.762 ms, StdDev:  0.314 ms, Min:  1.519 ms, Max:  2.436 ms
+Rust        : Mean:  1.828 ms, StdDev:  0.256 ms, Min:  1.587 ms, Max:  2.320 ms
+Java        : Mean:  2.286 ms, StdDev:  0.574 ms, Min:  1.873 ms, Max:  3.443 ms
+CSharp      : Mean:  2.374 ms, StdDev:  0.257 ms, Min:  1.955 ms, Max:  2.818 ms
+Cpp         : Mean:  1.962 ms, StdDev:  0.482 ms, Min:  1.518 ms, Max:  2.954 ms
+Ruby        : Mean:  1.927 ms, StdDev:  0.278 ms, Min:  1.659 ms, Max:  2.582 ms
+
+Measuring larger file (100 functions) in Python:
+Python 100-fn: Mean:  2.033 ms, StdDev:  0.484 ms, Min:  1.731 ms, Max:  3.012 ms
+
+=== MEASURING 4: Rate Limiter and Reverse Proxy X-Forwarded-For Behavior ===
+Loopback requests (no XFF, 15 sent): 15/15 succeeded (whitelisted)
+External IP requests via XFF (198.51.100.55): 10 succeeded, 5 rate-limited (HTTP 429)
+Spoofed XFF: 127.0.0.1 requests (15 sent): 15/15 succeeded (bypassed rate limiter)
+
+=== MEASURING 5: RLIMIT_AS 30% RAM Ceiling vs 512MB Fallback on Java and .NET ===
+Java under 512MB RLIMIT_AS: Exit=1, Msg='Error occurred during initialization of VM
+Could not reserve enough space for 262144 KB object heap'
+Dotnet under 512MB RLIMIT_AS: Exit=137, Msg='GC: Reserving 268435456 bytes (0 GiB) for the regions range failed, do you have a virtual memory limit set on this proce'
+Java under 30% RAM (1.71GB) RLIMIT_AS: Exit=1
+Dotnet under 30% RAM (1.71GB) RLIMIT_AS: Exit=-6, Msg='Unhandled exception. System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.DotNet.Cli.Utils, Versi'
+
+=== MEASURING 6: Test Harness Hook Latency on 500-Test Suite ===
+500 Tests Latency: Mean: 127.431 ms, Min: 108.445 ms, Max: 136.777 ms
+
+=== MEASURING 7: Real External Repository AROP Mutation Gate Test ===
+Baseline test run: exit=0, output=..
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+Generated 3 mutants on real repo diff:
+  Mutant #1: INVERT_EQ at L396 -> if len(var_name) != 0:
+  Mutant #2: FLIP_BOOL_FALSE at L397 -> return True
+  Mutant #3: RETURN_NONE at L397 -> return None
+
+Real Repo Mutation Result: 3/3 killed (100.0%)
+  Mutant #1 (INVERT_EQ): KILLED
+  Mutant #2 (FLIP_BOOL_FALSE): KILLED
+  Mutant #3 (RETURN_NONE): KILLED
+
+All measurements saved to: /home/renan/Downloads/me/methodology_session/evidence/logs/measurements.json

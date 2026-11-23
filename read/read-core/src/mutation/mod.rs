@@ -133,7 +133,7 @@ impl BoundedMutator {
         let mut current_file: Option<String> = None;
 
         for line in bounded_diff.lines() {
-            // Hard timeout protection: prevent infinite loops or mobile CPU thermal throttling
+            // Hard timeout protection: prevent infinite loops or CPU exhaustion
             if start_time.elapsed() >= self.timeout_duration {
                 break;
             }
@@ -206,6 +206,15 @@ impl BoundedMutator {
     ) -> Vec<Mutant> {
         // Fast path for TypeScript / JavaScript source files
         if let Some(path) = file_path {
+            if path.starts_with(".read/")
+                || path.starts_with(".method/")
+                || path.ends_with(".log")
+                || path.ends_with(".md")
+                || path.ends_with(".json")
+                || path.ends_with(".txt")
+            {
+                return Vec::new();
+            }
             if ts_js::is_ts_js_file(path) {
                 return ts_js::generate_ts_js_line_mutants(line, line_num, file_path, current_count);
             }

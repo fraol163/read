@@ -34,7 +34,7 @@ READ does not replace external AI agent CLIs or inference engines. Instead, it p
 |                                          |                                              |
 |                                          v                                              |
 |   +---------------------------------------------------------------------------------+   |
-|   | Gated Execution Worktree (.method/STATE.json + git diff --staged)               |   |
+|   | Gated Execution Worktree (.read/STATE.json + git diff --staged)               |   |
 |   +---------------------------------------------------------------------------------+   |
 +-----------------------------------------------------------------------------------------+
 ```

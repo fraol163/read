@@ -96,7 +96,7 @@ Stored at the root of the target repository: `.read/config.json`.
       {"pattern": "__pycache__/**", "policy": "pc_only"},
       {"pattern": ".venv/**", "policy": "pc_only"},
       {"pattern": "node_modules/**", "policy": "pc_only"},
-      {"pattern": "docs/mobile/**", "policy": "phone_only"},
+      {"pattern": "scratch/**", "policy": "node_only"},
       {"pattern": "src/**", "policy": "both_sync"},
       {"pattern": "tests/**", "policy": "both_sync"}
     ]
@@ -118,14 +118,14 @@ Stored at the root of the target repository: `.read/config.json`.
 | `engine` | `max_diff_bytes` | integer | `52428800` | 50 MB ceiling on unified diff parsing to prevent memory spikes. |
 | `engine` | `ast_max_depth` | integer | `3` | Max recursion depth when following import statements. |
 | `storage_policies`| `default` | string | `"both_sync"` | Fallback policy for files not matched by explicit pattern rules. |
-| `storage_policies`| `rules` | array | `[]` | Glob patterns mapping paths to `pc_only`, `phone_only`, or `both_sync`. |
-
+| `storage_policies`| `rules` | array | `[]` | Glob patterns mapping paths to `pc_only`, `node_only`, or `both_sync`. |
+ 
 ---
-
+ 
 ## 4. Harness Configuration (`.read/harnesses.json`)
-
+ 
 Located at `.read/harnesses.json` or `~/.config/read/harnesses.json`.
-
+ 
 ```json
 {
   "harnesses": [
@@ -152,19 +152,19 @@ Located at `.read/harnesses.json` or `~/.config/read/harnesses.json`.
   ]
 }
 ```
-
+ 
 ---
-
+ 
 ## 5. Storage Policies Specification
-
-READ partitions files across three operational roles (`pc`, `phone`, `vps`):
-
+ 
+READ partitions files across operational nodes:
+ 
 ### 5.1 Storage Policy Types
-
+ 
 | Policy | Behavior | Typical File Types |
 | :--- | :--- | :--- |
-| `pc_only` | File is stored exclusively on the host PC. When synchronizing with mobile or VPS, this file is excluded from delta manifests and never transmitted. | `.git/`, build artifacts (`target/`, `node_modules/`, `dist/`), virtualenvs (`.venv/`), compiler caches (`.cache/`). |
-| `phone_only` | File is designated for mobile inspection only. It is excluded from the long-term repository history and stripped before production handoffs. | Ephemeral test screenshots, mobile debug captures, temporary audio/input notes. |
+| `pc_only` | File is stored exclusively on the host PC. When synchronizing with remote nodes, this file is excluded from delta manifests and never transmitted. | `.git/`, build artifacts (`target/`, `node_modules/`, `dist/`), virtualenvs (`.venv/`), compiler caches (`.cache/`). |
+| `node_only` | File is designated for local node inspection only. It is excluded from the long-term repository history and stripped before production handoffs. | Ephemeral test screenshots, local debug captures, temporary notes. |
 | `both_sync` | File is maintained in full cryptographic synchrony across all nodes. Any modification triggers a streaming SHA-256 Merkle update. | Source code (`.py`, `.rs`, `.go`, `.ts`), unit tests, documentation, `STATE.json`, `WAL.log`. |
 
 ### 5.2 Conflict Resolution Mechanics

@@ -1,0 +1,29 @@
+================================================================================
+STARTING PACKAGING & INSTALLATION VERIFICATION TEST
+Test Sandbox: /tmp/read-pkg-test-h4Jra3
+Framework Root: /home/renan/Downloads/me/methodology_session/read
+================================================================================
+[TEST 1] Running installer prerequisite check...
+[PASS] 1. Prerequisites check detected all toolchains
+[TEST 2] Running installer dry-run...
+[PASS] 2. Dry-run executed safely without side effects
+[TEST 3] Running full install.sh into isolated prefix...
+    Finished `release` profile [optimized] target(s) in 0.08s
+[PASS] 3. All binaries (read, read-engine, read-daemon, read-cli) installed and executable
+[PASS] 4. Default configuration initialized: /tmp/read-pkg-test-h4Jra3/mock_home/.config/read/config.json
+[TEST 5] Testing CLI flags (--version, --help, config)...
+[PASS] 5. Installed CLI verified: --version and --help return exit code 0
+[TEST 6] Testing fresh project workflow using installed CLI...
+[READ] Initialized state engine in .method/
+[READ] Initialized declarative methodology contracts in .read/
+[READ] Activated declarative zero-command pre-commit hook (core.hooksPath=.read/hooks)
+[PASS] 6. Fresh user successfully initialized and queried project with installed CLI
+[TEST 7] Testing configuration preservation on re-installation...
+[PASS] 7. Existing user configuration strictly preserved on re-installation
+[TEST 8] Testing Makefile targets (verify, package, uninstall)...
+    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.03s
+[PASS] 8. Makefile targets (verify, package, install with DESTDIR, uninstall) verified
+================================================================================
+ALL PACKAGING AND INSTALLATION VERIFICATION TESTS PASSED SUCCESSFULLY
+================================================================================

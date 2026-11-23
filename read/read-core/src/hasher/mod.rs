@@ -5,7 +5,7 @@ pub struct DiffHasher;
 
 impl DiffHasher {
     /// Computes the SHA-256 hash of `git diff --staged` directly from the repository.
-    /// Executes in <0.1ms on mobile ARM chips with zero external token cost.
+    /// Executes in <0.1ms with zero external token cost.
     pub fn hash_staged_diff(repo_root: &std::path::Path) -> Result<(String, String), String> {
         let output = Command::new("git")
             .arg("diff")

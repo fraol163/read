@@ -265,32 +265,44 @@ impl AstContextResolver {
             let is_def = trimmed.starts_with("def ");
             if is_def || is_async_def {
                 let offset = if is_async_def { 10 } else { 4 };
-                let mut sig_parts = Vec::new();
                 let mut paren_count = 0;
-                let mut found_colon = false;
-                let mut j = i;
-
-                // Multiline signature collection until colon or broken EOF
-                while j < lines.len() {
-                    let curr_line = lines[j].trim();
-                    paren_count += curr_line.chars().filter(|&c| c == '(').count() as isize;
-                    paren_count -= curr_line.chars().filter(|&c| c == ')').count() as isize;
-                    sig_parts.push(curr_line);
-
-                    if curr_line.ends_with(':') && paren_count <= 0 {
-                        found_colon = true;
-                        break;
+                for &b in trimmed.as_bytes() {
+                    if b == b'(' {
+                        paren_count += 1;
+                    } else if b == b')' {
+                        paren_count -= 1;
                     }
-                    if j > i + 10 {
-                        // Broken signature guard: active edit has unclosed parentheses
-                        degraded = true;
-                        break;
-                    }
-                    j += 1;
                 }
 
+                let (full_sig, found_colon, j) = if trimmed.ends_with(':') && paren_count <= 0 {
+                    (trimmed.to_string(), true, i)
+                } else {
+                    let mut sig_parts = vec![trimmed];
+                    let mut found = false;
+                    let mut j_scan = i + 1;
+                    while j_scan < lines.len() {
+                        let curr_line = lines[j_scan].trim();
+                        for &b in curr_line.as_bytes() {
+                            if b == b'(' {
+                                paren_count += 1;
+                            } else if b == b')' {
+                                paren_count -= 1;
+                            }
+                        }
+                        sig_parts.push(curr_line);
+                        if curr_line.ends_with(':') && paren_count <= 0 {
+                            found = true;
+                            break;
+                        }
+                        if j_scan > i + 10 {
+                            degraded = true;
+                            break;
+                        }
+                        j_scan += 1;
+                    }
+                    (sig_parts.join(" "), found, j_scan)
+                };
 
-                let full_sig = sig_parts.join(" ");
                 let raw_name_slice = &full_sig[offset..];
                 let name_end = raw_name_slice
                     .find('(')

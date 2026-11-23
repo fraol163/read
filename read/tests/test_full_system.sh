@@ -20,8 +20,8 @@ git config user.email "test@read.framework"
 
 # 1. Test Native Rust Engine Initialization
 "$READ_ENGINE" init
-if [ ! -d ".method" ] || [ ! -f ".method/WAL.log" ] || [ ! -f ".method/STATE.json" ]; then
-    echo "FAIL: .method/ artifacts missing"
+if [ ! -d ".read" ] || [ ! -f ".read/WAL.log" ] || [ ! -f ".read/STATE.json" ]; then
+    echo "FAIL: .read/ artifacts missing"
     exit 1
 fi
 echo "[PASS] 1. Native Rust Engine initialized atomic WAL & STATE"
@@ -40,7 +40,7 @@ git commit -qm "Initial commit"
 CONTRACT_HASH=$(sha256sum auth_service.py | cut -d' ' -f1)
 "$READ_ENGINE" define "TASK-101" "$CONTRACT_HASH" "HEAD"
 
-STATE_HASH=$(python3 -c "import json; print(json.load(open('.method/STATE.json'))['contract_hash'])")
+STATE_HASH=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['contract_hash'])")
 if [ "$STATE_HASH" != "$CONTRACT_HASH" ]; then
     echo "FAIL: Contract hash mismatch: $STATE_HASH != $CONTRACT_HASH"
     exit 1
