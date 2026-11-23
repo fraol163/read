@@ -66,7 +66,7 @@ Every discipline is codified with the Architect's historical postmortem.
   > *"Building Veloce Studio (a lightweight Linux terminal Android IDE on a 1.5 GiB RAM floor) taught us the brutal physics of mobile ARM execution. When an AI agent was permitted to perform unrestricted multi-file rewrites, memory spiked, Android's Low Memory Killer Daemon (lmkd) killed the process mid-write, leaving the Git repository corrupted and the Gradle daemon in an unrecoverable lock. Bounded staged diffs and POSIX atomic .tmp swaps are non-negotiable survival gear."*
 
 ### 1.4 Core Discipline 4: Forensic Asymmetric Verification & Handoff
-- **Normative Rule:** Verification is asymmetric: generation uses local compute ($C_1$), but verification relies on deterministic syntax gates ($C_0$) and Bounded Diff-Targeted Mutation ($\le 10$ mutants). Mobile devices terminate at `Handoff`, emitting `HANDOFF.json` and deferring CI/CD to servers.
+- **Normative Rule:** Verification is asymmetric: generation uses local compute ($C_1$), but verification relies on deterministic syntax gates ($C_0$) and Bounded Diff-Targeted Mutation ($\le 10$ mutants). Mobile devices terminate at `Handoff`, emitting `HANDOFF.json` and deferring CI/CD [UNTESTED] to servers.
 - > **Master's Rationale (The Veloce Stage 4 & Alphabet Postmortem):**  
   > *"In the Veloce Stage 4 audit, we discovered that naive regex log parsers accepted malformed test runs and duplicate success logs as green passes. In Alphabet, fixture reductions (reducing Fibonacci tests from 30 to 20) were used to silently mask performance regressions, and test denominators went stale (reporting 467 tests when 585 existed). Trusting an AI's conversational claim of 'tests passing' is fatal. You must execute bounded mutation testing against the diff to prove the test suite actually catches broken logic."*
 
@@ -231,7 +231,7 @@ def verify_environment_parity(rafenv_path: pathlib.Path) -> bool:
 flowchart LR
     S1["1. DEFINE<br/>(TASK.md & .rafenv Locked)"] -->|Exit Gate 1: Parity & Contract Verified| S2["2. BUILD<br/>(C0-AST Context, Minimal Diff)"]
     S2 -->|Exit Gate 2: Staged Diff Committed| S3["3. VERIFY<br/>(AST Check, &le;10 Mutants, AROP)"]
-    S3 -->|Exit Gate 3: verify_hash Sealed| S4["4. HANDOFF<br/>(HANDOFF.json & Server CI Push)"]
+    S3 -->|Exit Gate 3: verify_hash Sealed| S4["4. HANDOFF<br/>(HANDOFF.json & Server CI [UNTESTED] Push)"]
     
     S3 -.->|Failure / Smell Test| Ovr["[OVERRIDE]<br/>Master Rationale Hashed"]
     Ovr -->|Forced Seal| S4
@@ -247,7 +247,7 @@ flowchart LR
 | **1. DEFINE** | User intent, existing repo state | 1. Identify real problem and non-goals in `TASK.md`.<br/>2. Assign Risk Tier (R0–R4).<br/>3. Verify environment parity against `.rafenv`. | `TASK.md` + `.rafenv` lock | Contract frozen, `.rafenv` validated. |
 | **2. BUILD** | `TASK.md`, target source file | 1. Execute **$C_0$ AST Context Resolver** to extract import tree.<br/>2. Retrieve exact symbol definitions into context envelope.<br/>3. Generate atomic unified diff via local $C_1$ model. | Git staged diff (`git diff --staged`) | Clean working tree, changes isolated to task scope, state `executing`. |
 | **3. VERIFY** | Staged diff, test commands | 1. Execute criterion test commands in target environment.<br/>2. Pass 1: Static syntax/type gate (`C0`).<br/>3. Pass 2: **Bounded Diff-Targeted Mutation ($\le 10$ mutants)**.<br/>4. Generate `verify_hash` (or invoke `[OVERRIDE]`). | `EVIDENCE.json` (`verify_hash` sealed) | All criteria `PASS` (or overridden with rationale), state `verified`. |
-| **4. HANDOFF** | Verified diff, `verify_hash` | 1. Validate CAS state lock (`verify_hash` present).<br/>2. Generate `HANDOFF.json` sealed payload.<br/>3. Execute lightweight, retry-able Git push.<br/>4. Defer CI/CD to server-side receiver. | `HANDOFF.json` + Pushed Commit | State transition CAS validated; state `handoff_complete`. |
+| **4. HANDOFF** | Verified diff, `verify_hash` | 1. Validate CAS state lock (`verify_hash` present).<br/>2. Generate `HANDOFF.json` sealed payload.<br/>3. Execute lightweight, retry-able Git push.<br/>4. Defer CI/CD [UNTESTED] to server-side receiver. | `HANDOFF.json` + Pushed Commit | State transition CAS validated, state `handoff_complete`. |
 
 ---
 

@@ -214,7 +214,7 @@ The daemon actively scrubs stdout, stderr, and environment parameters using 10 s
 - CLI key flags (`--api-key`, `--token`, `--secret`)
 
 ### 4.3 Automated End-to-End Task Orchestration Script
-Below is an example Bash script demonstrating how a developer or CI job orchestrates an external agent using READ:
+Below is an example Bash script demonstrating how a developer or CI [UNTESTED] job orchestrates an external agent using READ:
 
 ```bash
 #!/usr/bin/env bash

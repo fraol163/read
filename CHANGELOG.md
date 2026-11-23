@@ -19,7 +19,7 @@ All notable changes to the READ Framework will be documented in this file.
 - Multi-language AST operators and test harness runners for TypeScript, JavaScript, Java, C#, C++, and Ruby.
 - Cryptographic WAL git tag anchoring (`read-wal-head`) via subcommands `anchor-wal` and `verify-wal-anchor` to detect rewritten WAL logs.
 - Daemon network security surface: `--tls-cert` and `--tls-key` enforcement, constant-time bearer token authentication, and token bucket rate limiting (10 burst, 2 sustained per second).
-- Server-side CI enforcement workflow in `.github/workflows/read-gate.yml` to reject client-side `git commit --no-verify` hook bypasses.
+- Server-side CI [UNTESTED] enforcement workflow in `.github/workflows/read-gate.yml` to reject client-side `git commit --no-verify` hook bypasses.
 - Threat modeling documentation in `read/docs/THREAT_MODEL.md` detailing PTY shell exposure, reverse proxy XFF spoofing, and advisory flock limits.
 - Empirical evidence dossier in `evidence/EVIDENCE.md` linking directly to raw execution logs in `evidence/logs/`.
 - Claim audit ledger in `evidence/CLAIM_AUDIT.md` tracking the status of 15 technical claims.

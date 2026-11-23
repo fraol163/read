@@ -37,8 +37,8 @@ The framework operates across three distinct privilege zones:
 ### 2.5 Master Override Rationale Governance
 - Threat: Developers or autonomous agents can bypass verification failures by issuing `read-engine override <OPERATOR> <RATIONALE>`.
 - Analysis: The engine checks only that the operator identifier is non-empty and the rationale string contains at least 30 characters. This string length check does not verify technical correctness or genuine human authorization.
-- Mitigation: The override writes an immutable entry into `WAL.log` and stamps the verification hash with the `OVR-` prefix. This provides cryptographic auditability in the WAL history. Full enterprise governance requires server-side CI enforcement and dual-key authorization rather than client-side length checks.
+- Mitigation: The override writes an immutable entry into `WAL.log` and stamps the verification hash with the `OVR-` prefix. This provides cryptographic auditability in the WAL history. Full enterprise governance requires server-side CI [UNTESTED] enforcement and dual-key authorization rather than client-side length checks.
 
 ### 2.6 Pre-Commit Hook Bypass (git commit --no-verify)
 - Threat: Git executes client-side hooks locally. Any user or script can bypass the verification gate by running `git commit --no-verify`.
-- Mitigation: Client hooks are a developer convenience. True policy enforcement requires a server-side gate on the CI/CD pipeline (such as `.github/workflows/read-gate.yml`) that rejects pushes lacking a verified state and a valid WAL git tag anchor.
+- Mitigation: Client hooks are a developer convenience. True policy enforcement requires a server-side gate on the CI/CD pipeline [UNTESTED] (such as `.github/workflows/read-gate.yml`) that rejects pushes lacking a verified state and a valid WAL git tag anchor.
