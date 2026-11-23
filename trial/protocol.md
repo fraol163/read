@@ -16,18 +16,18 @@ This trial evaluates the usability, friction, and effectiveness of the READ meth
 
 - Three independent tasks: bugfix, endpoint, and refactor.
 - Fixed time allocation of 20 minutes per task.
-- Participants complete tasks sequentially with short rest intervals between tasks.
+- Participants execute tasks sequentially with short rest intervals between tasks.
 - If a participant reaches 20 minutes on a task without passing all tests, the task is marked as timed out.
 
-## Task Completion Definition
+## Task Success Definition
 
-A task is defined as completed when all unit tests in the assigned task test suite pass with exit code 0 on the participant's final committed code within the 20-minute time limit.
+A task is defined as successfully finished when all unit tests in the assigned task test suite pass with exit code 0 on the participant's final committed code within the 20-minute time limit.
 
 Justification: Defining completion strictly by passing the task test suite allows the trial to evaluate baseline functional correctness independently from measuring how participants interact with and remediate mutation warnings.
 
 ## Cohort Completion Threshold (80% Rule)
 
-The 80% completion rule counts PARTICIPANTS who pass all three tasks. At least 10 of 12 participants must pass all three tasks. Per-task pass rates are reported as a secondary table.
+The 80% completion rule (recorded in [record_template.csv](file:///home/renan/Downloads/me/methodology_session/trial/record_template.csv) and [measurements.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/measurements.log)) counts PARTICIPANTS who pass all three tasks. At least 10 of 12 participants must pass all three tasks. Per-task pass rates are reported as a secondary table.
 
 Justification: Counting participants who pass all three tasks ensures that the cohort demonstrates proficiency across bug fixing, endpoint implementation, and refactoring rather than compensating for a failed domain with multiple simple passes.
 
@@ -37,7 +37,7 @@ Justification: Counting participants who pass all three tasks ensures that the c
    - If a participant exhausts their 3-retry cap or reaches the 20-minute limit on any task without passing all tests, they must stop work on that task, record the task as failed in `record_template.csv`, and continue immediately to the next assigned task.
    - A failure or timeout on one task does not disqualify a participant from continuing to the next task.
 2. Cohort-Level Evaluation:
-   - If overall cohort completion falls below the 80% threshold (fewer than 10 of 12 participants passing all three tasks), the trial is stopped for protocol and guidance review before running subsequent cohorts.
+   - If overall cohort completion (recorded in [record_template.csv](file:///home/renan/Downloads/me/methodology_session/trial/record_template.csv) and [measurements.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/measurements.log)) falls below the 80% threshold (fewer than 10 of 12 participants passing all three tasks), the trial is stopped for protocol and guidance review before running subsequent cohorts.
    - If an unrecoverable platform or environment defect occurs during a session, the trial session is stopped immediately for remediation.
 
 ## Cohort Profile

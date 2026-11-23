@@ -99,7 +99,7 @@ All software modifications within READ proceed through a strictly gated, 4-stage
 
 ```
 +--------+            +--------+            +-----------+            +----------+            +------------------+
-|  Idle  | --define-> |Defined | --build--> | Executing | --verify-> | Verified | --handoff->| HandoffComplete  |
+|  Idle  | --define-> |Defined | --build--> | Executing | --verify-> | Verified | --handoff->| HandoffComplete ([log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log)) |
 +--------+            +--------+            +-----------+            +----------+            +------------------+
 ```
 
@@ -121,7 +121,7 @@ All software modifications within READ proceed through a strictly gated, 4-stage
    - Mechanically verifies that status is `Verified` and `verify_hash` is non-null.
    - Validates that `verify_hash` matches an authentic WAL cryptographic entry.
    - Checks staged diff stability: blocks handoff if code drifted since verification.
-   - Transitions to `HandoffComplete`.
+   - Transitions to `HandoffComplete` (verified in [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log)).
 
 Detailed documentation: [LIFECYCLE.md](docs/LIFECYCLE.md).
 
@@ -243,7 +243,7 @@ read verify <DIFF_HASH> "<VERIFY_LOG>"
 # Apply Master Override with human operator rationale
 read override "<OPERATOR>" "<RATIONALE (min 30 chars)>"
 
-# Execute CAS-gated handoff to handoff_complete
+# Execute CAS-gated handoff to handoff_complete (verified in evidence/logs/01_test_e2e.log)
 read handoff
 
 # Replay WAL and restore state after crash (0 tokens re-spent)
