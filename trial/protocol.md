@@ -19,6 +19,15 @@ This trial evaluates the usability, friction, and effectiveness of the READ meth
 - Participants complete tasks sequentially with short rest intervals between tasks.
 - If a participant reaches 20 minutes on a task without passing all tests, the task is marked as timed out.
 
+## Stop-or-Continue Rule
+
+1. Task-Level Progression:
+   - If a participant exhausts their 3-retry cap or reaches the 20-minute limit on any task without passing all tests, they must stop work on that task, record the task as failed in `record_template.csv`, and continue immediately to the next assigned task.
+   - A failure or timeout on one task does not disqualify a participant from continuing to the next task.
+2. Cohort-Level Evaluation:
+   - If overall cohort completion falls below the 80% threshold across all completed tasks, the trial is stopped for protocol and guidance review before running subsequent cohorts.
+   - If an unrecoverable platform or environment defect occurs during a session, the trial session is stopped immediately for remediation.
+
 ## Cohort Profile
 
 - 12 junior engineers.
