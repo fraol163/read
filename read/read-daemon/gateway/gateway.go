@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -44,6 +45,12 @@ type GatewayServer struct {
 }
 
 func NewGatewayServer(cfg ServerConfig) (*GatewayServer, error) {
+	hasTLS := cfg.TLSCert != "" && cfg.TLSKey != ""
+	isLoopback := cfg.Host == "" || cfg.Host == "127.0.0.1" || cfg.Host == "localhost" || cfg.Host == "::1" || strings.HasPrefix(cfg.Host, "127.")
+	if !hasTLS && !isLoopback {
+		return nil, fmt.Errorf("[SECURITY VIOLATION] Refusing non-loopback bind to %s without TLS", cfg.Host)
+	}
+
 	reg, err := scanner.ScanHost(cfg.CustomHarness)
 	if err != nil {
 		return nil, err
