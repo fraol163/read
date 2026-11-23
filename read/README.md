@@ -2,7 +2,7 @@
 
 ## Architectural Specification and Framework Manual
 
-READ is an executable software engineering framework and process supervision system designed to replace conversational LLM chat workflows with deterministic systems mechanics.
+READ is an executable software engineering framework and process supervision system designed to replace conversational LLM chat workflows with deterministic systems mechanics. Linux is the only supported platform (x86_64 and aarch64).
 
 The framework enforces mechanical verification gates, deterministic context assembly, and cryptographic auditability across multi-agent AI development lifecycles.
 
@@ -133,7 +133,7 @@ Detailed documentation: [LIFECYCLE.md](docs/LIFECYCLE.md).
 Instead of passing full source trees to LLMs:
 - Traverses import declarations up to a configurable depth (default: 3).
 - Extracts public function and class signatures, stripping function bodies and private implementation details.
-- Supports Python, Rust, Go, TypeScript/JavaScript, Java, C#/.NET, C++, and Ruby.
+- Supports Python, Rust, Go, TypeScript/JavaScript. Java, .NET, C++, and Ruby are experimental.
 - Finishes in under 5 milliseconds on host CPU with zero external API calls.
 
 ### 4.2 Compare-And-Swap (CAS) State Engine
@@ -155,7 +155,7 @@ Every mutation is written to `.read/WAL.log` before updating state:
 Standard mutation testing takes dozens of minutes across a codebase. AROP (Asymmetric Bounded Mutation Testing) enforces strict execution bounds:
 - Restricts mutations strictly to modified lines in `git diff --staged`.
 - Bounds mutant population to a maximum of 10 targeted alterations ($M \le 10$).
-- Full multi-language support: Python, Rust, Go, TypeScript/JavaScript, Java, C#/.NET, C++, and Ruby.
+- Multi-language support: Python, Rust, Go, TypeScript/JavaScript are supported. Java, .NET, C++, and Ruby are experimental.
 - Targeted AST mutation operators:
   - TypeScript / JavaScript: `INVERT_EQUALITY` (`===` <-> `!==`), `RETURN_UNDEFINED` (`return undefined`), `BOUNDARY_SHIFT`, `REMOVE_OPTIONAL_CHAIN` (`?.` -> `.`).
   - Java: `INVERT_EQUALITY` (`==` <-> `!=`, `.equals()` <-> `!.equals()`), `RETURN_NULL` (`return null`), `BOUNDARY_SHIFT`, `REMOVE_NULL_CHECK` (`if (x != null)` -> `if (true)`).
@@ -361,7 +361,7 @@ bash read/tests/test_chaos.sh
 
 ## 11. Known System Limitations
 
-1. Operating System Exclusivity: READ currently supports only Linux x86_64 and aarch64 due to POSIX `libc::flock`, `RLIMIT_AS`, `setpgid`, and termios PTY requirements.
+1. Operating System Exclusivity: Linux is the only supported platform (x86_64 and aarch64). macOS, Windows, and BSD are unsupported.
 2. Virtual Memory Constraints (`RLIMIT_AS`): Setting `RLIMIT_AS` to 30% of RAM breaks 64-bit Java (JVM) and .NET CoreCLR runtimes on machines with under 6 GB memory. Use cgroups v2 instead of virtual memory limits for managed runtimes.
 3. Mutation Truncation on Large Diffs: The AROP mutation engine accepts the first 10 mutants sequentially. Modified lines appearing later in a diff receive no mutation testing.
 4. Reverse Proxy Header Spoofing: Trusting `X-Forwarded-For` allows external clients to spoof loopback status unless the reverse proxy strips client headers.
