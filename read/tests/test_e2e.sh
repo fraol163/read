@@ -123,10 +123,22 @@ if ! grep -q "REMOVE_OPTIONAL_CHAIN" ts_mutation_output.txt || ! grep -q "INVERT
     echo "[FAIL] TypeScript AST Mutation engine failed to generate targeted TS mutants" >&2
     exit 1
 fi
-
-PASS_TS_OUTPUT=$("$READ" eval-mutation-score 4 4 2>&1)
-if ! echo "$PASS_TS_OUTPUT" | grep -q "100.0% (4/4 killed, 0 survivors)"; then
+TS_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' ts_mutation_output.txt | grep -o '[0-9]*')
+if [ "$TS_COUNT" -ne 7 ]; then
+    echo "[FAIL] Expected exactly 7 TypeScript mutants, got: $TS_COUNT" >&2
+    exit 1
+fi
+PASS_TS_OUTPUT=$("$READ" eval-mutation-score "$TS_COUNT" "$TS_COUNT" 2>&1)
+if ! echo "$PASS_TS_OUTPUT" | grep -q "100.0% ($TS_COUNT/$TS_COUNT killed, 0 survivors)"; then
     echo "[FAIL] Expected 100% mutation score acceptance for TS mutants, got: $PASS_TS_OUTPUT" >&2
+    exit 1
+fi
+set +e
+"$READ" eval-mutation-score $((TS_COUNT - 1)) "$TS_COUNT" >/dev/null 2>&1
+TS_REJECT_CODE=$?
+set -e
+if [ $TS_REJECT_CODE -eq 0 ]; then
+    echo "[FAIL] Expected strict gate rejection for TS survivor" >&2
     exit 1
 fi
 echo "[PASS] 6c. TypeScript AST Diff Mutation generated all targeted operators (INVERT_EQUALITY, BOUNDARY_SHIFT, REMOVE_OPTIONAL_CHAIN) and satisfied 100% gate"
@@ -150,10 +162,22 @@ if ! grep -q "REMOVE_NULL_CHECK" java_mutation_output.txt || ! grep -q "INVERT_E
     echo "[FAIL] Java AST Mutation engine failed to generate targeted Java mutants" >&2
     exit 1
 fi
-
-PASS_JAVA_OUTPUT=$("$READ" eval-mutation-score 4 4 2>&1)
-if ! echo "$PASS_JAVA_OUTPUT" | grep -q "100.0% (4/4 killed, 0 survivors)"; then
+JAVA_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' java_mutation_output.txt | grep -o '[0-9]*')
+if [ "$JAVA_COUNT" -ne 5 ]; then
+    echo "[FAIL] Expected exactly 5 Java mutants, got: $JAVA_COUNT" >&2
+    exit 1
+fi
+PASS_JAVA_OUTPUT=$("$READ" eval-mutation-score "$JAVA_COUNT" "$JAVA_COUNT" 2>&1)
+if ! echo "$PASS_JAVA_OUTPUT" | grep -q "100.0% ($JAVA_COUNT/$JAVA_COUNT killed, 0 survivors)"; then
     echo "[FAIL] Expected 100% mutation score acceptance for Java mutants, got: $PASS_JAVA_OUTPUT" >&2
+    exit 1
+fi
+set +e
+"$READ" eval-mutation-score $((JAVA_COUNT - 1)) "$JAVA_COUNT" >/dev/null 2>&1
+JAVA_REJECT_CODE=$?
+set -e
+if [ $JAVA_REJECT_CODE -eq 0 ]; then
+    echo "[FAIL] Expected strict gate rejection for Java survivor" >&2
     exit 1
 fi
 echo "[PASS] 6d. Java AST Diff Mutation generated all targeted operators (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
@@ -178,10 +202,22 @@ if ! grep -q "REMOVE_NULL_CONDITIONAL" csharp_mutation_output.txt || ! grep -q "
     echo "[FAIL] C# AST Mutation engine failed to generate targeted C# mutants" >&2
     exit 1
 fi
-
-PASS_CS_OUTPUT=$("$READ" eval-mutation-score 4 4 2>&1)
-if ! echo "$PASS_CS_OUTPUT" | grep -q "100.0% (4/4 killed, 0 survivors)"; then
+CS_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' csharp_mutation_output.txt | grep -o '[0-9]*')
+if [ "$CS_COUNT" -ne 6 ]; then
+    echo "[FAIL] Expected exactly 6 C# mutants, got: $CS_COUNT" >&2
+    exit 1
+fi
+PASS_CS_OUTPUT=$("$READ" eval-mutation-score "$CS_COUNT" "$CS_COUNT" 2>&1)
+if ! echo "$PASS_CS_OUTPUT" | grep -q "100.0% ($CS_COUNT/$CS_COUNT killed, 0 survivors)"; then
     echo "[FAIL] Expected 100% mutation score acceptance for C# mutants, got: $PASS_CS_OUTPUT" >&2
+    exit 1
+fi
+set +e
+"$READ" eval-mutation-score $((CS_COUNT - 1)) "$CS_COUNT" >/dev/null 2>&1
+CS_REJECT_CODE=$?
+set -e
+if [ $CS_REJECT_CODE -eq 0 ]; then
+    echo "[FAIL] Expected strict gate rejection for C# survivor" >&2
     exit 1
 fi
 echo "[PASS] 6e. C# AST Diff Mutation generated all targeted operators (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
@@ -207,10 +243,22 @@ if ! grep -q "REMOVE_NULLPTR_CHECK" cpp_mutation_output.txt || ! grep -q "INVERT
     echo "[FAIL] C++ AST Mutation engine failed to generate targeted C++ mutants" >&2
     exit 1
 fi
-
-PASS_CPP_OUTPUT=$("$READ" eval-mutation-score 4 4 2>&1)
-if ! echo "$PASS_CPP_OUTPUT" | grep -q "100.0% (4/4 killed, 0 survivors)"; then
+CPP_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' cpp_mutation_output.txt | grep -o '[0-9]*')
+if [ "$CPP_COUNT" -ne 4 ]; then
+    echo "[FAIL] Expected exactly 4 C++ mutants, got: $CPP_COUNT" >&2
+    exit 1
+fi
+PASS_CPP_OUTPUT=$("$READ" eval-mutation-score "$CPP_COUNT" "$CPP_COUNT" 2>&1)
+if ! echo "$PASS_CPP_OUTPUT" | grep -q "100.0% ($CPP_COUNT/$CPP_COUNT killed, 0 survivors)"; then
     echo "[FAIL] Expected 100% mutation score acceptance for C++ mutants, got: $PASS_CPP_OUTPUT" >&2
+    exit 1
+fi
+set +e
+"$READ" eval-mutation-score $((CPP_COUNT - 1)) "$CPP_COUNT" >/dev/null 2>&1
+CPP_REJECT_CODE=$?
+set -e
+if [ $CPP_REJECT_CODE -eq 0 ]; then
+    echo "[FAIL] Expected strict gate rejection for C++ survivor" >&2
     exit 1
 fi
 echo "[PASS] 6f. C++ AST Diff Mutation generated all targeted operators (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT) and satisfied 100% gate"
@@ -235,10 +283,22 @@ if ! grep -q "REMOVE_SAFE_NAVIGATION" ruby_mutation_output.txt || ! grep -q "INV
     echo "[FAIL] Ruby AST Mutation engine failed to generate targeted Ruby mutants" >&2
     exit 1
 fi
-
-PASS_RUBY_OUTPUT=$("$READ" eval-mutation-score 5 5 2>&1)
-if ! echo "$PASS_RUBY_OUTPUT" | grep -q "100.0% (5/5 killed, 0 survivors)"; then
+RUBY_COUNT=$(grep -o 'READ BOUNDED DIFF MUTANTS: [0-9]*' ruby_mutation_output.txt | grep -o '[0-9]*')
+if [ "$RUBY_COUNT" -ne 6 ]; then
+    echo "[FAIL] Expected exactly 6 Ruby mutants, got: $RUBY_COUNT" >&2
+    exit 1
+fi
+PASS_RUBY_OUTPUT=$("$READ" eval-mutation-score "$RUBY_COUNT" "$RUBY_COUNT" 2>&1)
+if ! echo "$PASS_RUBY_OUTPUT" | grep -q "100.0% ($RUBY_COUNT/$RUBY_COUNT killed, 0 survivors)"; then
     echo "[FAIL] Expected 100% mutation score acceptance for Ruby mutants, got: $PASS_RUBY_OUTPUT" >&2
+    exit 1
+fi
+set +e
+"$READ" eval-mutation-score $((RUBY_COUNT - 1)) "$RUBY_COUNT" >/dev/null 2>&1
+RUBY_REJECT_CODE=$?
+set -e
+if [ $RUBY_REJECT_CODE -eq 0 ]; then
+    echo "[FAIL] Expected strict gate rejection for Ruby survivor" >&2
     exit 1
 fi
 echo "[PASS] 6g. Ruby AST Diff Mutation generated all targeted operators (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL) and satisfied 100% gate"

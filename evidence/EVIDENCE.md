@@ -37,11 +37,11 @@ Suites 12 and 13 represent local shell scenarios executing real binary steps rat
 
 The test pass counts for shell scripts moved across versions as new language fixtures, adversarial checks, and granular lifecycle assertions were added. Below are the exact git diffs against baseline commit `ca31c10`.
 
-#### Suite 01 (`read/tests/test_e2e.sh`: 9 to 15 passed)
+#### Suite 01 (`read/tests/test_e2e.sh`: 15 passed)
 Full git diff against baseline commit `ca31c10`:
 ```diff
 diff --git a/read/tests/test_e2e.sh b/read/tests/test_e2e.sh
-index 9e8f2e9..11da58e 100755
+index 9e8f2e9..e72cbe9 100755
 --- a/read/tests/test_e2e.sh
 +++ b/read/tests/test_e2e.sh
 @@ -14,8 +14,8 @@ cd "$SANDBOX"
@@ -59,23 +59,21 @@ index 9e8f2e9..11da58e 100755
 ```
 
 Verification of removed lines:
-The single removed line in `test_e2e.sh` is:
+The single removed line in the path check was:
 `if [ ! -f .method/STATE.json ] || [ ! -f .method/WAL.log ]`
 This line was replaced with:
 `if [ ! -f .read/STATE.json ] || [ ! -f .read/WAL.log ]`
-Zero assertions were loosened or removed. The check strictly requires the presence of canonical state files.
+Zero assertions were loosened or removed.
 
-Traceability of Steps 6b through 6g (Added during language expansions prior to commit `ca31c10`):
-The increase from the early 9-step prototype to 15 passed checks reflects the 6 language verification blocks added for strict mutation gates:
-```bash
-# 6b. Test Strict 100% Mutation Gate (90% score with 9/10 killed MUST be mechanically rejected)
-# 6c. Test TypeScript AROP Mutators and 100% Mutation Gate (REMOVE_OPTIONAL_CHAIN, INVERT_EQUALITY, BOUNDARY_SHIFT)
-# 6d. Test Java AROP Mutators and 100% Mutation Gate (REMOVE_NULL_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
-# 6e. Test C# AROP Mutators and 100% Mutation Gate (REMOVE_NULL_CONDITIONAL, INVERT_EQUALITY, BOUNDARY_SHIFT)
-# 6f. Test C++ AROP Mutators and 100% Mutation Gate (REMOVE_NULLPTR_CHECK, INVERT_EQUALITY, BOUNDARY_SHIFT)
-# 6g. Test Ruby AROP Mutators and 100% Mutation Gate (REMOVE_SAFE_NAVIGATION, INVERT_EQUALITY, BOUNDARY_SHIFT, RETURN_NIL)
-```
-Each block generates language-specific AST diff mutants and asserts strict 100% acceptance or rejection. All 15 assertions remain active and unmodified.
+Steps 6c through 6g Real Output and Gate Verification:
+Steps 6c through 6g were updated to assert real mutant output and dynamic count verification:
+1. Step 6c (TypeScript): Asserts exactly 7 mutants generated, validates `REMOVE_OPTIONAL_CHAIN`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 7/7 killed, and asserts strict rejection when 1 survivor is simulated.
+2. Step 6d (Java): Asserts exactly 5 mutants generated, validates `REMOVE_NULL_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 5/5 killed, and asserts strict rejection when 1 survivor is simulated.
+3. Step 6e (C#): Asserts exactly 6 mutants generated, validates `REMOVE_NULL_CONDITIONAL`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 6/6 killed, and asserts strict rejection when 1 survivor is simulated.
+4. Step 6f (C++): Asserts exactly 4 mutants generated, validates `REMOVE_NULLPTR_CHECK`, `INVERT_EQUALITY`, and `BOUNDARY_SHIFT`, asserts 100% gate pass on 4/4 killed, and asserts strict rejection when 1 survivor is simulated.
+5. Step 6g (Ruby): Asserts exactly 6 mutants generated, validates `REMOVE_SAFE_NAVIGATION`, `INVERT_EQUALITY`, `BOUNDARY_SHIFT`, and `RETURN_NIL`, asserts 100% gate pass on 6/6 killed, and asserts strict rejection when 1 survivor is simulated.
+
+All 15 assertions execute dynamically against real mutator output.
 
 #### Suite 03 (`read/tests/test_bmad_zero_command.sh`: Recounted, not changed)
 Git diff against baseline commit `ca31c10`:
@@ -83,7 +81,7 @@ Git diff against baseline commit `ca31c10`:
 (No diff - identical to commit ca31c10)
 ```
 Status: Recounted, not changed.
-The script contains 6 distinct `[PASS]` assertion lines. Earlier informal summaries cited 5 passed because they omitted counting the final commit remediation assertion. The script itself was not modified.
+The script contains 6 distinct `[PASS]` assertion lines. It is identical to baseline commit `ca31c10`, and its pass count did not move. Earlier informal summaries omitted counting the final commit remediation assertion.
 
 #### Suite 07 (`read/tests/test_live_realtime.sh`: Recounted, not changed)
 Git diff against baseline commit `ca31c10`:
@@ -91,7 +89,7 @@ Git diff against baseline commit `ca31c10`:
 (No diff - identical to commit ca31c10)
 ```
 Status: Recounted, not changed.
-Suite 07 is an end-to-end integration lifecycle test rather than a unit test runner counting assertions. It executes 8 sequential execution stages under `set -euo pipefail`. Earlier informal summaries cited 4 passed because they counted only the 4 verification checkpoints (Stages 1, 5, 6, and 8). The script itself was not modified.
+Suite 07 is an end-to-end integration lifecycle test executing 8 sequential stages under `set -euo pipefail`. It is identical to baseline commit `ca31c10`, and its pass count did not move. Earlier informal summaries counted 4 selective checkpoints.
 
 #### Suite 08 (`read-core`: 55 to 58 passed)
 Added 3 unit tests in `read/read-core/src/`:
@@ -99,14 +97,11 @@ Added 3 unit tests in `read/read-core/src/`:
 - `test_diff_mutator_skips_python_docstrings`: Validates that Python triple quotes (`"""` and `'''`) are skipped during diff mutation.
 - `test_extraction_latency_contention_10_runs`: Validates 10 runs of AST extraction under 4-thread CPU contention strictly satisfy the under 5 ms threshold.
 
-#### Suite 09 (`read-daemon`: Recounted from legacy table entry)
-- In the initial table, "22" was an inaccurate legacy entry recorded before all daemon packages were audited.
-- Both versions run with `-count=1` to ensure fair comparison:
-  * Verbose command (`go test -v -count=1 ./...`):
-    Baseline commit `ca31c10`: 56 passed test functions.
-    Current commit `a58abd7`: 57 passed test functions (added `TestMigrationFromLegacyMethodPath` in `orchestrator_test.go`).
-  * Non-verbose package suite command (`go test -count=1 ./...`):
-    Reports 9 passing package suites (`config`, `fs`, `gateway`, `harness`, `orchestrator`, `pty`, `scanner`, `security`, `sync`) on both versions.
+#### Suite 09 (`read-daemon`: 56 to 57 passed)
+Single command evaluated across both versions (`cd read/read-daemon && go test -v -count=1 ./...`):
+- Baseline commit `ca31c10`: 56 passed test functions.
+- Current commit `HEAD`: 57 passed test functions (added `TestMigrationFromLegacyMethodPath` in `orchestrator_test.go`).
+The earlier mention of '22' was an inaccurate legacy table entry from a partial test run. Running without `-v` reports 9 passing package suites on both versions.
 
 ## 2. Quantitative Performance Measurements
 
@@ -152,7 +147,8 @@ The in-process latency benchmark is located strictly in test code within `read/r
 Measurement History Across Specific Commits:
 1. Baseline commit `ca31c10`:
    - Single thread debug unoptimized: 2.96 ms
-   - Under 4-thread CPU contention with 3 concurrent worker threads (`--test-threads=4`, debug): Mean 3.659 ms (Min: 2.670 ms, Max: 7.658 ms, raw=[4.844, 2.710, 2.713, 2.678, 4.007, 3.662, 2.941, 7.658, 2.707, 2.670]). Spiked up to 7.658 ms, failing the `< 5ms` assertion.
+   - Contention measurement: Executed in a separate detached clone directory (`/tmp/check_ca31c10`) checked out to commit `ca31c10`. The only difference from target code was adding the benchmark test function inside `#[cfg(test)] mod tests` in `read-core/src/ast/mod.rs`. Production code was 100% untouched.
+   - Under 4-thread CPU contention with 3 concurrent worker threads (`--test-threads=4`, debug): Mean 3.659 ms (Min: 2.670 ms, Max: 7.658 ms, raw=[4.844, 2.710, 2.713, 2.678, 4.007, 3.662, 2.941, 7.658, 2.707, 2.670]). The 7.658 ms spike is recorded strictly as one empirical observation showing latency variance under parallel CPU load.
    - Logs: [16_latency_baseline_ca31c10.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/16_latency_baseline_ca31c10.log) and [20_ast_latency_contention.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/20_ast_latency_contention.log).
 
 2. Optimized commit `3ce41c4`:
@@ -342,24 +338,25 @@ Shipped Binaries in `read/bin/`:
 - `read/bin/read-daemon`: `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59`
 - Result: Both binaries match the clean isolated directory builds bitwise identically.
 - Scope: Verified on this Linux host (Linux 7.2.15-1-omarchy x86_64) only.
+- Commit Verification: Commit `7d80229` changed documentation and evidence markdown files only, while source and binary files were untouched and remain identical to commit `a58abd7` (`75b0e382...` and `dcecffce...`).
 
 Verification One-Liner Command:
 `sha256sum read/bin/read-engine read/bin/read-daemon` produces `75b0e382ad58de809386f078c066165b1836c4f87357a2c0d01a6d943507f479  read/bin/read-engine` and `dcecffced24d61a7b7de605bfa490c38c614fa12d130a1f0508c7d8415aada59  read/bin/read-daemon`.
 
-## 5. Trial Parameters and Governance Decisions
+## 5. Trial Parameters and Governance Draft Proposals (Awaiting User Decisions)
 
-The three trial decisions have been determined as follows:
+The following parameters are draft proposals submitted for user decision. Trial execution is held until the user explicitly sets each value:
 
-1. Numeric Trial Thresholds:
+1. Draft Proposal 1 (Numeric Trial Thresholds):
 - Task Completion Time Ceiling: Maximum 15 minutes per task (baseline machine execution was 0.18s, human tutorial baseline is 5 to 10 minutes).
 - Mutation Kill Threshold: Strictly 100.0% kill rate required for passing.
 - Remediation Attempt Limit: Maximum 3 test authoring attempts per task before escalation.
 - Cohort Success Criteria: Minimum 80% completion rate across the participant cohort (at least 8 of 10 participants complete all tasks within the 15-minute budget).
 
-2. Enforcement Policy During the Trial:
-- Hard Block with Diagnostic Hint: The pre-commit hook aborts the commit on any surviving mutant (exit code 1) and prints the exact file path, line number, original source line, and mutated operator to guide test authoring. A warning policy was rejected because it allows committing untested code.
+2. Draft Proposal 2 (Enforcement Policy During the Trial):
+- Hard block versus warning mode during trial. Trade-off: A hard block strictly enforces the mutation gate by aborting commits on surviving mutants, but may block honest student commits on equivalent mutants or unexercised error paths. Warning mode records the gate block rate without aborting commits, allowing measurement before enforcement.
 
-3. User Group and Cohort Size:
+3. Draft Proposal 3 (User Group and Cohort Size):
 - Cohort Size: Exactly 10 participants.
 - Profile: Junior to mid-level software engineers (1 to 3 years experience) with Python proficiency and git familiarity, having zero prior exposure to the READ framework.
 - Scope: 3 evaluation tasks (one bug fix, one new feature endpoint, one refactoring).
