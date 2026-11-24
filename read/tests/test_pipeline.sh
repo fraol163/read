@@ -166,18 +166,26 @@ json.dump(st, open('.read/STATE.json', 'w'))
 "
 
 # Run without auto-approve: should fail verification gate or fail tests
+GATE_LOG="$SANDBOX_DIR/test4_gate.log"
 set +e
 "$READ_BIN" run \
     --harness mock_agent \
     --custom-harness "$CUSTOM_HARNESS_CFG" \
     --test-cmd "python3 -m unittest test_tokens.py" \
     --timeout 15 \
-    "Add backdoor token check"
-FAIL_EXIT=$?
+    "Add backdoor token check" 2>&1 | tee "$GATE_LOG"
+FAIL_EXIT=${PIPESTATUS[0]}
 set -e
 
+if grep -q "GATE FAILED" "$GATE_LOG"
+then
+    echo "FAIL: Stage 4 (Diff & Mutation Verification) reported GATE FAILED" >&2
+    exit 1
+fi
+
 GATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
-if [ "$GATE_STATUS" = "handoff_complete" ]; then
+if [ "$GATE_STATUS" = "handoff_complete" ]
+then
     echo "FAIL: Gate should have blocked handoff when mutants survived!" >&2
     exit 1
 fi
