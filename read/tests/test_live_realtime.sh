@@ -101,24 +101,33 @@ def divide(a: int, b: int) -> float:
 EOF
 
 git add auth.py
+
+echo "=== STEP 6a: Adversarial Code Injection in Block Mode ==="
 python3 -c '
 import json
-with open(".read/config.json") as f:
-    c = json.load(f)
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
 c["enforcement_mode"] = "block"
 with open(".read/config.json", "w") as f:
     json.dump(c, f, indent=2)
 '
-echo "Attempting commit without tests (should be rejected by gate)..."
+git add .read/config.json
+
+echo "Attempting commit without tests in block mode (should be rejected by gate)..."
 set +e
-git commit -m "feat: add divide function without tests"
+BLOCK_OUTPUT=$(git commit -m "feat: add divide function without tests in block mode" 2>&1)
 COMMIT_CODE=$?
 set -e
+echo "$BLOCK_OUTPUT"
 
-if [ "$COMMIT_CODE" -ne 0 ]; then
-    echo "[PASS] Pre-commit hook mechanically BLOCKED commit (Exit Code: $COMMIT_CODE)."
+if [ "$COMMIT_CODE" -ne 0 ]
+then
+    echo "[PASS] Pre-commit hook mechanically BLOCKED commit in block mode (Exit Code: $COMMIT_CODE)."
 else
-    echo "[FAIL] Pre-commit hook failed to block unverified code!"
+    echo "[FAIL] Pre-commit hook failed to block unverified code in block mode!"
     exit 1
 fi
 
@@ -127,6 +136,59 @@ import json
 ev = json.load(open('.read/EVIDENCE.json'))
 print(f'EVIDENCE.json Gate Status: {ev.get(\"status\")} (Score: {ev.get(\"mutation_score\")}%)')
 "
+echo ""
+
+echo "=== STEP 6b: Adversarial Code Injection in Warning Mode ==="
+python3 -c '
+import json
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
+c["enforcement_mode"] = "warning"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
+git add .read/config.json
+
+echo "Attempting commit without tests in warning mode (should succeed with warning)..."
+set +e
+WARN_OUTPUT=$(git commit -m "feat: add divide function without tests in warning mode" 2>&1)
+WARN_CODE=$?
+set -e
+echo "$WARN_OUTPUT"
+
+if [ "$WARN_CODE" -eq 0 ]
+then
+    echo "[PASS] Pre-commit hook allowed commit in warning mode (Exit Code: $WARN_CODE)."
+else
+    echo "[FAIL] Pre-commit hook failed to allow commit in warning mode!"
+    exit 1
+fi
+
+if echo "$WARN_OUTPUT" | grep -q "GATE WARNING"
+then
+    echo "[PASS] Warning mode output contained GATE WARNING."
+else
+    echo "[FAIL] Warning mode output did not contain GATE WARNING!"
+    exit 1
+fi
+
+# Reset soft HEAD~1 to keep divide staged for remediation test in block mode
+git reset --soft HEAD~1
+python3 -c '
+import json
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
+c["enforcement_mode"] = "block"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
+git add .read/config.json
 echo ""
 
 echo "=== STEP 7: Test Remediation (Killing All Mutants) ==="

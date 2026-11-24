@@ -34,7 +34,6 @@ cp .read/hooks/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 
 echo "[TEST 1] Setup repository with .read/ template and git pre-commit hook."
-echo '{"enforcement_mode": "block"}' > .read/config.json
 
 # Configure PROJECT.md to use python unittest
 cat << 'EOF' > .read/PROJECT.md
@@ -98,7 +97,8 @@ echo "[TEST 3] Verifying that pre-commit hook automatically sealed state..."
 
 # Assert that STATE.json was automatically updated to handoff_complete
 STATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
-if [ "$STATE_STATUS" != "handoff_complete" ]; then
+if [ "$STATE_STATUS" != "handoff_complete" ]
+then
     echo "FAIL: Expected status 'handoff_complete', got '$STATE_STATUS'"
     exit 1
 fi
@@ -107,7 +107,8 @@ echo "[PASS] 1. STATE.json status transitioned to 'handoff_complete' with zero m
 # Assert that EVIDENCE.json was automatically written with mutation proof
 EVIDENCE_STATUS=$(python3 -c "import json; print(json.load(open('.read/EVIDENCE.json'))['status'])")
 MUTATION_SCORE=$(python3 -c "import json; print(json.load(open('.read/EVIDENCE.json'))['mutation_score'])")
-if [ "$EVIDENCE_STATUS" != "verified" ]; then
+if [ "$EVIDENCE_STATUS" != "verified" ]
+then
     echo "FAIL: Expected evidence status 'verified', got '$EVIDENCE_STATUS'"
     exit 1
 fi
@@ -115,14 +116,15 @@ echo "[PASS] 2. EVIDENCE.json sealed with verified mutation proof (Score: ${MUTA
 
 # Assert that the git commit actually includes the sealed STATE.json and EVIDENCE.json
 COMMITTED_FILES=$(git show --name-only --oneline HEAD | tr '\n' ' ')
-if [[ "$COMMITTED_FILES" != *".read/STATE.json"* ]] || [[ "$COMMITTED_FILES" != *".read/EVIDENCE.json"* ]]; then
+if [[ "$COMMITTED_FILES" != *".read/STATE.json"* ]] || [[ "$COMMITTED_FILES" != *".read/EVIDENCE.json"* ]]
+then
     echo "FAIL: Git commit does not contain sealed .read/STATE.json and .read/EVIDENCE.json"
     exit 1
 fi
 echo "[PASS] 3. Git commit atomically sealed .read/STATE.json and .read/EVIDENCE.json."
 
 # Step 5: Test adversarial rejection on weak test coverage (No manual commands)
-echo "[TEST 4] Testing adversarial rejection: adding function without tests..."
+echo "[TEST 4a] Block mode: setting enforcement_mode 'block' and committing untested function..."
 
 cat << 'EOF' >> calculator.py
 
@@ -144,25 +146,86 @@ Acceptance Criteria:
 - divide(a, b) returns quotient or raises ValueError
 EOF
 
+python3 -c '
+import json
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
+c["enforcement_mode"] = "block"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
 git add .
 
-# Attempt commit without adding tests for divide: should be REJECTED by mutation gate!
+# Attempt commit without adding tests for divide in block mode: should be REJECTED!
 COMMIT_FAILED=0
-git commit -m "feat: add divide without tests" > /tmp/read_commit_reject.log 2>&1 || COMMIT_FAILED=1
+git commit -m "feat: add divide without tests in block mode" > /tmp/read_commit_reject.log 2>&1 || COMMIT_FAILED=1
 
-if [ "$COMMIT_FAILED" -ne 1 ]; then
+if [ "$COMMIT_FAILED" -ne 1 ]
+then
     echo "FAIL: Commit should have been rejected due to surviving mutants, but it succeeded!"
     exit 1
 fi
 
-echo "[PASS] 4. Pre-commit hook mechanically blocked commit when mutation score fell below strictly required 100% threshold."
+echo "[PASS] 4a. Pre-commit hook mechanically blocked commit when mutation score fell below strictly required 100% threshold."
 
 # Verify that EVIDENCE.json records the gate failure
 GATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/EVIDENCE.json'))['status'])")
-if [ "$GATE_STATUS" != "gate_failed" ]; then
+if [ "$GATE_STATUS" != "gate_failed" ]
+then
     echo "FAIL: Expected evidence status 'gate_failed', got '$GATE_STATUS'"
     exit 1
 fi
+echo "[PASS] 4a. EVIDENCE.json accurately diagnosed and recorded 'gate_failed'."
+
+echo "[TEST 4b] Warning mode: setting enforcement_mode 'warning' and committing untested function..."
+python3 -c '
+import json
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
+c["enforcement_mode"] = "warning"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
+git add .read/config.json
+
+COMMIT_WARN_FAILED=0
+git commit -m "feat: add divide without tests in warning mode" > /tmp/read_commit_warning.log 2>&1 || COMMIT_WARN_FAILED=1
+
+if [ "$COMMIT_WARN_FAILED" -ne 0 ]
+then
+    echo "FAIL: Commit should have succeeded in warning mode, but failed!"
+    cat /tmp/read_commit_warning.log
+    exit 1
+fi
+
+if ! grep -q "GATE WARNING" /tmp/read_commit_warning.log
+then
+    echo "FAIL: Warning mode output did not contain 'GATE WARNING'!"
+    cat /tmp/read_commit_warning.log
+    exit 1
+fi
+echo "[PASS] 4b. Pre-commit hook allowed commit in warning mode and output contained GATE WARNING."
+
+# Reset soft HEAD~1 to keep divide staged for remediation test in block mode
+git reset --soft HEAD~1
+python3 -c '
+import json
+import os
+c = {}
+if os.path.exists(".read/config.json"):
+    with open(".read/config.json") as f:
+        c = json.load(f)
+c["enforcement_mode"] = "block"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
+git add .read/config.json
 echo "[PASS] 5. EVIDENCE.json accurately diagnosed and recorded 'gate_failed'."
 
 # Step 6: Fix tests to satisfy mutation gate and commit again
@@ -199,7 +262,8 @@ git add .
 git commit -m "feat: add divide with complete test assertions"
 
 FINAL_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
-if [ "$FINAL_STATUS" != "handoff_complete" ]; then
+if [ "$FINAL_STATUS" != "handoff_complete" ]
+then
     echo "FAIL: Expected final status 'handoff_complete', got '$FINAL_STATUS'"
     exit 1
 fi
