@@ -370,13 +370,13 @@ CAS Lock Cleared: Lease released and monotonic revision preserved.
 
 [MASTER'S NOTE]: In Veloce Termux / Fraol, unmetered in-memory agents crashed mid-stream, losing execution state and forcing complete task re-runs. BMAD assumes infinite uptime and unmetered cloud compute. READ assumes computational finitude and process death: Compare-And-Swap (CAS) state locks mechanically prevent concurrent corruption, while the cryptographic Write-Ahead Log (WAL) recovers 100% of state with zero tokens re-spent.
 
-================================================================================
+────────────────────────────────────────────────────────────────────────────────
 ONBOARDING MASTERY ACHIEVED: 100.0% (3/3 SCENARIOS PASSED)
 You have internalized the immutable systems mechanics of the READ Framework:
 1. 100% AROP Mutation Gate over Brittle Testing
 2. Deterministic C0-AST Context Resolver over LLM Token Bleed
 3. CAS Monotonic State Machine & WAL Crash Recovery over In-Memory Fragility
-================================================================================"#;
+────────────────────────────────────────────────────────────────────────────────"#;
         Ok(msg.to_string())
     }
 
@@ -387,9 +387,9 @@ You have internalized the immutable systems mechanics of the READ Framework:
         let s3 = if p.completed_scenarios.contains(&3) { "[PASSED]" } else { "[PENDING]" };
 
         format!(
-r#"================================================================================
+r#"────────────────────────────────────────────────────────────────────────────────
 READ FRAMEWORK: ADVERSARIAL ONBOARDING PROGRESS
-================================================================================
+────────────────────────────────────────────────────────────────────────────────
 Mastery Score:       {:.1}%
 Current Scenario:    {}
 Scenarios Completed: {} / 3
@@ -400,7 +400,7 @@ SCENARIOS:
   3. CAS Race Condition (Atomic Locks & WAL Crash Recovery): {}
 
 Attempts Recorded:
-{}================================================================================"#,
+{}────────────────────────────────────────────────────────────────────────────────"#,
             p.mastery_score,
             p.current_scenario,
             p.completed_scenarios.len(),

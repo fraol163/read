@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 # READ Framework Adversarial Red-Team & Chaos Test Suite
 # Tests:
 #   1. SIGKILL during mid-write of STATE.json and WAL.log (Crash / Power-Cut)
@@ -9,7 +9,7 @@
 #   5. Unauthorized Gate Bypass (Null hash, Mismatched hash, Tampered JSON)
 #
 # IMPORTANT: Zero emojis are used in this script, logs, or outputs.
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 
 set -euo pipefail
 
@@ -41,12 +41,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "STARTING ADVERSARIAL CHAOS & RED-TEAM TEST SUITE"
 echo "Sandbox Directory: $TEST_TEMP_DIR"
 echo "READ Engine: $READ_ENGINE"
 echo "READ Daemon: $READ_DAEMON"
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 
 # Verify required binaries exist and are executable
 for bin in "$READ_BIN" "$READ_ENGINE" "$READ_DAEMON"; do
@@ -954,7 +954,7 @@ echo "[PASS] SCENARIO 10 PASSED: Localhost whitelisting verified."
 # FINAL REPORT
 # ------------------------------------------------------------------------------
 echo ""
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "ALL 10 ADVERSARIAL CHAOS SCENARIOS COMPLETED SUCCESSFULLY"
 echo "  [PASS] Scenario 1: SIGKILL Resilience and Zero-Token Crash Recovery"
 echo "  [PASS] Scenario 2: AST Parser Fuzzing (Syntax, Braces, Imports, Loops, Binary)"
@@ -966,4 +966,4 @@ echo "  [PASS] Scenario 7: Non-Loopback 0.0.0.0 Rejection & TLS/HTTPS Enforcemen
 echo "  [PASS] Scenario 8: Constant-Time Bearer Token Authentication (subtle.ConstantTimeCompare)"
 echo "  [PASS] Scenario 9: Per-IP Token Bucket Rate Limiting (10 Burst, 2/sec, 429 Retry-After)"
 echo "  [PASS] Scenario 10: Localhost Loopback Whitelisting (Unthrottled Dev Access)"
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"

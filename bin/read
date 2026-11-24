@@ -37,10 +37,10 @@ fi
 # Subcommand: setup (Interactive BMAD-style onboarding wizard for repository)
 if [ "$1" = "setup" ]; then
     shift
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     echo "READ Framework: Declarative Repository Setup Wizard"
     echo "Resource-conscious, Evidence-driven AI Development"
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     echo ""
 
     WORKSPACE="$(pwd)"
@@ -162,28 +162,42 @@ EOF
     fi
 
     echo ""
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     echo "READ Repository Setup Complete"
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     echo "Declarative Contracts: .read/TASK.md, .read/STATE.json, .read/EVIDENCE.json"
     echo "Configuration:         .read/config.json"
     echo ""
 
-    if [ "$BATCH_SETUP" = "0" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]; then
-        printf "Configure READ MCP server & Skill into your detected AI coding assistants? [Y/n]: "
-        read -r cfg_assistants || true
-        case "$cfg_assistants" in
-            [nN]*)
-                echo "Skipping AI assistant configuration. Run 'read-mcp setup' anytime."
-                ;;
-            *)
-                if command -v read-mcp >/dev/null 2>&1; then
-                    read-mcp setup
-                elif [ -f "$DIR/harness_setup.py" ]; then
-                    python3 "$DIR/harness_setup.py"
-                fi
-                ;;
-        esac
+    if [ "$BATCH_SETUP" = "0" ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]
+    then
+        if [ -r /dev/tty ] && [ -w /dev/tty ] && [ -t 1 ]
+        then
+            printf "Configure READ MCP server & Skill into your detected AI coding assistants? [Y/n]: "
+            read -r cfg_assistants < /dev/tty || true
+            case "$cfg_assistants" in
+                [nN]*)
+                    echo "Skipping AI assistant configuration. Run 'read-mcp setup' anytime."
+                    ;;
+                *)
+                    if command -v read-mcp >/dev/null 2>&1
+                    then
+                        read-mcp setup < /dev/tty
+                    elif [ -f "$DIR/harness_setup.py" ]
+                    then
+                        python3 "$DIR/harness_setup.py" < /dev/tty
+                    fi
+                    ;;
+            esac
+        else
+            if command -v read-mcp >/dev/null 2>&1
+            then
+                read-mcp setup --detected
+            elif [ -f "$DIR/harness_setup.py" ]
+            then
+                python3 "$DIR/harness_setup.py" --detected
+            fi
+        fi
     fi
     echo "How to work (Zero-Command BMAD Methodology):"
     echo "1. Specify your requirements in .read/TASK.md"
@@ -191,7 +205,7 @@ EOF
     echo "3. Run 'git commit -m \"feat: your changes\"'"
     echo "   The pre-commit gate will verify your tests, run mutation checks,"
     echo "   and atomically seal verified proof into the commit."
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     exit 0
 fi
 

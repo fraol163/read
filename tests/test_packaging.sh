@@ -1,5 +1,5 @@
 #!/bin/sh
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 # READ Framework Packaging & Installation Verification Test
 # Tests:
 #   1. Standalone install.sh in clean isolated sandbox directory
@@ -10,7 +10,7 @@
 #   6. Makefile targets: build, test, install, verify, package, uninstall
 #
 # IMPORTANT: Zero emojis are used in this script, logs, or outputs.
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 
 set -eu
 
@@ -24,11 +24,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "STARTING PACKAGING & INSTALLATION VERIFICATION TEST"
 echo "Test Sandbox: $TEST_SANDBOX"
 echo "Framework Root: $REPO_ROOT"
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 
 # 1. Setup isolated user environment
 ORIGINAL_HOME="$HOME"
@@ -176,6 +176,6 @@ echo "[TEST 8] Testing Makefile targets (verify, package, uninstall)..."
 )
 echo "[PASS] 8. Makefile targets (verify, package, install with DESTDIR, uninstall) verified"
 
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "ALL PACKAGING AND INSTALLATION VERIFICATION TESTS PASSED SUCCESSFULLY"
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"

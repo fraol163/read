@@ -95,15 +95,15 @@ func scanCli(args []string) {
 		return
 	}
 
-	fmt.Println("================================================================")
+	fmt.Println("────────────────────────────────────────────────────────────────")
 	fmt.Printf("READ Framework Harness Scanner (v0.1.0)\n")
 	fmt.Printf("Detected %d AI agent harnesses / servers on host:\n", len(reg.Harnesses))
-	fmt.Println("================================================================")
+	fmt.Println("────────────────────────────────────────────────────────────────")
 	for _, h := range reg.Harnesses {
 		fmt.Printf("- [%s] %-34s (%s)\n    Status:  %-12s Version: %s\n    Path:    %s\n",
 			h.Type, h.Name, h.ID, h.Status, h.Version, h.Path)
 	}
-	fmt.Println("================================================================")
+	fmt.Println("────────────────────────────────────────────────────────────────")
 	os.Exit(0)
 }
 
@@ -237,7 +237,7 @@ func main() {
 		scheme = "https"
 	}
 
-	fmt.Println("================================================================")
+	fmt.Println("────────────────────────────────────────────────────────────────")
 	fmt.Printf("READ Framework Host Daemon (v0.1.0)\n")
 	fmt.Printf("Listening on:   %s://%s\n", scheme, addr)
 	fmt.Printf("Workspace:      %s\n", absWorkspace)
@@ -254,7 +254,7 @@ func main() {
 		fmt.Printf("Auth:           OPEN (Loopback dev mode)\n")
 	}
 	fmt.Println("Ready for remote controller connections...")
-	fmt.Println("================================================================")
+	fmt.Println("────────────────────────────────────────────────────────────────")
 
 	if hasTLS {
 		if err := http.ListenAndServeTLS(addr, *tlsCert, *tlsKey, handler); err != nil && err != http.ErrServerClosed {

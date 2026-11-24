@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 # READ Framework - Zero-Command Declarative BMAD Workflow Test Suite
 # Verifies that READ operates purely through declarative markdown contracts,
 # file edits, and git hooks with ZERO manual CLI commands needed by the user.
-# ==============================================================================
+# ────────────────────────────────────────────────────────────────────────────==
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,12 +20,12 @@ fi
 SANDBOX_DIR=$(mktemp -d -t read-bmad-sandbox-XXXXXX)
 trap 'rm -rf "$SANDBOX_DIR"' EXIT
 
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "STARTING BMAD ZERO-COMMAND DECLARATIVE WORKFLOW TEST"
 echo "Sandbox Directory: $SANDBOX_DIR"
 echo "Template:          $TEMPLATE_DIR"
 echo "Engine Binary:     $ENGINE_BIN"
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 
 cd "$SANDBOX_DIR"
 
@@ -276,7 +276,7 @@ then
 fi
 echo "[PASS] 6. Commit succeeded automatically once test suite killed all mutants."
 
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"
 echo "ALL 6 BMAD ZERO-COMMAND DECLARATIVE WORKFLOW TESTS PASSED SUCCESSFULLY"
 echo "Verified: Zero commands required. Pure git & markdown operation like BMAD."
-echo "================================================================================"
+echo "────────────────────────────────────────────────────────────────────────────────"

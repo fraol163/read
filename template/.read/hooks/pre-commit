@@ -63,10 +63,10 @@ if [ -z "$ENGINE_BIN" ]; then
     fi
 fi
 
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "[READ METHODOLOGY] Autonomous Pre-Commit Verification Gate"
 echo "Zero-command enforcement: Validating declarative contracts..."
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 
 # 4. Extract Contract Hash from TASK.md
 CONTRACT_HASH=""
@@ -333,10 +333,10 @@ EOF
 fi
 
 if [ "$TEST_EXIT" -ne 0 ] && [ "$ENFORCEMENT_MODE" = "warning" ]; then
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
     echo "[READ GATE WARNING] Commit allowed in warning mode."
     echo "Review test failures before release."
-    echo "================================================================"
+    echo "────────────────────────────────────────────────────────────────"
 
     cat << EOF > "$EVIDENCE_FILE"
 {
@@ -386,10 +386,10 @@ EOF
 # 11. Auto-stage STATE and EVIDENCE into the current git commit
 git add "$STATE_FILE" "$EVIDENCE_FILE"
 
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "[READ GATE PASSED] Contract & Mutation proof sealed into commit."
 echo "Verify Hash: ${VERIFY_HASH:0:32}..."
 echo "Handoff complete with ZERO manual commands required."
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 
 exit 0

@@ -346,13 +346,14 @@ impl StateEngine {
             GENESIS_HASH.to_string()
         };
 
+        let clean_payload = payload.replace('\n', " ").replace('\r', " ");
         let timestamp = Utc::now().to_rfc3339();
-        let entry_hash = WalEntry::compute_hash(&timestamp, &prev_hash, event_type, payload);
+        let entry_hash = WalEntry::compute_hash(&timestamp, &prev_hash, event_type, &clean_payload);
         let entry = WalEntry {
             timestamp,
             prev_hash,
             event_type: event_type.to_string(),
-            payload: payload.to_string(),
+            payload: clean_payload,
             entry_hash,
         };
 
@@ -568,11 +569,15 @@ impl StateEngine {
             ));
         }
 
+        let clean_task_id = task_id.trim();
+        let clean_contract_hash = contract_hash.trim();
+        let clean_base_commit = base_commit.trim().replace('\n', "").replace('\r', "");
+
         st.state_revision += 1;
         st.status = TaskStatus::Defined;
-        st.active_task_id = Some(task_id.to_string());
-        st.contract_hash = Some(contract_hash.to_string());
-        st.base_commit = Some(base_commit.to_string());
+        st.active_task_id = Some(clean_task_id.to_string());
+        st.contract_hash = Some(clean_contract_hash.to_string());
+        st.base_commit = Some(clean_base_commit.clone());
         st.staged_diff_hash = None;
         st.verify_hash = None;
         st.cas_lock.expected_revision = st.state_revision;
@@ -580,7 +585,7 @@ impl StateEngine {
         self.atomic_save(&st)?;
         self.internal_append_wal(
             "DEFINE",
-            &format!("task_id={} contract_hash={} base_commit={}", task_id, contract_hash, base_commit),
+            &format!("task_id={} contract_hash={} base_commit={}", clean_task_id, clean_contract_hash, clean_base_commit),
         )?;
         Ok(st)
     }

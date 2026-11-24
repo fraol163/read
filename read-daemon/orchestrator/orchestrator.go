@@ -119,13 +119,13 @@ func (o *Orchestrator) Run(ctx context.Context) (*PipelineResult, error) {
 		StageResults: make(map[string]StageStatus),
 	}
 
-	o.logMessage("================================================================")
+	o.logMessage("────────────────────────────────────────────────────────────────")
 	o.logMessage("[READ PIPELINE] Starting autonomous agent execution")
 	o.logMessage("Workspace:    %s", o.cfg.Workspace)
 	o.logMessage("Prompt:       %s", o.cfg.Prompt)
 	o.logMessage("Timeout:      %v", o.cfg.Timeout)
 	o.logMessage("AutoApprove:  %v", o.cfg.AutoApprove)
-	o.logMessage("================================================================")
+	o.logMessage("────────────────────────────────────────────────────────────────")
 
 	// Ensure .read directory exists
 	methodDir := filepath.Join(o.cfg.Workspace, ".read")
@@ -265,9 +265,9 @@ func (o *Orchestrator) Run(ctx context.Context) (*PipelineResult, error) {
 	}
 
 	res.ExecutionTimeMs = time.Since(startTime).Milliseconds()
-	o.logMessage("================================================================")
+	o.logMessage("────────────────────────────────────────────────────────────────")
 	o.logMessage("[READ PIPELINE] Execution finished in %dms, Success=%v, State=%s", res.ExecutionTimeMs, res.Success, res.FinalState)
-	o.logMessage("================================================================")
+	o.logMessage("────────────────────────────────────────────────────────────────")
 
 	return res, nil
 }

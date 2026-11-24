@@ -10,10 +10,10 @@ enable -n read 2>/dev/null || true
 DEMO_DIR=$(mktemp -d -t read-live-realtime-XXXXXX)
 trap 'rm -rf "$DEMO_DIR"' EXIT
 
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "READ FRAMEWORK: LIVE REAL-TIME EXECUTION AUDIT"
 echo "Workspace Sandbox: $DEMO_DIR"
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo ""
 
 cd "$DEMO_DIR"
@@ -240,6 +240,6 @@ print("Final Mutation Score:  " + str(ev.get("mutation_score")) + "% (" + str(ev
 git log --oneline -n 2
 
 echo ""
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "LIVE REAL-TIME AUDIT COMPLETE: 100% OPERATIONAL WITH ZERO COMMANDS"
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"

@@ -228,10 +228,10 @@ def configure_harness(harness):
         install_cursor_rule(harness["rules_dir"])
 
 def run_interactive_setup(auto_all=False, auto_detected=False):
-    print("================================================================")
+    print("────────────────────────────────────────────────────────────────")
     print("   READ Framework: AI Agent Harness & Skill Setup")
     print("   skills.sh Compatible Multi-Agent Discovery & Configuration")
-    print("================================================================")
+    print("────────────────────────────────────────────────────────────────")
     print("")
 
     harnesses = detect_harnesses()
@@ -310,10 +310,10 @@ def run_interactive_setup(auto_all=False, auto_detected=False):
             print(f"  [ERROR] {h['name']}: Failed to configure: {str(e)}")
 
     print("")
-    print("================================================================")
+    print("────────────────────────────────────────────────────────────────")
     print("AI Agent harnesses successfully configured with READ MCP & Skill!")
     print("Restart your agent (e.g. Claude Code or Cursor) to load the tools.")
-    print("================================================================")
+    print("────────────────────────────────────────────────────────────────")
 
 def main():
     args = sys.argv[1:]

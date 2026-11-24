@@ -1,10 +1,10 @@
 #!/bin/sh
-# ==============================================================================
+# ──────────────────────────────────────────────────────────────────────────────
 # READ Framework Standalone POSIX Installer (v0.1.0)
 # Resource-conscious, Evidence-driven AI Development
 #
 # Supported Systems: Arch Linux, Debian/Ubuntu, Fedora/RHEL, macOS, Windows (WSL2), Termux, POSIX
-# ==============================================================================
+# ──────────────────────────────────────────────────────────────────────────────
 
 set -eu
 
@@ -72,7 +72,7 @@ EOF
     printf "%b" "$C_RESET"
     printf "%bREAD Framework Standalone Installer (v%s)%b\n" "$C_BOLD" "$VERSION" "$C_RESET"
     printf "Resource-conscious, Evidence-driven AI Development\n"
-    printf "================================================================\n"
+    printf "────────────────────────────────────────────────────────────────\n"
 }
 
 log_step() {
@@ -611,10 +611,19 @@ main() {
     if [ "$CHECK_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ]
     then
         log_step "5/5" "AI Agent Harness Discovery & Skill Setup"
-        if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] )
+        if [ "$DO_SETUP" = "1" ]
+        then
+            if [ -f "${BINDIR}/read-mcp" ]
+            then
+                "${BINDIR}/read-mcp" setup --all
+            elif [ -f "${SRC_DIR}/harness_setup.py" ]
+            then
+                python3 "${SRC_DIR}/harness_setup.py" --all
+            fi
+        elif [ -r /dev/tty ] && [ -w /dev/tty ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]
         then
             printf "Would you like to auto-detect and configure READ in your AI coding assistants (Claude Code, Cursor, Antigravity)? [Y/n]: "
-            read -r cfg_agents || true
+            read -r cfg_agents < /dev/tty || true
             case "$cfg_agents" in
                 [nN]*)
                     log_info "Skipping AI assistant configuration. You can run 'read-mcp setup' anytime."
@@ -622,16 +631,15 @@ main() {
                 *)
                     if [ -f "${BINDIR}/read-mcp" ]
                     then
-                        "${BINDIR}/read-mcp" setup
+                        "${BINDIR}/read-mcp" setup < /dev/tty
                     elif [ -f "${SRC_DIR}/harness_setup.py" ]
                     then
-                        python3 "${SRC_DIR}/harness_setup.py"
+                        python3 "${SRC_DIR}/harness_setup.py" < /dev/tty
                     fi
                     ;;
             esac
-        elif [ "$DO_SETUP" = "0" ] || [ "${READ_NON_INTERACTIVE:-0}" = "1" ]
-        then
-            log_info "Non-interactive mode: Auto-configuring detected AI agent harnesses..."
+        else
+            log_info "Auto-configuring detected AI agent harnesses..."
             if [ -f "${BINDIR}/read-mcp" ]
             then
                 "${BINDIR}/read-mcp" setup --detected
@@ -641,30 +649,31 @@ main() {
             fi
         fi
     fi
-    if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] && [ "$DRY_RUN" -eq 0 ] && [ "$CHECK_ONLY" -eq 0 ] )
+    if [ "$CHECK_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ]
     then
         if [ "$DO_SETUP" = "1" ]
         then
             "${BINDIR}/read" setup
-        else
+        elif [ -r /dev/tty ] && [ -w /dev/tty ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]
+        then
             echo ""
             printf "Would you like to initialize READ methodology in current workspace (%s)? [Y/n]: " "$(pwd)"
-            read -r init_ws || true
+            read -r init_ws < /dev/tty || true
             case "$init_ws" in
                 [nN]*)
                     ;;
                 *)
-                    "${BINDIR}/read" setup
+                    "${BINDIR}/read" setup < /dev/tty
                     ;;
             esac
         fi
     fi
 
     echo ""
-    printf "================================================================\n"
+    printf "────────────────────────────────────────────────────────────────\n"
     printf "%bREAD Framework successfully installed! (v%s)%b\n" "$C_GREEN" "$VERSION" "$C_RESET"
     printf "Execute 'read --help' or 'read-mcp --check' to begin.\n"
-    printf "================================================================\n"
+    printf "────────────────────────────────────────────────────────────────\n"
 }
 
 main "$@"

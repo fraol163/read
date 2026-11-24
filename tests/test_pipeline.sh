@@ -28,10 +28,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "=== [TEST SUITE] Starting READ Autonomous Pipeline Tests ==="
 echo "Sandbox: $SANDBOX_DIR"
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 
 cd "$SANDBOX_DIR"
 git init -q
@@ -266,7 +266,7 @@ if [ "$API_SUCCESS" != "true" ] || [ "$API_STATE" != "handoff_complete" ]; then
 fi
 echo "[PASS] 6. Daemon REST endpoint /api/v1/pipeline/run successfully executed pipeline (task: $API_TASK_ID)"
 
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
 echo "=== [ALL 6 PIPELINE INTEGRATION TESTS PASSED] ==="
 echo "TEST 4 Summary: Mutation score 40.0% (Killed 4/10)"
-echo "================================================================"
+echo "────────────────────────────────────────────────────────────────"
