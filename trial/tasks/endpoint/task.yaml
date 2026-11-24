@@ -1,0 +1,10 @@
+id: endpoint
+title: Implement User Search API Handler
+objective: >
+  Implement the handle_search function in endpoint.py to search a list of user records.
+  The function must support case-insensitive substring matching against name, optional role filtering, configurable limit, and input validation.
+affected_files:
+  - endpoint.py
+  - test_endpoint.py
+test_command: python3 -m unittest test_endpoint.py
+timeout_minutes: 20

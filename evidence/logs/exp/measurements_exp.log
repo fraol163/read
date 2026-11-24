@@ -1,0 +1,35 @@
+=== STOPWATCH MEASUREMENT BENCHMARK ===
+Target Task: bugfix
+Timestamp: 2026-11-24T08:12:39Z
+
+--- MEASUREMENT 1: CONTROL ARM (MARKDOWN CONTRACT) ---
+Control Start Epoch: 1795507959
+[PASS] trial/tasks/bugfix/task.md: Valid Markdown task contract
+Control End Epoch: 1795507960
+Control Arm Duration Seconds: 1
+
+--- MEASUREMENT 2: EXPERIMENT ARM (YAML CONTRACT & HTML REPORT) ---
+Experiment Start Epoch: 1795507960
+[PASS] trial/tasks/bugfix/task.yaml: Valid YAML task contract
+Generated evidence/reports/report_bugfix.html (SHA-256: 5a238a42620afe4df13af4be16c5fcae6b981eed55ca26274fc5fc615cd1c1e9)
+Generated evidence/reports/report_endpoint.html (SHA-256: 7181e637f4a3b7d74fc5be77d7cf3d9b67b2271a353ad341ce3c18f88bfb83dd)
+Generated evidence/reports/report_refactor.html (SHA-256: 4522f4006c1f8bd09009a604fc94ad7ea5db0841823c2194c1273b904ff19bb6)
+Generated evidence/reports/report_gapped.html (SHA-256: 22508be44182d845af640f06169a6621bf5f26705a52d580bb5e97f0dafc725c)
+Experiment End Epoch: 1795507961
+Experiment Arm Duration Seconds: 1
+
+--- MEASUREMENT 3: LINES OF CONFIG ---
+task.md lines: 16
+task.yaml lines: 10
+
+--- MEASUREMENT 4: MINUTES TO READ GATE FAILURE ---
+gate failure triage duration: NOT MEASURED
+
+--- MEASUREMENT 5: REPORT ARTIFACT SIZE AND SHA-256 ---
+report_bugfix.html bytes: 2386
+report_bugfix.html sha256: eb1770385696affa686ef338f5d0ddab15f09f7146abd1b2be224ef1dcc16e18
+
+--- MEASUREMENT 6: TEST SUITE PASS COUNTS ---
+suites executed: 9
+suites passed: 9
+suites failed: 0
