@@ -176,8 +176,21 @@ set +e
 FAIL_EXIT=$?
 set -e
 
+if [ "$FAIL_EXIT" -eq 0 ]
+then
+    echo "FAIL: Stage 4 (Diff & Mutation Verification) gate failed to block (exit code was zero)" >&2
+    exit 1
+fi
+
+if [ "$FAIL_EXIT" -ne 0 ]
+then
+    echo "FAIL: Stage 4 (Diff & Mutation Verification) reported gate failure (exit code $FAIL_EXIT)" >&2
+    exit 1
+fi
+
 GATE_STATUS=$(python3 -c "import json; print(json.load(open('.read/STATE.json'))['status'])")
-if [ "$GATE_STATUS" = "handoff_complete" ]; then
+if [ "$GATE_STATUS" = "handoff_complete" ]
+then
     echo "FAIL: Gate should have blocked handoff when mutants survived!" >&2
     exit 1
 fi
