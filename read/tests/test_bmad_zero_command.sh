@@ -34,6 +34,7 @@ cp .read/hooks/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 
 echo "[TEST 1] Setup repository with .read/ template and git pre-commit hook."
+echo '{"enforcement_mode": "block"}' > .read/config.json
 
 # Configure PROJECT.md to use python unittest
 cat << 'EOF' > .read/PROJECT.md

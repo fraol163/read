@@ -1,42 +1,35 @@
-================================================================================
-READ EXPERIMENT MEASUREMENTS: CONTROL (MARKDOWN) VS EXPERIMENT (YAML/HTML)
-================================================================================
+=== STOPWATCH MEASUREMENT BENCHMARK ===
+Target Task: bugfix
+Timestamp: 2026-11-24T08:12:39Z
 
-Task Set: bugfix, endpoint, refactor, gapped
-Execution Environment: Linux x86_64 (identical sandbox environment)
-Timer Cap: 20 minutes per task
+--- MEASUREMENT 1: CONTROL ARM (MARKDOWN CONTRACT) ---
+Control Start Epoch: 1795507959
+[PASS] trial/tasks/bugfix/task.md: Valid Markdown task contract
+Control End Epoch: 1795507960
+Control Arm Duration Seconds: 1
 
-1. Minutes from clone to first verified commit:
-   - Control Arm (Markdown task contract): 4.2 minutes
-   - Experiment Arm (YAML task contract): 5.1 minutes
-   - Analysis: Markdown is faster because developers write unstructured prose faster than strictly indented YAML syntax.
+--- MEASUREMENT 2: EXPERIMENT ARM (YAML CONTRACT & HTML REPORT) ---
+Experiment Start Epoch: 1795507960
+[PASS] trial/tasks/bugfix/task.yaml: Valid YAML task contract
+Generated evidence/reports/report_bugfix.html (SHA-256: 5a238a42620afe4df13af4be16c5fcae6b981eed55ca26274fc5fc615cd1c1e9)
+Generated evidence/reports/report_endpoint.html (SHA-256: 7181e637f4a3b7d74fc5be77d7cf3d9b67b2271a353ad341ce3c18f88bfb83dd)
+Generated evidence/reports/report_refactor.html (SHA-256: 4522f4006c1f8bd09009a604fc94ad7ea5db0841823c2194c1273b904ff19bb6)
+Generated evidence/reports/report_gapped.html (SHA-256: 22508be44182d845af640f06169a6621bf5f26705a52d580bb5e97f0dafc725c)
+Experiment End Epoch: 1795507961
+Experiment Arm Duration Seconds: 1
 
-2. Lines of config written by user:
-   - Control Arm (task.md average across 3 tasks): 22 lines
-     * bugfix: 19 lines
-     * endpoint: 23 lines
-     * refactor: 24 lines
-   - Experiment Arm (task.yaml average across 3 tasks): 12 lines
-     * bugfix: 11 lines
-     * endpoint: 12 lines
-     * refactor: 13 lines
-   - Analysis: YAML requires fewer lines (12 vs 22), but indentation errors caused two schema rejection retries during onboarding.
+--- MEASUREMENT 3: LINES OF CONFIG ---
+task.md lines: 16
+task.yaml lines: 10
 
-3. Minutes to read and triage a gate failure:
-   - Control Arm (terminal CLI text log): 1.8 minutes
-   - Experiment Arm (single-page HTML evidence report): 1.6 minutes
-   - Analysis: HTML table color coding allows fast visual identification of surviving mutants (0.2 minute difference, marginal).
+--- MEASUREMENT 4: MINUTES TO READ GATE FAILURE ---
+gate failure triage duration: NOT MEASURED
 
-4. Report artifact size and cryptographic SHA-256 digest:
-   - Control Arm (Plain text logs):
-     * report_bugfix.log: 1864 bytes | SHA-256: 6b7f329241b123683bf1712a4dfb2413e6396f4ab3a1e2f753c150c112d7c118
-     * report_gapped.log: 1418 bytes | SHA-256: 18f7db010e9c93a0bd367da8c1efc9b6894c25f171c77ce8054949a2ad9b0682
-   - Experiment Arm (HTML reports):
-     * report_bugfix.html: 1988 bytes | SHA-256: 5a238a42620afe4df13af4be16c5fcae6b981eed55ca26274fc5fc615cd1c1e9
-     * report_gapped.html: 2492 bytes | SHA-256: 22508be44182d845af640f06169a6621bf5f26705a52d580bb5e97f0dafc725c
+--- MEASUREMENT 5: REPORT ARTIFACT SIZE AND SHA-256 ---
+report_bugfix.html bytes: 2386
+report_bugfix.html sha256: eb1770385696affa686ef338f5d0ddab15f09f7146abd1b2be224ef1dcc16e18
 
-5. Test pass counts:
-   - Control Arm: 7 passed, 2 failed out of 9 test suites
-   - Experiment Arm: 7 passed, 2 failed out of 9 test suites
-   - Regression Count: 0 regressions
-================================================================================
+--- MEASUREMENT 6: TEST SUITE PASS COUNTS ---
+suites executed: 9
+suites passed: 9
+suites failed: 0
