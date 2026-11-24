@@ -431,9 +431,29 @@ def main():
         if flag in ["--help", "-h"]:
             print("read-mcp: Universal Model Context Protocol (MCP) server for READ Framework")
             print("Usage:")
-            print("  read-mcp          Run JSON-RPC stdio MCP server")
-            print("  read-mcp --check  Verify engine binaries and output configuration")
-            print("  read-mcp -v       Print version")
+            print("  read-mcp                 Run JSON-RPC stdio MCP server")
+            print("  read-mcp setup           Interactive AI agent harness & skill configuration")
+            print("  read-mcp detect          Scan host for installed AI agent harnesses")
+            print("  read-mcp --check         Verify engine binaries and output configuration")
+            print("  read-mcp -v              Print version")
+            sys.exit(0)
+        if flag in ["setup", "install", "--setup", "--install", "detect", "--detect"]:
+            script_dir = os.path.dirname(os.path.realpath(__file__))
+            harness_path = os.path.join(script_dir, "harness_setup.py")
+            if not os.path.exists(harness_path):
+                harness_path = os.path.join(script_dir, "..", "harness_setup.py")
+            if os.path.exists(harness_path):
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("harness_setup", harness_path)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                mod.main()
+            else:
+                try:
+                    import harness_setup
+                    harness_setup.main()
+                except Exception as e:
+                    print(f"Could not load harness setup: {e}")
             sys.exit(0)
         if flag == "--check":
             print("READ MCP Server Diagnostic (v0.1.0)")

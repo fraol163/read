@@ -168,6 +168,23 @@ EOF
     echo "Declarative Contracts: .read/TASK.md, .read/STATE.json, .read/EVIDENCE.json"
     echo "Configuration:         .read/config.json"
     echo ""
+
+    if [ "$BATCH_SETUP" = "0" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]; then
+        printf "Configure READ MCP server & Skill into your detected AI coding assistants? [Y/n]: "
+        read -r cfg_assistants || true
+        case "$cfg_assistants" in
+            [nN]*)
+                echo "Skipping AI assistant configuration. Run 'read-mcp setup' anytime."
+                ;;
+            *)
+                if command -v read-mcp >/dev/null 2>&1; then
+                    read-mcp setup
+                elif [ -f "$DIR/harness_setup.py" ]; then
+                    python3 "$DIR/harness_setup.py"
+                fi
+                ;;
+        esac
+    fi
     echo "How to work (Zero-Command BMAD Methodology):"
     echo "1. Specify your requirements in .read/TASK.md"
     echo "2. Edit your source code and tests"

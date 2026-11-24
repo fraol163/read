@@ -21,4 +21,7 @@ requires-python = ">=3.8"
 read-mcp = "read_mcp:main"
 
 [tool.setuptools]
-py-modules = ["read_mcp"]
+py-modules = ["read_mcp", "harness_setup"]
+
+[tool.setuptools.package-data]
+"*" = ["skills/**/*", "bin/*", "template/**/*", "config.default.json"]

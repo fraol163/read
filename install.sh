@@ -584,6 +584,13 @@ main() {
         log_ok "Template installed to ${DATADIR}/template"
     fi
 
+    if [ -f "${SRC_DIR}/harness_setup.py" ]
+    then
+        cp "${SRC_DIR}/harness_setup.py" "${BINDIR}/harness_setup.py"
+        chmod 0755 "${BINDIR}/harness_setup.py"
+        log_ok "Installed ${BINDIR}/harness_setup.py"
+    fi
+
     log_info "Initializing configuration in ${CONFIG_DIR}..."
     mkdir -p "${CONFIG_DIR}"
     CONFIG_FILE="${CONFIG_DIR}/config.json"
@@ -600,7 +607,40 @@ main() {
     log_step "4/4" "Verification & Shell Setup"
     verify_installation
 
-    # Interactive BMAD-style workspace setup offer
+    # Step 5: AI Agent Harness & Skill Configuration (skills.sh compatible)
+    if [ "$CHECK_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ]
+    then
+        log_step "5/5" "AI Agent Harness Discovery & Skill Setup"
+        if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] )
+        then
+            printf "Would you like to auto-detect and configure READ in your AI coding assistants (Claude Code, Cursor, Antigravity)? [Y/n]: "
+            read -r cfg_agents || true
+            case "$cfg_agents" in
+                [nN]*)
+                    log_info "Skipping AI assistant configuration. You can run 'read-mcp setup' anytime."
+                    ;;
+                *)
+                    if [ -f "${BINDIR}/read-mcp" ]
+                    then
+                        "${BINDIR}/read-mcp" setup
+                    elif [ -f "${SRC_DIR}/harness_setup.py" ]
+                    then
+                        python3 "${SRC_DIR}/harness_setup.py"
+                    fi
+                    ;;
+            esac
+        elif [ "$DO_SETUP" = "0" ] || [ "${READ_NON_INTERACTIVE:-0}" = "1" ]
+        then
+            log_info "Non-interactive mode: Auto-configuring detected AI agent harnesses..."
+            if [ -f "${BINDIR}/read-mcp" ]
+            then
+                "${BINDIR}/read-mcp" setup --detected
+            elif [ -f "${SRC_DIR}/harness_setup.py" ]
+            then
+                python3 "${SRC_DIR}/harness_setup.py" --detected
+            fi
+        fi
+    fi
     if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] && [ "$DRY_RUN" -eq 0 ] && [ "$CHECK_ONLY" -eq 0 ] )
     then
         if [ "$DO_SETUP" = "1" ]

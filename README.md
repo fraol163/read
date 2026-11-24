@@ -26,8 +26,18 @@ Or install with `pipx` for isolated global execution:
 pipx install git+https://github.com/fraol163/read.git
 ```
 
-#### MCP Client Configuration
-Add READ to your AI assistant configuration:
+#### One-Step AI Agent Auto-Configuration (skills.sh compatible)
+Run the interactive setup wizard to scan your host and automatically wire READ MCP tools and skills into your detected AI coding assistants:
+```bash
+read-mcp setup
+```
+Or scan without writing changes:
+```bash
+read-mcp detect
+```
+
+#### Manual MCP Client Configuration (Optional)
+If configuring manually, add READ to your AI assistant configuration:
 
 For **Claude Code** (`~/.claude.json` or run `claude mcp add read read-mcp`):
 ```json
