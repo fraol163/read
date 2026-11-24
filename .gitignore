@@ -4,3 +4,6 @@ zips/
 __pycache__/
 trial/realworld/
 PRODUCT-READINESS.md
+build/
+*.egg-info/
+dist/

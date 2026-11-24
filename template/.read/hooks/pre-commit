@@ -136,6 +136,7 @@ if [ -z "$TEST_CMD" ]; then
 fi
 
 # 7. Execute Test Suite
+TEST_EXIT=0
 if [ -n "$TEST_CMD" ]; then
     echo "[READ Verification] Executing test suite: $TEST_CMD..."
     TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1) || TEST_EXIT=$?
@@ -355,14 +356,22 @@ fi
 VERIFY_HASH=$(echo "${DIFF_HASH}:${CONTRACT_HASH}:${MUTATION_SCORE}:${KILLED}" | sha256sum | cut -d' ' -f1)
 
 # 10. Seal STATE.json and EVIDENCE.json Automatically (Zero Commands)
+BASE_COMMIT="$(git rev-parse --verify -q HEAD 2>/dev/null || echo '0000000000000000000000000000000000000000')"
+BASE_COMMIT="$(echo "$BASE_COMMIT" | tail -n 1 | tr -d '[:space:]')"
 cat << EOF > "$STATE_FILE"
 {
-  "task_id": "$TASK_ID",
-  "contract_hash": "$CONTRACT_HASH",
+  "state_revision": 2,
   "status": "handoff_complete",
+  "active_task_id": "$TASK_ID",
+  "contract_hash": "$CONTRACT_HASH",
+  "base_commit": "$BASE_COMMIT",
+  "staged_diff_hash": "$DIFF_HASH",
   "verify_hash": "$VERIFY_HASH",
-  "revision": 2,
-  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  "cas_lock": {
+    "expected_revision": 2,
+    "locked_by": "system",
+    "lease_expires": "2099-01-01T00:00:00Z"
+  }
 }
 EOF
 

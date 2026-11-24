@@ -24,11 +24,27 @@ pub enum TaskStatus {
     Blocked,
 }
 
+impl Default for TaskStatus {
+    fn default() -> Self {
+        TaskStatus::Idle
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct CasLock {
     pub expected_revision: u64,
     pub locked_by: String,
     pub lease_expires: DateTime<Utc>,
+}
+
+impl Default for CasLock {
+    fn default() -> Self {
+        Self {
+            expected_revision: 1,
+            locked_by: "system".to_string(),
+            lease_expires: Utc::now() + chrono::Duration::days(36500),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -41,13 +57,21 @@ pub struct LearnProgress {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct State {
+    #[serde(default, alias = "revision")]
     pub state_revision: u64,
+    #[serde(default)]
     pub status: TaskStatus,
+    #[serde(default, alias = "task_id")]
     pub active_task_id: Option<String>,
+    #[serde(default)]
     pub contract_hash: Option<String>,
+    #[serde(default)]
     pub base_commit: Option<String>,
+    #[serde(default)]
     pub staged_diff_hash: Option<String>,
+    #[serde(default)]
     pub verify_hash: Option<String>,
+    #[serde(default)]
     pub cas_lock: CasLock,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub learn_progress: Option<LearnProgress>,

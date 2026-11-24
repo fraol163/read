@@ -515,14 +515,14 @@ verify_installation() {
 # Main installer flow
 main() {
     log_banner
-    log_step "1/4" "Environment & Target Destinations"
+    log_step "1/5" "Environment & Target Destinations"
     PLATFORM_NAME="$(uname -s) ($(uname -m))"
     log_info "Detected platform: ${PLATFORM_NAME}"
     log_info "Target binary directory: ${BINDIR}"
     log_info "Target config directory: ${CONFIG_DIR}"
 
     # Step 2: Source and Prerequisites
-    log_step "2/4" "Source Resolution & Toolchain Discovery"
+    log_step "2/5" "Source Resolution & Toolchain Discovery"
     resolve_source
 
     if ! check_toolchain
@@ -537,7 +537,7 @@ main() {
     fi
 
     # Step 3: Compilation and installation
-    log_step "3/4" "Compilation & Binary Assembly"
+    log_step "3/5" "Compilation & Binary Assembly"
     if [ "$NO_BUILD" -eq 0 ]
     then
         if [ "$DRY_RUN" -eq 1 ]
@@ -574,6 +574,10 @@ main() {
     do
         if [ -f "${SRC_DIR}/bin/$b" ]
         then
+            if [ -L "${BINDIR}/$b" ] || [ -f "${BINDIR}/$b" ]
+            then
+                rm -f "${BINDIR}/$b" 2>/dev/null || true
+            fi
             cp "${SRC_DIR}/bin/$b" "${BINDIR}/$b"
             chmod 0755 "${BINDIR}/$b"
             log_ok "Installed ${BINDIR}/$b"
@@ -593,6 +597,10 @@ main() {
 
     if [ -f "${SRC_DIR}/harness_setup.py" ]
     then
+        if [ -L "${BINDIR}/harness_setup.py" ] || [ -f "${BINDIR}/harness_setup.py" ]
+        then
+            rm -f "${BINDIR}/harness_setup.py" 2>/dev/null || true
+        fi
         cp "${SRC_DIR}/harness_setup.py" "${BINDIR}/harness_setup.py"
         chmod 0755 "${BINDIR}/harness_setup.py"
         log_ok "Installed ${BINDIR}/harness_setup.py"
@@ -611,7 +619,7 @@ main() {
     fi
 
     # Step 4: Verification and Setup
-    log_step "4/4" "Verification & Shell Setup"
+    log_step "4/5" "Verification & Shell Setup"
     verify_installation
 
     # Step 5: AI Agent Harness Discovery & Autonomous Configuration

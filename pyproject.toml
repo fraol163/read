@@ -7,7 +7,7 @@ name = "read-mcp"
 version = "0.1.0"
 description = "Universal Model Context Protocol (MCP) Server for the READ Framework"
 readme = "README.md"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 authors = [{ name = "READ Methodology Team" }]
 classifiers = [
     "Operating System :: POSIX :: Linux",
