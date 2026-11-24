@@ -1,0 +1,81 @@
+{
+  "$schema": "./config.schema.json",
+  "version": "0.1.0",
+  "daemon": {
+    "host": "127.0.0.1",
+    "port": 8089,
+    "workspace_root": ".",
+    "engine_bin": "",
+    "custom_harness": ""
+  },
+  "storage": {
+    "default_policy": "both_sync",
+    "sync_interval_seconds": 30,
+    "chunk_size_bytes": 1048576,
+    "exclude_patterns": [
+      ".git",
+      ".method",
+      "target",
+      "node_modules",
+      "__pycache__",
+      ".venv"
+    ]
+  },
+  "core": {
+    "state_dir": ".read",
+    "state_file": ".read/STATE.json",
+    "wal_file": ".read/WAL.log",
+    "strict_cas": true,
+    "wal_compaction_threshold": 1000
+  },
+  "ast": {
+    "max_depth": 3,
+    "timeout_ms": 100,
+    "supported_languages": [
+      "python",
+      "typescript",
+      "rust",
+      "go"
+    ]
+  },
+  "mutation": {
+    "max_mutants": 10,
+    "timeout_ms": 4500,
+    "operators": [
+      "INVERT_EQ",
+      "FLIP_BOOL_TRUE",
+      "FLIP_BOOL_FALSE",
+      "BOUNDARY_SHIFT",
+      "RETURN_INVERT"
+    ]
+  },
+  "harness": {
+    "discovery_enabled": true,
+    "scan_timeout_ms": 500,
+    "local_endpoints": {
+      "ollama": "http://127.0.0.1:11434",
+      "llamacpp": "http://127.0.0.1:8080",
+      "vllm": "http://127.0.0.1:8000"
+    },
+    "custom_config_paths": [
+      ".read/harnesses.json",
+      "~/.config/read/harnesses.json"
+    ]
+  },
+  "security": {
+    "sandbox_enabled": true,
+    "allow_process_spawn": true,
+    "allowed_paths": [
+      "."
+    ],
+    "blocked_commands": [
+      "rm -rf /",
+      ":(){ :|:& };:"
+    ]
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "file": ""
+  }
+}

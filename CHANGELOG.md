@@ -2,6 +2,15 @@
 
 All notable changes to the READ Framework will be documented in this file.
 
+## [v0.1.0] - 2026-11-24
+
+### Added
+- Model Context Protocol (MCP) production server (read-mcp) exposing 21 lifecycle tools over JSON-RPC.
+- Short Assembly Micro-DSL interpreter (read asm) for ultra-low token multi-stage agent sequencing.
+- Structured YAML status reporting and self-verifying HTML evidence reporting with embedded SHA-256 digests.
+- Real-world empirical benchmark on fraol163/alphabet repository demonstrating mechanical detection of unasserted boundary gaps.
+- Standalone universal installation package for instant MCP setup.
+
 ## [v0.7.1] - 2026-11-23
 
 ### Changed

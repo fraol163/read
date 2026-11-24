@@ -1,0 +1,351 @@
+#!/bin/sh
+# READ Framework Unified CLI (v0.1.0)
+# Resource-conscious, Evidence-driven AI Development
+# Standalone POSIX-compliant wrapper
+
+set -e
+
+# Resolve directory of this script, following symlinks if any
+PRG="$0"
+while [ -L "$PRG" ]; do
+    PRG_DIR="$(dirname "$PRG")"
+    PRG="$(readlink "$PRG")"
+    case "$PRG" in
+        /*) ;;
+        *) PRG="$PRG_DIR/$PRG" ;;
+    esac
+done
+DIR="$(cd "$(dirname "$PRG")" && pwd)"
+
+# Discover engine and daemon binaries
+if [ -x "$DIR/read-engine" ]; then
+    ENGINE="$DIR/read-engine"
+elif command -v read-engine >/dev/null 2>&1; then
+    ENGINE="$(command -v read-engine)"
+else
+    ENGINE=""
+fi
+
+if [ -x "$DIR/read-daemon" ]; then
+    DAEMON="$DIR/read-daemon"
+elif command -v read-daemon >/dev/null 2>&1; then
+    DAEMON="$(command -v read-daemon)"
+else
+    DAEMON=""
+fi
+
+# Subcommand: setup (Interactive BMAD-style onboarding wizard for repository)
+if [ "$1" = "setup" ]; then
+    shift
+    echo "================================================================"
+    echo "READ Framework: Declarative Repository Setup Wizard"
+    echo "Resource-conscious, Evidence-driven AI Development"
+    echo "================================================================"
+    echo ""
+
+    WORKSPACE="$(pwd)"
+    echo "[1/4] Inspecting workspace: $WORKSPACE"
+
+    LANG="Unknown"
+    TEST_CMD=""
+    if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ] || ls *.py >/dev/null 2>&1; then
+        LANG="Python"
+        if command -v pytest >/dev/null 2>&1; then
+            TEST_CMD="pytest"
+        else
+            TEST_CMD="python3 -m unittest"
+        fi
+    elif [ -f "Cargo.toml" ]; then
+        LANG="Rust"
+        TEST_CMD="cargo test"
+    elif [ -f "go.mod" ]; then
+        LANG="Go"
+        TEST_CMD="go test ./..."
+    elif [ -f "package.json" ]; then
+        LANG="TypeScript / JavaScript"
+        TEST_CMD="npm test"
+    fi
+    echo "      Detected Language:   $LANG"
+    echo "      Default Test Runner: ${TEST_CMD:-None detected}"
+
+    echo ""
+    echo "[2/4] Scanning local AI agent harnesses..."
+    AVAILABLE_HARNESSES=""
+    if command -v claude >/dev/null 2>&1; then
+        AVAILABLE_HARNESSES="$AVAILABLE_HARNESSES claude"
+    fi
+    if command -v gemini >/dev/null 2>&1; then
+        AVAILABLE_HARNESSES="$AVAILABLE_HARNESSES gemini"
+    fi
+    if command -v ollama >/dev/null 2>&1; then
+        AVAILABLE_HARNESSES="$AVAILABLE_HARNESSES ollama"
+    fi
+    if command -v cursor >/dev/null 2>&1; then
+        AVAILABLE_HARNESSES="$AVAILABLE_HARNESSES cursor"
+    fi
+
+    if [ -n "$AVAILABLE_HARNESSES" ]; then
+        echo "      Detected local harnesses:$AVAILABLE_HARNESSES"
+    else
+        echo "      No local harnesses detected (generic fallback active)"
+    fi
+
+    echo ""
+    echo "[3/4] Configuring methodology parameters:"
+
+    SELECTED_HARNESS="auto"
+    SELECTED_TEST="${TEST_CMD:-pytest}"
+    ENABLE_HOOK="Y"
+
+    BATCH_SETUP=0
+    for a in "$@"; do
+        if [ "$a" = "--batch" ] || [ "$a" = "-y" ] || [ "$a" = "--non-interactive" ]; then
+            BATCH_SETUP=1
+        fi
+    done
+
+    if [ "$BATCH_SETUP" = "0" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ]; then
+        printf "      Confirm test execution command [%s]: " "${SELECTED_TEST}"
+        read -r input_test || true
+        if [ -n "$input_test" ]; then
+            SELECTED_TEST="$input_test"
+        fi
+
+        printf "      Enable zero-command pre-commit verification gate? [Y/n]: "
+        read -r input_hook || true
+        case "$input_hook" in
+            [nN]*) ENABLE_HOOK="N" ;;
+            *) ENABLE_HOOK="Y" ;;
+        esac
+    fi
+
+    echo ""
+    echo "[4/4] Deploying declarative contracts into .read/..."
+
+    TEMPLATE_DIR=""
+    for cand in "$DIR/../template/.read" "$DIR/template/.read" "$DIR/../share/read/template/.read" "/usr/local/share/read/template/.read" "/usr/share/read/template/.read"; do
+        if [ -d "$cand" ]; then
+            TEMPLATE_DIR="$cand"
+            break
+        fi
+    done
+
+    if [ ! -d ".read" ]; then
+        if [ -n "$TEMPLATE_DIR" ]; then
+            cp -r "$TEMPLATE_DIR" .read
+        else
+            mkdir -p .read/hooks
+        fi
+    fi
+
+    if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]; then
+        "$ENGINE" init >/dev/null 2>&1 || true
+    fi
+
+    cat > .read/config.json << EOF
+{
+  "project_name": "$(basename "$WORKSPACE")",
+  "language": "$LANG",
+  "test_command": "$SELECTED_TEST",
+  "default_harness": "$SELECTED_HARNESS",
+  "mutation_threshold": 0.80,
+  "storage_policy": "both_sync",
+  "engine_bin": "${ENGINE:-read-engine}"
+}
+EOF
+
+    if [ "$ENABLE_HOOK" = "Y" ] && [ -d ".git" ]; then
+        if [ -d ".read/hooks" ]; then
+            git config core.hooksPath .read/hooks 2>/dev/null || true
+            echo "      Configured git pre-commit hook (core.hooksPath = .read/hooks)"
+        fi
+    fi
+
+    echo ""
+    echo "================================================================"
+    echo "READ Repository Setup Complete"
+    echo "================================================================"
+    echo "Declarative Contracts: .read/TASK.md, .read/STATE.json, .read/EVIDENCE.json"
+    echo "Configuration:         .read/config.json"
+    echo ""
+    echo "How to work (Zero-Command BMAD Methodology):"
+    echo "1. Specify your requirements in .read/TASK.md"
+    echo "2. Edit your source code and tests"
+    echo "3. Run 'git commit -m \"feat: your changes\"'"
+    echo "   The pre-commit gate will verify your tests, run mutation checks,"
+    echo "   and atomically seal verified proof into the commit."
+    echo "================================================================"
+    exit 0
+fi
+
+# Subcommand: init (Initializes .read state AND installs declarative .read contracts + pre-commit hook)
+if [ "$1" = "init" ]; then
+    shift
+    if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]; then
+        "$ENGINE" init "$@"
+    else
+        echo "[ERROR] Native read-engine binary not found in $DIR or PATH" >&2
+        exit 1
+    fi
+
+    # Discover template directory
+    TEMPLATE_DIR=""
+    for cand in "$DIR/../template/.read" "$DIR/template/.read" "$DIR/../share/read/template/.read" "/usr/local/share/read/template/.read" "/usr/share/read/template/.read"; do
+        if [ -d "$cand" ]; then
+            TEMPLATE_DIR="$cand"
+            break
+        fi
+    done
+
+    if [ -n "$TEMPLATE_DIR" ]; then
+        mkdir -p .read
+        cp -r "$TEMPLATE_DIR"/* .read/ 2>/dev/null || true
+        if [ -d "$TEMPLATE_DIR/hooks" ]; then
+            mkdir -p .read/hooks
+            cp -r "$TEMPLATE_DIR/hooks"/* .read/hooks/ 2>/dev/null || true
+        fi
+        echo "[READ] Initialized declarative methodology contracts in .read/"
+    fi
+
+    # Auto-activate git pre-commit hook if in a git repository
+    if [ -d ".git" ]; then
+        if [ -d ".read/hooks" ]; then
+            git config core.hooksPath .read/hooks 2>/dev/null || true
+            echo "[READ] Activated declarative zero-command pre-commit hook (core.hooksPath=.read/hooks)"
+        elif [ -f ".read/hooks/pre-commit" ]; then
+            mkdir -p .git/hooks
+            cp .read/hooks/pre-commit .git/hooks/pre-commit
+            chmod +x .git/hooks/pre-commit
+            echo "[READ] Installed pre-commit verification hook in .git/hooks/pre-commit"
+        fi
+    fi
+    exit 0
+fi
+
+# Subcommand: run (Autonomous Agent Execution Pipeline)
+if [ "$1" = "run" ]; then
+    shift
+    if [ -z "$DAEMON" ]; then
+        echo "[ERROR] read-daemon binary not found in $DIR or PATH" >&2
+        exit 1
+    fi
+    exec "$DAEMON" run "$@"
+fi
+
+# Subcommand: scan (Host Harness Discovery)
+if [ "$1" = "scan" ]; then
+    shift
+    if [ -z "$DAEMON" ]; then
+        echo "[ERROR] read-daemon binary not found in $DIR or PATH" >&2
+        exit 1
+    fi
+    exec "$DAEMON" scan "$@"
+fi
+
+# Subcommand: daemon
+if [ "$1" = "daemon" ]; then
+    shift
+    if [ -z "$DAEMON" ]; then
+        echo "[ERROR] read-daemon binary not found in $DIR or PATH" >&2
+        exit 1
+    fi
+    exec "$DAEMON" "$@"
+fi
+
+# Subcommand: report
+if [ "$1" = "report" ]
+then
+    shift
+    if [ "$1" = "--yaml" ]
+    then
+        if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]
+        then
+            exec "$ENGINE" status --yaml
+        else
+            echo "[ERROR] Native read-engine binary not found in $DIR or PATH" >&2
+            exit 1
+        fi
+    fi
+    OUT_PATH="evidence/reports/report_latest.html"
+    if [ "$1" = "--html" ]
+    then
+        shift
+        if [ -n "$1" ]
+        then
+            OUT_PATH="$1"
+        fi
+    fi
+    REPORT_SCRIPT=""
+    for cand in "$DIR/read-report" "$DIR/../bin/read-report" "/home/renan/.local/bin/read-report"
+    do
+        if [ -f "$cand" ]
+        then
+            REPORT_SCRIPT="$cand"
+            break
+        fi
+    done
+    if [ -z "$REPORT_SCRIPT" ]
+    then
+        echo "[ERROR] read-report script not found" >&2
+        exit 1
+    fi
+    exec python3 "$REPORT_SCRIPT" "$OUT_PATH"
+fi
+
+# Flag: version
+if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
+    echo "READ Framework Unified CLI (v0.1.0)"
+    if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]; then
+        "$ENGINE" --version 2>/dev/null || true
+    fi
+    exit 0
+fi
+
+# Flag: help or no arguments
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] || [ $# -eq 0 ]; then
+    echo "READ Framework Unified CLI (v0.1.0)"
+    echo "Resource-conscious, Evidence-driven AI Development"
+    echo ""
+    echo "USAGE:"
+    echo "    read <COMMAND> [ARGS]"
+    echo ""
+    echo "CORE ENGINE COMMANDS:"
+    echo "    setup                            Interactive BMAD-style repository setup wizard"
+    echo "    init                             Initialize .read state directory and STATE.json"
+    echo "    status                           Display current CAS state machine status"
+    echo "    define <TASK_ID> <CONTRACT_HASH> <BASE_COMMIT>"
+    echo "                                     Freeze task contract into defined state"
+    echo "    build                            Transition state to executing (Build stage)"
+    echo "    verify <DIFF_HASH> <VERIFY_LOG>  Record AROP verification and seal verify_hash"
+    echo "    handoff                          CAS-gated transition to handoff_complete"
+    echo "    recover                          Zero-token crash recovery from WAL.log"
+    echo "    override <OPERATOR> <RATIONALE>  Apply Master Override with hashed rationale"
+    echo "    diff-hash                        Compute SHA-256 of git diff --staged (<0.1ms)"
+    echo "    ast-context <TARGET_FILE>        Deterministically extract C0 AST context (\$0.00)"
+    echo "    mutate <DIFF_FILE>               Generate <=10 targeted diff mutants (<4.5s)"
+    echo "    eval-mutation-score <K> <TOTAL>  Evaluate mutation score against strictly 100% gate"
+    echo "    learn <ACTION> [SCENARIO_ID]     Adversarial developer induction (init|scenario|diagnose|progress)"
+    echo "    asm <OPCODES>                    Execute Short Assembly Micro-DSL opcodes"
+    echo "    report [--html [PATH] | --yaml]  Generate HTML or YAML evidence verification report"
+    echo "    config                           Display resolved configuration"
+    echo ""
+    echo "AUTONOMOUS PIPELINE COMMANDS:"
+    echo "    run [OPTIONS] <PROMPT>           Execute unified autonomous agent pipeline"
+    echo ""
+    echo "DISCOVERY & DAEMON COMMANDS:"
+    echo "    scan [OPTIONS]                   Discover and inspect all AI agent harnesses on host"
+    echo "    daemon [OPTIONS]                 Run READ background daemon"
+    echo ""
+    echo "FLAGS:"
+    echo "    -h, --help                       Print help information"
+    echo "    -v, --version                    Print version information"
+    exit 0
+fi
+
+# Execute native engine
+if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]; then
+    exec "$ENGINE" "$@"
+else
+    echo "[ERROR] Native read-engine binary not found in $DIR or PATH" >&2
+    exit 1
+fi
