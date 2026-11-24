@@ -1,16 +1,32 @@
 # READ: Resource-conscious, Evidence-driven AI Development
 
-## Architectural Specification and Framework Manual
+> **Stop burning tokens on conversation. Start building with cryptographic certainty.**  
+> READ is an open-source verification framework that turns conversational AI coding assistants into rigorous, evidence-driven software engineers.
 
-READ is an executable software engineering framework and process supervision system designed to replace conversational LLM chat workflows with deterministic systems mechanics. Supported on Linux (x86_64 and aarch64), macOS (Apple Silicon and Intel), and Windows (via WSL2 and universal Python MCP).
+Supported natively on Linux (x86_64 and aarch64), macOS (Apple Silicon and Intel), and Windows (via WSL2 and universal Python MCP).
 
-The framework enforces mechanical verification gates, deterministic context assembly, and cryptographic auditability across multi-agent AI development lifecycles.
+---
 
-READ operates on a **declarative, zero-command repository contract model (just like BMAD)**: developers and AI agents interact exclusively through repository markdown files (`.read/TASK.md`, `.read/STATE.json`, `.read/EVIDENCE.json`) and standard `git commit` workflows. Git hooks automatically freeze contracts, execute tests against AROP mutants, and seal verification without requiring manual CLI command execution.
+## The Vision: Why READ Exists
+
+Modern AI coding assistants (like Claude, Cursor, Copilot, and Gemini) have transformed how we write software. They generate code at superhuman speeds, explain complex concepts fluently, and suggest creative solutions. But every developer and engineering team quickly runs into the same painful challenges:
+
+1. **The Green Checkmark Illusion**: An AI tells you "I fixed the issue and all tests pass." But did the tests actually test the logic? Often, agents write superficial or tautological tests that pass without checking real boundary conditions, letting silent bugs slip straight into production.
+2. **The Endless Token Burn**: Conversational tools dump entire source trees, boilerplate, and long chat histories into model context prompts over and over again. You burn through API budgets paying for tokens to re-read files that never changed.
+3. **Session Amnesia and Fragile State**: When an agent session crashes, terminal times out, or the host reboots, conversational context vanishes. You have to re-prompt, re-spend tokens, and hope the agent remembers what it was doing.
+4. **Lack of True Guardrails**: A conversational prompt cannot enforce operating system barriers. Models can accidentally alter out-of-scope files or declare tasks completed without authentic proof.
+
+**READ changes this paradigm completely.**
+
+Instead of relying on polite chat dialogue and unverified promises, READ brings deterministic systems mechanics and mathematical verification to AI development:
+- **Zero-Token Local Context**: Extracts public function and class signatures locally in under 5 milliseconds for $0.00 token cost.
+- **Strict 100% Mutation Gate (AROP)**: Automatically injects targeted bugs into modified lines to prove your test suite actually catches defects before allowing code to commit.
+- **Zero-Command Git Experience**: No complex commands to memorize. READ integrates directly into your regular `git commit` workflow and declarative markdown files (inspired by the zero-command philosophy of BMAD).
+- **Crash-Proof Write-Ahead Log (WAL)**: Every step is cryptographically recorded in an append-only log. If anything crashes, your state recovers in 15 milliseconds without spending a single token.
 
 READ is divided into two decoupled execution layers:
-1. **read-core**: A native Rust computational engine (edition 2021) enforcing atomic state transitions, zero-token C0 AST context extraction, staged git diff hashing, append-only write-ahead logging (WAL), and asymmetric bounded mutation verification (AROP).
-2. **read-daemon**: A Go service managing POSIX process supervision, WebSocket pseudo-terminal (PTY) multiplexing, dynamic agent socket discovery, real-time credential scrubbing, and 3-way storage synchronization across workstation, remote client, and VPS nodes.
+1. **read-core**: A high-speed native Rust computational engine enforcing atomic state transitions, zero-token C0 AST context extraction, staged git diff hashing, append-only write-ahead logging (WAL), and asymmetric bounded mutation verification (AROP).
+2. **read-daemon**: A robust Go host supervisor managing POSIX process supervision, WebSocket pseudo-terminal (PTY) multiplexing, dynamic agent socket discovery, real-time credential scrubbing, and 3-way storage synchronization across workstation, remote client, and VPS nodes.
 
 ---
 
