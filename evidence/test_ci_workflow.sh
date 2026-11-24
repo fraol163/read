@@ -5,7 +5,9 @@ echo "=== TEST: GitHub Actions CI Verification Gate Simulation ==="
 echo "Workflow Target: .github/workflows/read-gate.yml"
 echo "Date: $(date --iso-8601=seconds)"
 
-ENGINE="/home/renan/Downloads/me/methodology_session/read/bin/read-engine"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ENGINE="$REPO_DIR/bin/read-engine"
 TMPDIR=$(mktemp -d /tmp/read-ci-gate-test-XXXXXX)
 
 cleanup() {

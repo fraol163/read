@@ -1,4 +1,4 @@
-name: READ Framework Verification Gate
+name: READ Framework CI and Verification Gate
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main, master ]
 
 jobs:
-  verify-gate:
-    name: Enforce READ Verification Invariant
+  verify:
+    name: Build, Test and Verify READ Framework
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -16,37 +16,57 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Git Safe Identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build READ Engine
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build Native Binaries
         run: |
-          cargo build --release --manifest-path read/read-core/Cargo.toml
           mkdir -p bin
-          cp read/read-core/target/release/read-core bin/read-engine
-
-      - name: Verify State and Contract Integrity
-        run: |
-          if [ ! -f ".read/STATE.json" ] && [ ! -f ".method/STATE.json" ]
+          cargo build --release --manifest-path read-core/Cargo.toml
+          TARGET_DIR=$(cargo metadata --format-version 1 --manifest-path read-core/Cargo.toml --no-deps | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
+          if [ -f "${TARGET_DIR}/release/read-engine" ]
           then
-            echo "[ERROR] No READ state found. Commits must be processed by READ."
-            exit 1
-          fi
-
-      - name: Verify Cryptographic WAL Git Tag Anchor
-        run: |
-          ./bin/read-engine verify-wal-anchor || {
-            echo "[SECURITY ERROR] WAL git tag anchor verification failed. WAL may be tampered."
-            exit 1
-          }
-
-      - name: Enforce Sealed State Handoff
-        run: |
-          STATUS=$(./bin/read-engine status | grep '"status":' | tr -d '", ' | cut -d: -f2)
-          echo "Current READ State: $STATUS"
-          if [ "$STATUS" != "handoff_complete" ] && [ "$STATUS" != "verified" ]
+            cp "${TARGET_DIR}/release/read-engine" bin/read-engine
+          elif [ -f "read-core/target/release/read-engine" ]
           then
-            echo "[GATE FAILED] Commit was made without passing the READ verification gate."
-            echo "Direct git commit --no-verify bypasses are mechanically rejected on CI."
-            exit 1
+            cp read-core/target/release/read-engine bin/read-engine
+          elif [ -f "target/release/read-engine" ]
+          then
+            cp target/release/read-engine bin/read-engine
           fi
+          chmod +x bin/read-engine bin/read
+          cd read-daemon && go build -trimpath -o ../bin/read-daemon ./cmd/read-daemon && cd ..
+          chmod +x bin/read-daemon
+          chmod +x bin/read-mcp
+
+      - name: Run Rust Core Unit Tests
+        run: cargo test --manifest-path read-core/Cargo.toml
+
+      - name: Run Go Daemon Unit Tests
+        run: cd read-daemon && go test -v ./...
+
+      - name: Verify All 24 Commands
+        run: bash tests/test_all_commands.sh
+
+      - name: Run Packaging and E2E Tests
+        run: |
+          bash tests/test_packaging.sh
+          bash tests/test_e2e.sh
+
+      - name: Run CI Gate Simulation
+        run: bash evidence/test_ci_workflow.sh

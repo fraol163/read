@@ -50,8 +50,6 @@ fi
 if [ -z "$ENGINE_BIN" ]; then
     if command -v read-engine >/dev/null 2>&1; then
         ENGINE_BIN="$(command -v read-engine)"
-    elif [ -x "/home/renan/Downloads/me/methodology_session/read/bin/read-engine" ]; then
-        ENGINE_BIN="/home/renan/Downloads/me/methodology_session/read/bin/read-engine"
     elif [ -x "./bin/read-engine" ]; then
         ENGINE_BIN="./bin/read-engine"
     elif [ -x "./read/bin/read-engine" ]; then

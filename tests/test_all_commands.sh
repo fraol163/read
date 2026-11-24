@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-REPO="/home/renan/Downloads/me/methodology_session"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
 READ="$REPO/bin/read"
 READ_MCP="$REPO/bin/read-mcp"
 READ_ENGINE="$REPO/bin/read-engine"

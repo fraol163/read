@@ -5,7 +5,9 @@ echo "=== TEST: Cryptographic WAL Git Tag Anchoring and Rewritten Chain Attack =
 echo "Target Command: read-engine verify-wal-anchor & recover"
 echo "Date: $(date --iso-8601=seconds)"
 
-ENGINE="/home/renan/Downloads/me/methodology_session/read/bin/read-engine"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ENGINE="$REPO_DIR/bin/read-engine"
 TMPDIR=$(mktemp -d /tmp/read-wal-anchor-test-XXXXXX)
 
 cleanup() {
