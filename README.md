@@ -2,7 +2,7 @@
 
 ## Architectural Specification and Framework Manual
 
-READ is an executable software engineering framework and process supervision system designed to replace conversational LLM chat workflows with deterministic systems mechanics. Linux is the only supported platform (x86_64 and aarch64).
+READ is an executable software engineering framework and process supervision system designed to replace conversational LLM chat workflows with deterministic systems mechanics. Supported on Linux (x86_64 and aarch64), macOS (Apple Silicon and Intel), and Windows (via WSL2 and universal Python MCP).
 
 The framework enforces mechanical verification gates, deterministic context assembly, and cryptographic auditability across multi-agent AI development lifecycles.
 
@@ -14,32 +14,110 @@ READ is divided into two decoupled execution layers:
 
 ---
 
+## Installation
+
+### 1. Universal MCP Server (Recommended for AI Assistants)
+Install directly via Python without compiling native toolchains:
+```bash
+pip install git+https://github.com/fraol163/read.git
+```
+Or install with `pipx` for isolated global execution:
+```bash
+pipx install git+https://github.com/fraol163/read.git
+```
+
+#### MCP Client Configuration
+Add READ to your AI assistant configuration:
+
+For **Claude Code** (`~/.claude.json` or run `claude mcp add read read-mcp`):
+```json
+{
+  "mcpServers": {
+    "read": {
+      "command": "read-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+For **Google Antigravity / Gemini CLI** (`~/.gemini/antigravity-cli/mcp/read.json`):
+```json
+{
+  "command": "read-mcp",
+  "args": []
+}
+```
+
+For **Cursor** (`Settings -> Features -> MCP -> Add new MCP server`):
+- Name: `read`
+- Type: `command`
+- Command: `read-mcp`
+
+### 2. Standalone Shell Installer (Linux & macOS)
+Install pre-compiled release binaries and configure your shell environment with a single command:
+```bash
+curl -fsSL https://raw.githubusercontent.com/fraol163/read/main/install.sh | bash
+```
+Or clone and run the installer locally:
+```bash
+git clone https://github.com/fraol163/read.git
+cd read
+./install.sh
+```
+
+### 3. Windows Installation
+- **Recommended (WSL2)**: Open Windows Subsystem for Linux (Ubuntu, Debian, or Arch) and run the installer:
+  ```bash
+  wsl curl -fsSL https://raw.githubusercontent.com/fraol163/read/main/install.sh | bash
+  ```
+- **Native Python MCP**: Windows users can run `read-mcp` directly in Windows PowerShell or Command Prompt via:
+  ```powershell
+  pip install git+https://github.com/fraol163/read.git
+  ```
+
+### 4. Build from Source
+Prerequisites: Rust 1.75+ (`cargo`) and Go 1.22+.
+```bash
+git clone https://github.com/fraol163/read.git
+cd read
+make install
+```
+Verify the installation:
+```bash
+read --version
+read-mcp --check
+```
+
+---
+
 ## Table of Contents
 
-1. [Core Technical Problem Space](#1-core-technical-problem-space)
-2. [Dual-Engine Topology](#2-dual-engine-topology)
-3. [The 4-Stage Gated Lifecycle](#3-the-4-stage-gated-lifecycle)
-4. [Engine Subsystems (read-core)](#4-engine-subsystems-read-core)
+1. [Installation](#installation)
+2. [Core Technical Problem Space](#1-core-technical-problem-space)
+3. [Dual-Engine Topology](#2-dual-engine-topology)
+4. [The 4-Stage Gated Lifecycle](#3-the-4-stage-gated-lifecycle)
+5. [Engine Subsystems (read-core)](#4-engine-subsystems-read-core)
    - [4.1 C0 Deterministic AST Context Resolver](#41-c0-deterministic-ast-context-resolver)
    - [4.2 Compare-And-Swap (CAS) State Engine](#42-compare-and-swap-cas-state-engine)
    - [4.3 Cryptographic Write-Ahead Log (WAL)](#43-cryptographic-write-ahead-log-wal)
    - [4.4 AROP Bounded Mutation Testing](#44-arop-bounded-mutation-testing)
    - [4.5 Master Override Audit Trail](#45-master-override-audit-trail)
-5. [Daemon Subsystems (read-daemon)](#5-daemon-subsystems-read-daemon)
+6. [Daemon Subsystems (read-daemon)](#5-daemon-subsystems-read-daemon)
    - [5.1 Dynamic Agent and Socket Discovery](#51-dynamic-agent-and-socket-discovery)
    - [5.2 Process Supervision and PTY Multiplexing](#52-process-supervision-and-pty-multiplexing)
    - [5.3 3-Way Storage Engine](#53-3-way-storage-engine)
    - [5.4 Real-Time Credential Sanitization](#54-real-time-credential-sanitization)
-6. [Command-Line Interface Reference](#6-command-line-interface-reference)
-7. [HTTP & WebSocket Gateway API Reference](#7-http--websocket-gateway-api-reference)
-8. [Documentation Suite](#8-documentation-suite)
-9. [Verified Working Examples](#9-verified-working-examples)
-10. [Automated Verification and Chaos Suites](#10-automated-verification-and-chaos-suites)
-11. [Known System Limitations](#11-known-system-limitations)
-12. [Learning READ: Adversarial Induction Suite](#12-learning-read-adversarial-induction-suite)
-13. [Short Assembly Micro-DSL and Machine-Readable YAML](#13-short-assembly-micro-dsl-and-machine-readable-yaml)
-14. [Model Context Protocol (MCP) Server Integration](#14-model-context-protocol-mcp-server-integration)
-15. [Empirical Real-World Benchmark: Alphabet Meta-Compiler](#15-empirical-real-world-benchmark-alphabet-meta-compiler)
+7. [Command-Line Interface Reference](#6-command-line-interface-reference)
+8. [HTTP & WebSocket Gateway API Reference](#7-http--websocket-gateway-api-reference)
+9. [Documentation Suite](#8-documentation-suite)
+10. [Verified Working Examples](#9-verified-working-examples)
+11. [Automated Verification and Chaos Suites](#10-automated-verification-and-chaos-suites)
+12. [Known System Limitations and Platform Support](#11-known-system-limitations-and-platform-support)
+13. [Learning READ: Adversarial Induction Suite](#12-learning-read-adversarial-induction-suite)
+14. [Short Assembly Micro-DSL and Machine-Readable YAML](#13-short-assembly-micro-dsl-and-machine-readable-yaml)
+15. [Model Context Protocol (MCP) Server Integration](#14-model-context-protocol-mcp-server-integration)
+16. [Empirical Real-World Benchmark: Alphabet Meta-Compiler](#15-empirical-real-world-benchmark-alphabet-meta-compiler)
 
 ---
 
@@ -58,41 +136,39 @@ READ eliminates these failure modes through mechanical systems enforcement rathe
 
 ## 2. Dual-Engine Topology
 
-```
-+-----------------------------------------------------------------------------------+
-| Host Systems (PC / VPS / CI Runner [UNTESTED])                                    |
-|                                                                                   |
-|  +------------------------------------+    +-----------------------------------+  |
-|  | Discovered AI Agents & Harnesses   |    | Dynamic Socket / Engine Discovery |  |
-|  | - DeepSeek Harness (dsh)           |    | - Ollama (11434)                  |  |
-|  | - Claude Code CLI (claude)         |    | - llama.cpp (8080)                |  |
-|  | - Aider (aider)                    |    | - vLLM (8000)                     |  |
-|  +-----------------+------------------+    +-----------------+-----------------+  |
-|                    |                                         |                    |
-|                    +--------------------+--------------------+                    |
-|                                         |                                         |
-|                                         v                                         |
-|  +-----------------------------------------------------------------------------+  |
-|  | read-daemon (Go 1.22+)                                                      |  |
-|  | - Process Supervision & Output Multiplexing                                 |  |
-|  | - Bidirectional Remote Terminal Streaming (PTY)                             |  |
-|  | - 3-Way Storage Engine (pc_only, phone_only, both_sync)                       |  |
-|  | - Real-Time Secret Redaction (sk-ant, sk-proj, Bearer, gh tokens)           |  |
-|  | - Workspace File Sandbox & Hash Verification                                |  |
-|  +--------------------------------------+--------------------------------------+  |
-|                                         |                                         |
-|                                         v                                         |
-|  +-----------------------------------------------------------------------------+  |
-|  | read-core (Rust 1.75+)                                                       |  |
-|  | - C0 Deterministic AST Context Resolver ($0.00 token cost, <5ms)            |  |
-|  | - Compare-And-Swap (CAS) State Engine (.read/STATE.json)                  |  |
-|  | - Append-Only Write-Ahead Log (.read/WAL.log, SHA-256 hash chaining)      |  |
-|  | - Asymmetric Bounded Mutation Verifier (AROP, <=10 mutants, <4.5s)          |  |
-|  | - Staged Diff Hasher (SHA-256 over git diff --staged, <0.1ms)               |  |
-|  | - Master Override Audit Trail ([OVERRIDE] with SHA-256 proof)               |  |
-|  | - Zero-Token Crash Recovery System (7.5ms to 16.5ms recovery time)          |  |
-|  +-----------------------------------------------------------------------------+  |
-+-----------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph Host["Host Systems (PC / VPS / CI Runner)"]
+        subgraph Agents["Discovered AI Agents & Harnesses"]
+            DSH["DeepSeek Harness (dsh)"]
+            Claude["Claude Code CLI (claude)"]
+            Aider["Aider (aider)"]
+        end
+        subgraph Sockets["Dynamic Socket & Engine Discovery"]
+            Ollama["Ollama (:11434)"]
+            Llama["llama.cpp (:8080)"]
+            VLLM["vLLM (:8000)"]
+        end
+        subgraph Daemon["read-daemon (Go 1.22+)"]
+            D1["Process Supervision & Output Multiplexing"]
+            D2["Bidirectional Remote Terminal Streaming (PTY)"]
+            D3["3-Way Storage Engine (pc_only, phone_only, both_sync)"]
+            D4["Real-Time Secret Redaction (sk-ant, sk-proj, Bearer, gh tokens)"]
+            D5["Workspace File Sandbox & Hash Verification"]
+        end
+        subgraph Core["read-core (Rust 1.75+)"]
+            C1["C0 Deterministic AST Context Resolver ($0.00 cost, <5ms)"]
+            C2["Compare-And-Swap State Engine (.read/STATE.json)"]
+            C3["Append-Only Write-Ahead Log (.read/WAL.log, SHA-256 chaining)"]
+            C4["Asymmetric Bounded Mutation Verifier (AROP, <=10 mutants)"]
+            C5["Staged Diff Hasher (SHA-256 over git diff --staged)"]
+            C6["Master Override Audit Trail ([OVERRIDE] with SHA-256 proof)"]
+            C7["Zero-Token Crash Recovery System (7.5ms to 16.5ms)"]
+        end
+        Agents --> Daemon
+        Sockets --> Daemon
+        Daemon --> Core
+    end
 ```
 
 ---
@@ -101,10 +177,18 @@ READ eliminates these failure modes through mechanical systems enforcement rathe
 
 All software modifications within READ proceed through a strictly gated, 4-stage mechanical lifecycle:
 
-```
-+--------+            +--------+            +-----------+            +----------+            +------------------+
-|  Idle  | --define-> |Defined | --build--> | Executing | --verify-> | Verified | --handoff->| HandoffComplete ([log](evidence/logs/01_test_e2e.log)) |
-+--------+            +--------+            +-----------+            +----------+            +------------------+
+```mermaid
+flowchart LR
+    Idle(["Idle"]) -->|"read define"| Defined(["Defined"])
+    Defined -->|"read build"| Executing(["Executing"])
+    Executing -->|"read verify"| Verified(["Verified"])
+    Executing -.->|"read override"| Verified
+    Verified -->|"read handoff"| HandoffComplete(["HandoffComplete"])
+
+    classDef stage fill:#1f2937,stroke:#3b82f6,stroke-width:2px,color:#f9fafb
+    classDef done fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5
+    class Idle,Defined,Executing,Verified stage
+    class HandoffComplete done
 ```
 
 1. **Define Stage**:
@@ -180,8 +264,27 @@ When legitimate changes produce surviving mutants or emergency fixes must bypass
 - An operator applies `read-engine override <OPERATOR> <RATIONALE>`.
 - Rationale must be at least 30 characters.
 - Generates cryptographic proof:
-  $$\text{override\_hash} = \text{"OVR-"} \parallel \text{SHA-256}(\text{rationale} \parallel \text{operator} \parallel \text{timestamp})$$
+  ```text
+  override_hash = "OVR-" || SHA-256(rationale || operator || timestamp)
+  ```
+  $$\mathrm{override}_{\mathrm{hash}} = \text{"OVR-"} \parallel \mathrm{SHA256}(\text{rationale} \parallel \text{operator} \parallel \text{timestamp})$$
 - Seals state into `Verified` with full auditable trail in `WAL.log`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Human Operator
+    participant CLI as read-engine
+    participant State as ".read/STATE.json"
+    participant WAL as ".read/WAL.log"
+
+    Operator->>CLI: override OPERATOR_ID RATIONALE (>= 30 chars)
+    CLI->>CLI: Compute SHA-256 proof: override_hash = "OVR-" || SHA-256(...)
+    CLI->>WAL: Append [OVERRIDE] entry with proof & timestamp
+    CLI->>State: Atomic CAS transition to Verified (set verify_hash)
+    State-->>CLI: State revision incremented
+    CLI-->>Operator: Verification sealed with cryptographic receipt
+```
 
 ---
 
@@ -363,9 +466,12 @@ bash tests/test_chaos.sh
 
 ---
 
-## 11. Known System Limitations
+## 11. Known System Limitations and Platform Support
 
-1. Operating System Exclusivity: Linux is the only supported platform (x86_64 and aarch64). macOS, Windows, and BSD are unsupported.
+1. Platform Compatibility:
+   - **Linux (x86_64 and aarch64)**: Tier-1 first-class native support with cgroups v2, RLIMIT process sandboxing, atomic POSIX locking, and PTY streaming.
+   - **macOS (Apple Silicon and Intel)**: Supported via native POSIX runtime (flock file locking, POSIX PTY, BSD setrlimit).
+   - **Windows**: Supported via WSL2 (recommended for full daemon process tree supervision and PTY multiplexing) and native Python MCP (`read-mcp`).
 2. Virtual Memory Constraints (`RLIMIT_AS`): Setting `RLIMIT_AS` to 30% of RAM breaks 64-bit Java (JVM) and .NET CoreCLR runtimes on machines with under 6 GB memory. Use cgroups v2 instead of virtual memory limits for managed runtimes.
 3. Mutation Truncation on Large Diffs: The AROP mutation engine accepts the first 10 mutants sequentially. Modified lines appearing later in a diff receive no mutation testing.
 4. Reverse Proxy Header Spoofing: Trusting `X-Forwarded-For` allows external clients to spoof loopback status unless the reverse proxy strips client headers.
