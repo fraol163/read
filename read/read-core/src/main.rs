@@ -16,7 +16,8 @@ USAGE:
 
 COMMANDS:
     init                             Initialize .read state directory and STATE.json
-    status                           Display current CAS state machine status
+    status [--yaml]                  Display current CAS state machine status
+    asm <OPCODES|FILE>               Execute compact AI agent assembly opcodes
     define <TASK_ID> <CONTRACT_HASH> <BASE_COMMIT>
                                      Freeze task contract into defined state
     build                            Transition state to executing (Build stage)
@@ -66,13 +67,133 @@ fn main() {
                 std::process::exit(1);
             }
         },
-        "status" => match engine.load() {
-            Ok(st) => println!("{}", serde_json::to_string_pretty(&st).unwrap()),
-            Err(e) => {
-                eprintln!("[ERROR] {}", e);
+        "status" => {
+            let as_yaml = args.iter().any(|a| a == "--yaml");
+            match engine.load() {
+                Ok(st) => {
+                    if as_yaml {
+                        println!("state_revision: {}", st.state_revision);
+                        let status_str = format!("{:?}", st.status);
+                        println!("status: {}", status_str.to_lowercase());
+                        println!("active_task_id: {}", st.active_task_id.as_deref().unwrap_or("null"));
+                        println!("contract_hash: {}", st.contract_hash.as_deref().unwrap_or("null"));
+                        println!("base_commit: {}", st.base_commit.as_deref().unwrap_or("null"));
+                        println!("staged_diff_hash: {}", st.staged_diff_hash.as_deref().unwrap_or("null"));
+                        println!("verify_hash: {}", st.verify_hash.as_deref().unwrap_or("null"));
+                    } else {
+                        println!("{}", serde_json::to_string_pretty(&st).unwrap());
+                    }
+                }
+                Err(e) => {
+                    eprintln!("[ERROR] {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        "asm" => {
+            if args.len() < 3 {
+                eprintln!("[ERROR] Usage: read-engine asm <OPCODE_STRING_OR_FILE>");
                 std::process::exit(1);
             }
-        },
+            let input = &args[2];
+            let content = if std::path::Path::new(input).exists() {
+                std::fs::read_to_string(input).unwrap_or_else(|_| input.clone())
+            } else {
+                input.clone()
+            };
+
+            for line in content.lines() {
+                let trimmed = line.trim();
+                if trimmed.is_empty() || trimmed.starts_with('#') {
+                    continue;
+                }
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                match parts[0].to_uppercase().as_str() {
+                    "INIT" => match engine.init() {
+                        Ok(_) => println!("[ASM:OK] INIT"),
+                        Err(e) => { eprintln!("[ASM:FAIL] INIT: {}", e); std::process::exit(1); }
+                    },
+                    "STATUS" => match engine.load() {
+                        Ok(st) => println!("[ASM:OK] STATUS rev={} state={:?}", st.state_revision, st.status),
+                        Err(e) => { eprintln!("[ASM:FAIL] STATUS: {}", e); std::process::exit(1); }
+                    },
+                    "DEF" => {
+                        if parts.len() < 4 {
+                            eprintln!("[ASM:FAIL] DEF requires <task_id> <contract_hash> <base_commit>");
+                            std::process::exit(1);
+                        }
+                        match engine.transition_define(parts[1], parts[2], parts[3]) {
+                            Ok(st) => println!("[ASM:OK] DEF task={} rev={}", parts[1], st.state_revision),
+                            Err(e) => { eprintln!("[ASM:FAIL] DEF: {}", e); std::process::exit(1); }
+                        }
+                    },
+                    "BUILD" => match engine.transition_start_build() {
+                        Ok(_) => println!("[ASM:OK] BUILD"),
+                        Err(e) => { eprintln!("[ASM:FAIL] BUILD: {}", e); std::process::exit(1); }
+                    },
+                    "AST_SIG" => {
+                        if parts.len() < 2 {
+                            eprintln!("[ASM:FAIL] AST_SIG requires <file>");
+                            std::process::exit(1);
+                        }
+                        match AstContextResolver::resolve(parts[1], repo_root, 3) {
+                            Ok(m) => println!("[ASM:OK] AST_SIG file={} syms={} tokens={}", parts[1], m.symbols.len(), m.estimated_token_footprint),
+                            Err(e) => { eprintln!("[ASM:FAIL] AST_SIG: {}", e); std::process::exit(1); }
+                        }
+                    },
+                    "MUT_GEN" => {
+                        if parts.len() < 2 {
+                            eprintln!("[ASM:FAIL] MUT_GEN requires <diff_file>");
+                            std::process::exit(1);
+                        }
+                        match std::fs::read_to_string(parts[1]) {
+                            Ok(patch) => {
+                                let mutator = BoundedMutator::new();
+                                let mutants = mutator.generate_diff_mutants(&patch);
+                                println!("[ASM:OK] MUT_GEN count={}", mutants.len());
+                            }
+                            Err(e) => { eprintln!("[ASM:FAIL] MUT_GEN: {}", e); std::process::exit(1); }
+                        }
+                    },
+                    "SCORE_CHECK" => {
+                        if parts.len() < 3 {
+                            eprintln!("[ASM:FAIL] SCORE_CHECK requires <killed> <total>");
+                            std::process::exit(1);
+                        }
+                        let k: usize = parts[1].parse().unwrap_or(0);
+                        let t: usize = parts[2].parse().unwrap_or(0);
+                        if t == 0 || k < t {
+                            eprintln!("[ASM:FAIL] SCORE_CHECK: Gate failed: {}/{} killed", k, t);
+                            std::process::exit(1);
+                        } else {
+                            println!("[ASM:OK] SCORE_CHECK: 100% kill score ({}/{})", k, t);
+                        }
+                    },
+                    "SEAL" => {
+                        if parts.len() < 3 {
+                            eprintln!("[ASM:FAIL] SEAL requires <diff_hash> <verify_log>");
+                            std::process::exit(1);
+                        }
+                        match engine.transition_record_verification(parts[1], parts[2].as_bytes()) {
+                            Ok(_) => println!("[ASM:OK] SEAL"),
+                            Err(e) => { eprintln!("[ASM:FAIL] SEAL: {}", e); std::process::exit(1); }
+                        }
+                    },
+                    "HANDOFF" => match engine.transition_handoff() {
+                        Ok(_) => println!("[ASM:OK] HANDOFF"),
+                        Err(e) => { eprintln!("[ASM:FAIL] HANDOFF: {}", e); std::process::exit(1); }
+                    },
+                    "RECOVER" => match engine.recover(None) {
+                        Ok(_) => println!("[ASM:OK] RECOVER"),
+                        Err(e) => { eprintln!("[ASM:FAIL] RECOVER: {}", e); std::process::exit(1); }
+                    },
+                    op => {
+                        eprintln!("[ASM:FAIL] Unknown opcode: {}", op);
+                        std::process::exit(1);
+                    }
+                }
+            }
+        }
         "define" => {
             if args.len() < 5 {
                 eprintln!("[ERROR] Usage: read-engine define <TASK_ID> <CONTRACT_HASH> <BASE_COMMIT>");
