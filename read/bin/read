@@ -252,6 +252,46 @@ if [ "$1" = "daemon" ]; then
     exec "$DAEMON" "$@"
 fi
 
+# Subcommand: report
+if [ "$1" = "report" ]
+then
+    shift
+    if [ "$1" = "--yaml" ]
+    then
+        if [ -n "$ENGINE" ] && [ -x "$ENGINE" ]
+        then
+            exec "$ENGINE" status --yaml
+        else
+            echo "[ERROR] Native read-engine binary not found in $DIR or PATH" >&2
+            exit 1
+        fi
+    fi
+    OUT_PATH="evidence/reports/report_latest.html"
+    if [ "$1" = "--html" ]
+    then
+        shift
+        if [ -n "$1" ]
+        then
+            OUT_PATH="$1"
+        fi
+    fi
+    REPORT_SCRIPT=""
+    for cand in "$DIR/read-report" "$DIR/../bin/read-report" "/home/renan/.local/bin/read-report"
+    do
+        if [ -f "$cand" ]
+        then
+            REPORT_SCRIPT="$cand"
+            break
+        fi
+    done
+    if [ -z "$REPORT_SCRIPT" ]
+    then
+        echo "[ERROR] read-report script not found" >&2
+        exit 1
+    fi
+    exec python3 "$REPORT_SCRIPT" "$OUT_PATH"
+fi
+
 # Flag: version
 if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
     echo "READ Framework Unified CLI (v0.7.0)"
@@ -285,6 +325,8 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] || [ $# -eq 0 ]; 
     echo "    mutate <DIFF_FILE>               Generate <=10 targeted diff mutants (<4.5s)"
     echo "    eval-mutation-score <K> <TOTAL>  Evaluate mutation score against strictly 100% gate"
     echo "    learn <ACTION> [SCENARIO_ID]     Adversarial developer induction (init|scenario|diagnose|progress)"
+    echo "    asm <OPCODES>                    Execute Short Assembly Micro-DSL opcodes"
+    echo "    report [--html [PATH] | --yaml]  Generate HTML or YAML evidence verification report"
     echo "    config                           Display resolved configuration"
     echo ""
     echo "AUTONOMOUS PIPELINE COMMANDS:"

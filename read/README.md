@@ -35,7 +35,11 @@ READ is divided into two decoupled execution layers:
 8. [Documentation Suite](#8-documentation-suite)
 9. [Verified Working Examples](#9-verified-working-examples)
 10. [Automated Verification and Chaos Suites](#10-automated-verification-and-chaos-suites)
-11. [Learning READ: Adversarial Induction Suite](#11-learning-read-adversarial-induction-suite)
+11. [Known System Limitations](#11-known-system-limitations)
+12. [Learning READ: Adversarial Induction Suite](#12-learning-read-adversarial-induction-suite)
+13. [Short Assembly Micro-DSL and Machine-Readable YAML](#13-short-assembly-micro-dsl-and-machine-readable-yaml)
+14. [Model Context Protocol (MCP) Server Integration](#14-model-context-protocol-mcp-server-integration)
+15. [Empirical Real-World Benchmark: Alphabet Meta-Compiler](#15-empirical-real-world-benchmark-alphabet-meta-compiler)
 
 ---
 
@@ -403,3 +407,112 @@ read learn progress
    - The Trap: Simulated mid-build process crash leaves in-memory state desynchronized and CAS lease expired.
    - The Recovery: The developer triggers `read recover` to replay verified Write-Ahead Log entries, restoring state revision without re-executing agents or spending any tokens.
    - Forensic Note: Compare-And-Swap (CAS) state locks prevent concurrent corruption, while the cryptographic Write-Ahead Log (WAL) recovers state deterministically.
+
+---
+
+## 13. Short Assembly Micro-DSL and Machine-Readable YAML
+
+To minimize token consumption during automated agent loops, READ provides a low-overhead bytecode-style Micro-DSL interpreter (`read asm`) and structured YAML status reporting (`read status --yaml`).
+
+### Short Assembly Micro-DSL (`read asm`)
+Instead of issuing verbose multi-token shell commands, an AI agent or harness can sequence atomic lifecycle transitions in a single compact instruction stream:
+
+```bash
+# Example: Initialize, define contract, start build, and inspect status
+read asm "INIT | DEF TASK-001 <contract_hash> <base_commit> | BUILD | STATUS"
+```
+
+Supported opcodes:
+- `INIT`: Initialize state engine and .read/ directory structure
+- `DEF <id> <contract_hash> <base_commit>`: Freeze task contract into defined state
+- `BUILD`: Transition lifecycle state to executing
+- `AST_SIG <file>`: Extract deterministic symbol signatures without loading full file
+- `MUT_GEN <diff>`: Generate targeted AST diff mutants
+- `SCORE_CHECK <killed> <total>`: Enforce strict 100% mutation kill gate
+- `SEAL <diff_hash> <log>`: Record verification and seal state
+- `HANDOFF`: Execute Compare-And-Swap handoff transition
+- `RECOVER`: Perform zero-token crash recovery from WAL.log
+- `STATUS`: Output state machine status
+
+### Structured YAML Status Reporting
+For agents and pipelines requiring machine-readable output without regex parsing:
+
+```bash
+read status --yaml
+```
+
+Output:
+```yaml
+state_revision: 3
+status: Executing
+active_task: TASK-001
+contract_hash: a1b2c3d4e5f6...
+base_commit: a3e6770
+staged_diff_hash: ~
+verify_hash: ~
+cas_lock:
+  locked_by: system
+  expected_revision: 3
+  lease_expires: 2026-11-25T12:00:00Z
+```
+
+Built-in HTML reports with self-verifying SHA-256 digests can also be generated:
+```bash
+read report --html evidence/reports/report_latest.html
+```
+
+---
+
+## 14. Model Context Protocol (MCP) Server Integration
+
+READ provides a production Model Context Protocol (MCP) server (`read-mcp`) communicating over JSON-RPC stdio. This enables AI assistants (including Google Antigravity, Claude Code, and cursor) to invoke all framework operations directly as native tools.
+
+### Available MCP Tools (21 Tools)
+1. `read_status`: Inspect CAS state machine status.
+2. `read_status_yaml`: Inspect CAS state in structured YAML format.
+3. `read_init`: Initialize .read/ state and genesis WAL.
+4. `read_define`: Freeze task contract into defined state.
+5. `read_build`: Transition state to executing (Build stage).
+6. `read_verify`: Record AROP verification and seal verify_hash.
+7. `read_handoff`: CAS-gated transition to handoff_complete.
+8. `read_recover`: Zero-token crash recovery from WAL.log.
+9. `read_override`: Apply Master Override with hashed rationale.
+10. `read_diff_hash`: Compute SHA-256 of git diff --staged (<0.1ms).
+11. `read_ast_context`: Deterministically extract C0 AST context ($0.00).
+12. `read_mutate`: Generate targeted diff mutants (<4.5s).
+13. `read_eval_mutation_score`: Evaluate mutation score against strictly 100% gate.
+14. `read_anchor_wal`: Cryptographically anchor WAL hash to git commit.
+15. `read_verify_wal_anchor`: Verify git commit matches WAL anchor hash.
+16. `read_learn`: Execute adversarial induction onboarding scenarios.
+17. `read_config`: Display resolved configuration.
+18. `read_scan`: Discover and inspect host AI harnesses.
+19. `read_asm`: Execute Short Assembly Micro-DSL opcodes.
+20. `read_run`: Execute unified autonomous agent pipeline.
+21. `read_report_html`: Generate sealed HTML verification reports with SHA-256 digest.
+
+---
+
+## 15. Empirical Real-World Benchmark: Alphabet Meta-Compiler
+
+To evaluate defect-detection capability outside synthetic tests, READ was benchmarked against the real-world open-source C++17 meta-compiler repository [fraol163/alphabet](https://github.com/fraol163/alphabet).
+
+### Defect Scenario
+In `src/type_system.cpp`, the method `TypeManager::is_compatible` evaluates type hierarchy compatibility:
+```cpp
+if (source_type <= I64 && target_type <= I64) {
+    return (source_type <= target_type)
+}
+```
+A boundary mutant was injected at line 60: `source_type <= target_type` changed to `source_type < target_type` (`BOUNDARY_SHIFT`).
+
+### 3-Arm Empirical Evaluation Results
+
+| Metric | Arm 1: Plain ctest | Arm 2: BMAD Conversational Review | Arm 3: READ Framework |
+| :--- | :--- | :--- | :--- |
+| **Pass/Fail Verdict** | PASSED (Exit Code: 0) | APPROVED ("LGTM") | BLOCKED (Exit Code: 1) |
+| **Defect Detected** | NO (Silent survival) | NO (Conversational approval) | YES (BOUNDARY_SHIFT caught) |
+| **Verification Basis** | Test runner exit code | Prose dialogue + Exit code | Cryptographic AST mutation gate |
+| **Model Token Spend** | 0 tokens | ~2,500 prompt tokens | 0 tokens (Deterministic C0 AST) |
+| **Audit Artifact** | Ephemeral console log | Ephemeral transcript | Immutable WAL cryptographic receipt |
+
+Detailed benchmark log and forensic notes: [REAL_WORLD_BENCHMARK.md](file:///home/renan/Downloads/me/methodology_session/evidence/REAL_WORLD_BENCHMARK.md).

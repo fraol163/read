@@ -188,3 +188,48 @@ if __name__ == "__main__":
 If you mutate `is_positive` (e.g. changing `n > 0` to `n >= 0`), the weak test still passes because it never tested zero.
 The AROP mutation engine detects that the mutant survived and immediately rejects the commit.
 To pass the gate, you must strengthen the test suite until all generated mutants are killed.
+
+---
+
+## Step 9: Short Assembly (Micro-DSL) for Automated Execution
+
+For autonomous agents and low-overhead automation, READ provides a single-command bytecode interpreter (`read asm`).
+Instead of executing sequential multi-token CLI invocations, an entire lifecycle can be triggered at once:
+
+```bash
+read asm "INIT | DEF TASK-002 <contract_hash> <base_commit> | BUILD | STATUS"
+```
+
+The interpreter processes each opcode atomically, updating the CAS state engine and appending to the write-ahead log.
+
+---
+
+## Step 10: Machine-Readable Reports (YAML and HTML)
+
+READ produces structured machine-readable reports for continuous integration and agent tool chains:
+
+### Structured YAML State
+```bash
+read status --yaml
+```
+
+### Self-Verifying HTML Report
+Generate an evidence audit report complete with SHA-256 seal:
+```bash
+read report --html evidence/reports/report_latest.html
+```
+
+The report embeds task metadata, mutation kill scores, diff hashes, and surviving mutant triage tables.
+
+---
+
+## Step 11: Real-World Empirical Verification (Alphabet Case Study)
+
+In real-world software engineering, passing test suites often hide untested boundary logic.
+In the open-source repository `fraol163/alphabet` (a C++17 meta-compiler), all 35 tests pass cleanly in 0.80 seconds under `ctest`.
+However, when READ injects a targeted relational boundary mutant in `TypeManager::is_compatible` (`src/type_system.cpp:60`):
+1. `ctest` still reports 100% passed (exit code 0).
+2. Conversational code review approves the change ("LGTM").
+3. READ's mechanical AROP gate flags the surviving mutant and BLOCKS the commit (exit code 1).
+
+See [REAL_WORLD_BENCHMARK.md](file:///home/renan/Downloads/me/methodology_session/evidence/REAL_WORLD_BENCHMARK.md) for full empirical reproduction details.

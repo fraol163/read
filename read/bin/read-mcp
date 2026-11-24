@@ -278,6 +278,17 @@ TOOLS = [
                 "workspace_path": {"type": "string", "description": "Path to workspace. Defaults to current directory."}
             }
         }
+    },
+    {
+        "name": "read_report_html",
+        "description": "Generate an HTML evidence verification report for the active task or trial.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "out_path": {"type": "string", "description": "Output path for the HTML report. Defaults to evidence/reports/report_latest.html."},
+                "workspace_path": {"type": "string", "description": "Path to workspace. Defaults to current directory."}
+            }
+        }
     }
 ]
 
@@ -381,6 +392,11 @@ def handle_call_tool(tool_name, arguments):
     if tool_name == "read_run":
         prompt = arguments.get("prompt", "")
         rc, out = run_cmd([READ_CLI, "run", prompt], cwd=cwd)
+        return rc == 0, out
+
+    if tool_name == "read_report_html":
+        out_path = arguments.get("out_path", "evidence/reports/report_latest.html")
+        rc, out = run_cmd([READ_CLI, "report", "--html", out_path], cwd=cwd)
         return rc == 0, out
 
     return False, f"Unknown tool: {tool_name}"
