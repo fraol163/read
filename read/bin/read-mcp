@@ -246,6 +246,28 @@ TOOLS = [
         }
     },
     {
+        "name": "read_asm",
+        "description": "Execute compact Short Assembly opcodes (INIT, DEF, BUILD, AST_SIG, MUT_GEN, SCORE_CHECK, SEAL, HANDOFF, RECOVER, STATUS) for low-token agent execution.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["opcodes"],
+            "properties": {
+                "opcodes": {"type": "string", "description": "Newline-delimited stream of READ assembly opcodes"},
+                "workspace_path": {"type": "string", "description": "Path to workspace. Defaults to current directory."}
+            }
+        }
+    },
+    {
+        "name": "read_status_yaml",
+        "description": "Inspect the CAS state machine status formatted in structured YAML.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "workspace_path": {"type": "string", "description": "Path to workspace. Defaults to current directory."}
+            }
+        }
+    },
+    {
         "name": "read_run",
         "description": "Execute unified autonomous agent pipeline with a prompt.",
         "inputSchema": {
@@ -345,6 +367,15 @@ def handle_call_tool(tool_name, arguments):
 
     if tool_name == "read_scan":
         rc, out = run_cmd([READ_CLI, "scan"], cwd=cwd)
+        return rc == 0, out
+
+    if tool_name == "read_status_yaml":
+        rc, out = run_cmd([READ_ENGINE, "status", "--yaml"], cwd=cwd)
+        return rc == 0, out
+
+    if tool_name == "read_asm":
+        opcodes = arguments.get("opcodes", "")
+        rc, out = run_cmd([READ_ENGINE, "asm", opcodes], cwd=cwd)
         return rc == 0, out
 
     if tool_name == "read_run":
