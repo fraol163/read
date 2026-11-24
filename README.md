@@ -103,7 +103,7 @@ All software modifications within READ proceed through a strictly gated, 4-stage
 
 ```
 +--------+            +--------+            +-----------+            +----------+            +------------------+
-|  Idle  | --define-> |Defined | --build--> | Executing | --verify-> | Verified | --handoff->| HandoffComplete ([log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log)) |
+|  Idle  | --define-> |Defined | --build--> | Executing | --verify-> | Verified | --handoff->| HandoffComplete ([log](evidence/logs/01_test_e2e.log)) |
 +--------+            +--------+            +-----------+            +----------+            +------------------+
 ```
 
@@ -125,7 +125,7 @@ All software modifications within READ proceed through a strictly gated, 4-stage
    - Mechanically verifies that status is `Verified` and `verify_hash` is non-null.
    - Validates that `verify_hash` matches an authentic WAL cryptographic entry.
    - Checks staged diff stability: blocks handoff if code drifted since verification.
-   - Transitions to `HandoffComplete` (verified in [01_test_e2e.log](file:///home/renan/Downloads/me/methodology_session/evidence/logs/01_test_e2e.log)).
+   - Transitions to `HandoffComplete` (verified in [01_test_e2e.log](evidence/logs/01_test_e2e.log)).
 
 Detailed documentation: [LIFECYCLE.md](docs/LIFECYCLE.md).
 
@@ -309,8 +309,8 @@ When `read-daemon` is running, it exposes the following endpoints:
 
 - [VISION.md](docs/VISION.md): Philosophical foundations and four core contrasts with BMAD.
 - [SPECIFICATION.md](docs/SPECIFICATION.md): Normative RFC 2119 operational specification and enforcing test mappings.
-- [EVIDENCE.md](../evidence/EVIDENCE.md): Empirical test logs, benchmark measurements, and exit codes.
-- [CLAIM_AUDIT.md](../evidence/CLAIM_AUDIT.md): Detailed verification status of all technical claims.
+- [EVIDENCE.md](evidence/EVIDENCE.md): Empirical test logs, benchmark measurements, and exit codes.
+- [CLAIM_AUDIT.md](evidence/CLAIM_AUDIT.md): Detailed verification status of all technical claims.
 - [ARCHITECTURE_REVIEW.md](docs/ARCHITECTURE_REVIEW.md): Independent systems review and trade-off analysis.
 - [THREAT_MODEL.md](docs/THREAT_MODEL.md): Security boundaries, token auth, reverse proxy risks, and Git hook bypass mitigations.
 - [GAPS.md](docs/GAPS.md): Known limitations, contract authoring overhead, and roadmap.
@@ -352,13 +352,13 @@ The repository contains automated verification suites:
 
 ```bash
 # 1. Native Rust Engine Verification (9 checks)
-bash read/tests/test_e2e.sh
+bash tests/test_e2e.sh
 
 # 2. Host Daemon and Integration Verification (9 checks)
-bash read/tests/test_full_system.sh
+bash tests/test_full_system.sh
 
 # 3. Chaos and Resiliency Suite (CAS collision, tamper resistance, recovery)
-bash read/tests/test_chaos.sh
+bash tests/test_chaos.sh
 ```
 
 ---
@@ -515,4 +515,4 @@ A boundary mutant was injected at line 60: `source_type <= target_type` changed 
 | **Model Token Spend** | 0 tokens | ~2,500 prompt tokens | 0 tokens (Deterministic C0 AST) |
 | **Audit Artifact** | Ephemeral console log | Ephemeral transcript | Immutable WAL cryptographic receipt |
 
-Detailed benchmark log and forensic notes: [REAL_WORLD_BENCHMARK.md](file:///home/renan/Downloads/me/methodology_session/evidence/REAL_WORLD_BENCHMARK.md).
+Detailed benchmark log and forensic notes: [REAL_WORLD_BENCHMARK.md](evidence/REAL_WORLD_BENCHMARK.md).
