@@ -205,6 +205,9 @@ detect_platform() {
     elif [ "$OS_NAME" = "Darwin" ]
     then
         DISTRO="macos"
+    elif echo "$OS_NAME" | grep -qE "MINGW|MSYS|CYGWIN"
+    then
+        DISTRO="windows_posix"
     elif [ "$OS_NAME" = "Linux" ]
     then
         if [ -f /etc/os-release ]
@@ -382,6 +385,10 @@ check_toolchain() {
                 ;;
             termux)
                 printf "    pkg update && pkg install -y rust golang git python\n"
+                ;;
+            windows_posix)
+                printf "    winget install Rustlang.Rustup GoLang.Go Git.Git Python.Python.3\n"
+                printf "    Or install in WSL2: wsl --install -d Ubuntu\n"
                 ;;
             *)
                 printf "    Install Rust:   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh\n"
