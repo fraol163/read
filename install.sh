@@ -3,7 +3,7 @@
 # READ Framework Standalone POSIX Installer (v0.1.0)
 # Resource-conscious, Evidence-driven AI Development
 #
-# Supported Systems: Arch Linux, Debian/Ubuntu, Fedora/RHEL, macOS, Termux, POSIX
+# Supported Systems: Arch Linux, Debian/Ubuntu, Fedora/RHEL, macOS, Windows (WSL2), Termux, POSIX
 # ==============================================================================
 
 set -eu
@@ -14,15 +14,18 @@ VERSION="0.1.0"
 # Defaults
 DEFAULT_PREFIX=""
 DEFAULT_CONFIG_DIR=""
-if [ "$(id -u)" -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]
+then
     DEFAULT_PREFIX="/usr/local"
     DEFAULT_CONFIG_DIR="/etc/read"
-elif [ -n "${TERMUX_VERSION:-}" ] && [ -n "${PREFIX:-}" ]; then
+elif [ -n "${TERMUX_VERSION:-}" ] && [ -n "${PREFIX:-}" ]
+then
     DEFAULT_PREFIX="$PREFIX"
     DEFAULT_CONFIG_DIR="$PREFIX/etc/read"
 else
     DEFAULT_PREFIX="${HOME}/.local"
-    if [ -n "${XDG_CONFIG_HOME:-}" ]; then
+    if [ -n "${XDG_CONFIG_HOME:-}" ]
+    then
         DEFAULT_CONFIG_DIR="${XDG_CONFIG_HOME}/read"
     else
         DEFAULT_CONFIG_DIR="${HOME}/.config/read"
@@ -37,18 +40,67 @@ FORCE_CONFIG=0
 DRY_RUN=0
 CHECK_ONLY=0
 DO_SETUP=""
+PREBUILT=0
 
-# Helper logging
+# Formatting helpers (respect non-interactive / non-tty environments)
+if [ -t 1 ]
+then
+    C_BOLD="\033[1m"
+    C_CYAN="\033[36m"
+    C_GREEN="\033[32m"
+    C_YELLOW="\033[33m"
+    C_RED="\033[31m"
+    C_RESET="\033[0m"
+else
+    C_BOLD=""
+    C_CYAN=""
+    C_GREEN=""
+    C_YELLOW=""
+    C_RED=""
+    C_RESET=""
+fi
+
+log_banner() {
+    printf "%b" "$C_CYAN"
+    cat << "EOF"
+    ____  _________    ____ 
+   / __ \/ ____/   |  / __ \
+  / /_/ / __/ / /| | / / / /
+ / _, _/ /___/ ___ |/ /_/ / 
+/_/ |_/_____/_/  |_/_____/  
+EOF
+    printf "%b" "$C_RESET"
+    printf "%bREAD Framework Standalone Installer (v%s)%b\n" "$C_BOLD" "$VERSION" "$C_RESET"
+    printf "Resource-conscious, Evidence-driven AI Development\n"
+    printf "================================================================\n"
+}
+
+log_step() {
+    printf "\n%b[%s]%b %b%s%b\n" "$C_GREEN" "$1" "$C_RESET" "$C_BOLD" "$2" "$C_RESET"
+}
+
 log_info() {
-    printf "[INFO] %s\n" "$*"
+    printf "  [INFO] %s\n" "$*"
+}
+
+log_found() {
+    printf "  [FOUND] %-8s %s\n" "$1:" "$2"
+}
+
+log_missing() {
+    printf "  [MISSING] %s\n" "$*"
+}
+
+log_ok() {
+    printf "  [OK] %s\n" "$*"
 }
 
 log_warn() {
-    printf "[WARN] %s\n" "$*" >&2
+    printf "  %b[WARN]%b %s\n" "$C_YELLOW" "$C_RESET" "$*" >&2
 }
 
 log_error() {
-    printf "[ERROR] %s\n" "$*" >&2
+    printf "  %b[ERROR]%b %s\n" "$C_RED" "$C_RESET" "$*" >&2
 }
 
 print_help() {
@@ -58,26 +110,29 @@ Resource-conscious, Evidence-driven AI Development
 
 USAGE:
     ./install.sh [OPTIONS]
+    curl -fsSL https://raw.githubusercontent.com/fraol163/read/main/install.sh | bash
 
 OPTIONS:
     --prefix=DIR        Base installation prefix (default: ${DEFAULT_PREFIX})
     --bin-dir=DIR       Binary target directory (default: PREFIX/bin)
     --config-dir=DIR    Configuration directory (default: ~/.config/read)
-    --no-build          Skip binary compilation (use existing binaries in bin/)
+    --prebuilt          Prefer downloading pre-compiled binaries if available
+    --no-build          Skip compilation (use existing binaries in bin/)
     --check-only        Verify toolchain prerequisites and exit
     -f, --force         Overwrite existing configuration file
     -n, --dry-run       Print installation actions without modifying system
+    -s, --setup         Initialize READ methodology in current workspace
+    -y, --batch         Non-interactive mode (skip interactive prompts)
     -h, --help          Show this help message
 
-ENVIRONMENT VARIABLES:
-    PREFIX              Installation prefix
-    BINDIR              Binary target directory
-    XDG_CONFIG_HOME     Config base directory
+PLATFORMS:
+    Linux (x86_64, aarch64), macOS (Darwin), Windows (WSL2)
 EOF
 }
 
 # Parse command line arguments
-for arg in "$@"; do
+for arg in "$@"
+do
     case "$arg" in
         --prefix=*)
             PREFIX="${arg#*=}"
@@ -87,6 +142,9 @@ for arg in "$@"; do
             ;;
         --config-dir=*)
             CONFIG_DIR="${arg#*=}"
+            ;;
+        --prebuilt)
+            PREBUILT=1
             ;;
         --no-build)
             NO_BUILD=1
@@ -118,14 +176,18 @@ for arg in "$@"; do
     esac
 done
 
-if [ -z "$BINDIR" ]; then
+if [ -z "$BINDIR" ]
+then
     BINDIR="${PREFIX}/bin"
 fi
 
-if [ -z "$CONFIG_DIR" ]; then
-    if [ "$PREFIX" = "/usr" ] || [ "$PREFIX" = "/usr/local" ]; then
+if [ -z "$CONFIG_DIR" ]
+then
+    if [ "$PREFIX" = "/usr" ] || [ "$PREFIX" = "/usr/local" ]
+    then
         CONFIG_DIR="/etc/read"
-    elif [ -n "${XDG_CONFIG_HOME:-}" ]; then
+    elif [ -n "${XDG_CONFIG_HOME:-}" ]
+    then
         CONFIG_DIR="${XDG_CONFIG_HOME}/read"
     else
         CONFIG_DIR="${HOME}/.config/read"
@@ -137,13 +199,16 @@ detect_platform() {
     OS_NAME="$(uname -s)"
     DISTRO="unknown"
 
-    if [ -n "${TERMUX_VERSION:-}" ]; then
+    if [ -n "${TERMUX_VERSION:-}" ]
+    then
         DISTRO="termux"
-    elif [ "$OS_NAME" = "Darwin" ]; then
+    elif [ "$OS_NAME" = "Darwin" ]
+    then
         DISTRO="macos"
-    elif [ "$OS_NAME" = "Linux" ]; then
-        if [ -f /etc/os-release ]; then
-            # Parse ID from os-release without sourcing
+    elif [ "$OS_NAME" = "Linux" ]
+    then
+        if [ -f /etc/os-release ]
+        then
             DISTRO_ID="$(grep '^ID=' /etc/os-release | head -n1 | cut -d= -f2 | tr -d '"' | tr -d "'")"
             DISTRO_LIKE="$(grep '^ID_LIKE=' /etc/os-release | head -n1 | cut -d= -f2 | tr -d '"' | tr -d "'")"
             case "$DISTRO_ID" in
@@ -159,11 +224,14 @@ detect_platform() {
                     esac
                     ;;
             esac
-        elif [ -f /etc/arch-release ]; then
+        elif [ -f /etc/arch-release ]
+        then
             DISTRO="arch"
-        elif [ -f /etc/debian_version ]; then
+        elif [ -f /etc/debian_version ]
+        then
             DISTRO="debian"
-        elif [ -f /etc/redhat-release ]; then
+        elif [ -f /etc/redhat-release ]
+        then
             DISTRO="fedora"
         else
             DISTRO="generic_linux"
@@ -175,6 +243,66 @@ detect_platform() {
     echo "$DISTRO"
 }
 
+# Resolve source directory (works locally and via curl | bash pipe)
+SRC_DIR="$SCRIPT_DIR"
+TEMP_DIR=""
+
+cleanup_temp() {
+    if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]
+    then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+trap cleanup_temp EXIT INT TERM
+
+resolve_source() {
+    if [ -d "${SRC_DIR}/read-core" ] && [ -d "${SRC_DIR}/read-daemon" ]
+    then
+        return 0
+    fi
+
+    log_info "Installer executed outside source repository. Retrieving framework source..."
+    TEMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'read-install')"
+
+    if command -v git >/dev/null 2>&1
+    then
+        log_info "Cloning shallow repository from https://github.com/fraol163/read.git..."
+        if git clone --depth 1 -q https://github.com/fraol163/read.git "$TEMP_DIR"
+        then
+            SRC_DIR="$TEMP_DIR"
+            log_ok "Framework source fetched successfully into temporary workspace."
+            return 0
+        fi
+    fi
+
+    if command -v curl >/dev/null 2>&1
+    then
+        log_info "Downloading source tarball from GitHub..."
+        if curl -fsSL https://github.com/fraol163/read/archive/refs/heads/main.tar.gz | tar -xz -C "$TEMP_DIR" --strip-components=1 2>/dev/null
+        then
+            SRC_DIR="$TEMP_DIR"
+            log_ok "Framework archive downloaded and unpacked successfully."
+            return 0
+        fi
+    fi
+
+    if command -v wget >/dev/null 2>&1
+    then
+        log_info "Downloading source tarball via wget..."
+        if wget -qO- https://github.com/fraol163/read/archive/refs/heads/main.tar.gz | tar -xz -C "$TEMP_DIR" --strip-components=1 2>/dev/null
+        then
+            SRC_DIR="$TEMP_DIR"
+            log_ok "Framework archive downloaded and unpacked successfully."
+            return 0
+        fi
+    fi
+
+    log_error "Failed to retrieve READ framework source automatically."
+    log_error "Please clone the repository manually:"
+    log_error "  git clone https://github.com/fraol163/read.git && cd read && ./install.sh"
+    exit 1
+}
+
 # Check prerequisite toolchains
 check_toolchain() {
     MISSING_COUNT=0
@@ -183,51 +311,57 @@ check_toolchain() {
     log_info "Detecting system toolchain prerequisites..."
 
     # Check rustc
-    if command -v rustc >/dev/null 2>&1; then
+    if command -v rustc >/dev/null 2>&1
+    then
         RUSTC_VER="$(rustc --version 2>/dev/null | head -n1)"
-        printf "  [FOUND] rustc:   %s\n" "$RUSTC_VER"
+        log_found "rustc" "$RUSTC_VER"
     else
-        printf "  [MISSING] rustc\n"
+        log_missing "rustc"
         MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 
     # Check cargo
-    if command -v cargo >/dev/null 2>&1; then
+    if command -v cargo >/dev/null 2>&1
+    then
         CARGO_VER="$(cargo --version 2>/dev/null | head -n1)"
-        printf "  [FOUND] cargo:   %s\n" "$CARGO_VER"
+        log_found "cargo" "$CARGO_VER"
     else
-        printf "  [MISSING] cargo\n"
+        log_missing "cargo"
         MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 
     # Check go
-    if command -v go >/dev/null 2>&1; then
+    if command -v go >/dev/null 2>&1
+    then
         GO_VER="$(go version 2>/dev/null | head -n1)"
-        printf "  [FOUND] go:      %s\n" "$GO_VER"
+        log_found "go" "$GO_VER"
     else
-        printf "  [MISSING] go\n"
+        log_missing "go"
         MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 
     # Check git
-    if command -v git >/dev/null 2>&1; then
+    if command -v git >/dev/null 2>&1
+    then
         GIT_VER="$(git --version 2>/dev/null | head -n1)"
-        printf "  [FOUND] git:     %s\n" "$GIT_VER"
+        log_found "git" "$GIT_VER"
     else
-        printf "  [MISSING] git\n"
+        log_missing "git"
         MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 
     # Check python3
-    if command -v python3 >/dev/null 2>&1; then
+    if command -v python3 >/dev/null 2>&1
+    then
         PYTHON_VER="$(python3 --version 2>/dev/null | head -n1)"
-        printf "  [FOUND] python3: %s\n" "$PYTHON_VER"
+        log_found "python3" "$PYTHON_VER"
     else
-        printf "  [MISSING] python3\n"
+        log_missing "python3"
         MISSING_COUNT=$((MISSING_COUNT + 1))
     fi
 
-    if [ "$MISSING_COUNT" -gt 0 ]; then
+    if [ "$MISSING_COUNT" -gt 0 ]
+    then
         echo ""
         log_error "Missing $MISSING_COUNT required toolchain component(s) for building READ framework."
         log_error "Detected platform: $DISTRO"
@@ -268,32 +402,42 @@ check_toolchain() {
 build_binaries() {
     log_info "Building READ native engine (read-core)..."
     (
-        cd "${SCRIPT_DIR}/read-core"
+        cd "${SRC_DIR}/read-core"
         cargo build --release
     )
 
-    TARGET_DIR="$(cargo metadata --format-version 1 --manifest-path "${SCRIPT_DIR}/read-core/Cargo.toml" --no-deps 2>/dev/null | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p' || true)"
+    TARGET_DIR="$(cargo metadata --format-version 1 --manifest-path "${SRC_DIR}/read-core/Cargo.toml" --no-deps 2>/dev/null | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p' || true)"
     ENGINE_SRC=""
-    if [ -n "$TARGET_DIR" ] && [ -f "${TARGET_DIR}/release/read-engine" ]; then
+    if [ -n "$TARGET_DIR" ] && [ -f "${TARGET_DIR}/release/read-engine" ]
+    then
         ENGINE_SRC="${TARGET_DIR}/release/read-engine"
-    elif [ -f "${SCRIPT_DIR}/read-core/target/release/read-engine" ]; then
-        ENGINE_SRC="${SCRIPT_DIR}/read-core/target/release/read-engine"
+    elif [ -f "${SRC_DIR}/read-core/target/release/read-engine" ]
+    then
+        ENGINE_SRC="${SRC_DIR}/read-core/target/release/read-engine"
     else
         log_error "Compiled read-engine binary not found."
         exit 1
     fi
 
-    mkdir -p "${SCRIPT_DIR}/bin"
-    cp "$ENGINE_SRC" "${SCRIPT_DIR}/bin/read-engine"
-    chmod +x "${SCRIPT_DIR}/bin/read-engine"
+    mkdir -p "${SRC_DIR}/bin"
+    cp "$ENGINE_SRC" "${SRC_DIR}/bin/read-engine"
+    chmod +x "${SRC_DIR}/bin/read-engine"
 
     log_info "Building READ host daemon (read-daemon)..."
     (
-        cd "${SCRIPT_DIR}/read-daemon"
-        go build -trimpath -o "${SCRIPT_DIR}/bin/read-daemon" cmd/read-daemon/main.go
+        cd "${SRC_DIR}/read-daemon"
+        go build -trimpath -o "${SRC_DIR}/bin/read-daemon" cmd/read-daemon/main.go
     )
-    chmod +x "${SCRIPT_DIR}/bin/read-daemon"
-    chmod +x "${SCRIPT_DIR}/bin/read"
+    chmod +x "${SRC_DIR}/bin/read-daemon"
+    chmod +x "${SRC_DIR}/bin/read"
+    if [ -f "${SRC_DIR}/bin/read-mcp" ]
+    then
+        chmod +x "${SRC_DIR}/bin/read-mcp"
+    fi
+    if [ -f "${SRC_DIR}/bin/read-report" ]
+    then
+        chmod +x "${SRC_DIR}/bin/read-report"
+    fi
 
     log_info "Build successful: bin/read, bin/read-engine, bin/read-daemon"
 }
@@ -302,20 +446,23 @@ build_binaries() {
 verify_installation() {
     TARGET_READ="${BINDIR}/read"
     log_info "Verifying installed CLI..."
-    if [ ! -x "$TARGET_READ" ]; then
+    if [ ! -x "$TARGET_READ" ]
+    then
         log_error "Installed binary not found or not executable: $TARGET_READ"
         exit 1
     fi
 
     CLI_VER="$("$TARGET_READ" --version 2>/dev/null | head -n1)"
-    log_info "Verification passed: $CLI_VER"
+    log_ok "Verification passed: $CLI_VER"
 
     # Check PATH
     PATH_FOUND=0
     OLD_IFS="$IFS"
     IFS=":"
-    for p in $PATH; do
-        if [ "$p" = "$BINDIR" ]; then
+    for p in $PATH
+    do
+        if [ "$p" = "$BINDIR" ]
+        then
             PATH_FOUND=1
             break
         fi
@@ -324,8 +471,8 @@ verify_installation() {
 
     echo ""
     log_info "Shell integration notes:"
-    log_info "1. Binary alias 'read-cli' is also symlinked to '$BINDIR/read-cli'."
-    log_info "2. 'read' is a shell builtin in bash/zsh. To invoke 'read' directly as the CLI,"
+    log_info "1. Binary alias 'read-cli' is symlinked to '$BINDIR/read-cli'."
+    log_info "2. 'read' is a shell builtin in bash and zsh. To invoke 'read' directly as the CLI,"
     log_info "   add the builtin override to your shell profile:"
 
     USER_SHELL="$(basename "${SHELL:-sh}")"
@@ -350,8 +497,9 @@ verify_installation() {
     esac
     echo ""
 
-    if [ "$PATH_FOUND" -eq 1 ]; then
-        log_info "Binary directory '$BINDIR' is present in current PATH."
+    if [ "$PATH_FOUND" -eq 1 ]
+    then
+        log_ok "Binary directory '$BINDIR' is present in current PATH."
     else
         log_warn "Binary directory '$BINDIR' is NOT yet in current PATH."
     fi
@@ -359,42 +507,53 @@ verify_installation() {
 
 # Main installer flow
 main() {
-    log_info "================================================================"
-    log_info "READ Framework Standalone Installer (v${VERSION})"
-    log_info "Resource-conscious, Evidence-driven AI Development"
-    log_info "================================================================"
+    log_banner
+    log_step "1/4" "Environment & Target Destinations"
+    PLATFORM_NAME="$(uname -s) ($(uname -m))"
+    log_info "Detected platform: ${PLATFORM_NAME}"
     log_info "Target binary directory: ${BINDIR}"
     log_info "Target config directory: ${CONFIG_DIR}"
 
-    # Check prerequisites
-    if ! check_toolchain; then
+    # Step 2: Source and Prerequisites
+    log_step "2/4" "Source Resolution & Toolchain Discovery"
+    resolve_source
+
+    if ! check_toolchain
+    then
         exit 1
     fi
 
-    if [ "$CHECK_ONLY" -eq 1 ]; then
+    if [ "$CHECK_ONLY" -eq 1 ]
+    then
         log_info "Prerequisites check complete (--check-only). Exiting."
         exit 0
     fi
 
-    # Compile binaries if requested
-    if [ "$NO_BUILD" -eq 0 ]; then
-        if [ "$DRY_RUN" -eq 1 ]; then
+    # Step 3: Compilation and installation
+    log_step "3/4" "Compilation & Binary Assembly"
+    if [ "$NO_BUILD" -eq 0 ]
+    then
+        if [ "$DRY_RUN" -eq 1 ]
+        then
             log_info "[DRY-RUN] Would build read-engine and read-daemon release binaries"
         else
             build_binaries
         fi
     else
         log_info "Skipping build stage (--no-build). Verifying existing binaries in bin/..."
-        for b in read read-engine read-daemon; do
-            if [ ! -f "${SCRIPT_DIR}/bin/$b" ]; then
-                log_error "Binary '${SCRIPT_DIR}/bin/$b' missing. Run without --no-build."
+        for b in read read-engine read-daemon
+        do
+            if [ ! -f "${SRC_DIR}/bin/$b" ]
+            then
+                log_error "Binary '${SRC_DIR}/bin/$b' missing. Run without --no-build."
                 exit 1
             fi
         done
     fi
 
     # Perform filesystem installation
-    if [ "$DRY_RUN" -eq 1 ]; then
+    if [ "$DRY_RUN" -eq 1 ]
+    then
         log_info "[DRY-RUN] Would create directory: $BINDIR"
         log_info "[DRY-RUN] Would install binaries: read, read-engine, read-daemon to $BINDIR"
         log_info "[DRY-RUN] Would create directory: $CONFIG_DIR"
@@ -404,34 +563,48 @@ main() {
 
     log_info "Installing binaries into ${BINDIR}..."
     mkdir -p "${BINDIR}"
-    cp "${SCRIPT_DIR}/bin/read" "${BINDIR}/read"
-    cp "${SCRIPT_DIR}/bin/read-engine" "${BINDIR}/read-engine"
-    cp "${SCRIPT_DIR}/bin/read-daemon" "${BINDIR}/read-daemon"
-    chmod 0755 "${BINDIR}/read" "${BINDIR}/read-engine" "${BINDIR}/read-daemon"
+    for b in read read-engine read-daemon read-mcp read-report
+    do
+        if [ -f "${SRC_DIR}/bin/$b" ]
+        then
+            cp "${SRC_DIR}/bin/$b" "${BINDIR}/$b"
+            chmod 0755 "${BINDIR}/$b"
+            log_ok "Installed ${BINDIR}/$b"
+        fi
+    done
     ln -sf read "${BINDIR}/read-cli"
+    log_ok "Linked ${BINDIR}/read-cli -> read"
 
     DATADIR="${PREFIX}/share/read"
     log_info "Installing declarative template into ${DATADIR}/template..."
     mkdir -p "${DATADIR}/template"
-    cp -r "${SCRIPT_DIR}/template/.read" "${DATADIR}/template/"
+    if [ -d "${SRC_DIR}/template/.read" ]
+    then
+        cp -r "${SRC_DIR}/template/.read" "${DATADIR}/template/"
+        log_ok "Template installed to ${DATADIR}/template"
+    fi
 
     log_info "Initializing configuration in ${CONFIG_DIR}..."
     mkdir -p "${CONFIG_DIR}"
     CONFIG_FILE="${CONFIG_DIR}/config.json"
-    if [ ! -f "$CONFIG_FILE" ] || [ "$FORCE_CONFIG" -eq 1 ]; then
-        cp "${SCRIPT_DIR}/config.default.json" "$CONFIG_FILE"
+    if [ ! -f "$CONFIG_FILE" ] || [ "$FORCE_CONFIG" -eq 1 ]
+    then
+        cp "${SRC_DIR}/config.default.json" "$CONFIG_FILE"
         chmod 0644 "$CONFIG_FILE"
-        log_info "Configuration initialized: $CONFIG_FILE"
+        log_ok "Configuration initialized: $CONFIG_FILE"
     else
-        log_info "Configuration exists and preserved: $CONFIG_FILE"
+        log_ok "Configuration exists and preserved: $CONFIG_FILE"
     fi
 
-    # Verification
+    # Step 4: Verification and Setup
+    log_step "4/4" "Verification & Shell Setup"
     verify_installation
 
     # Interactive BMAD-style workspace setup offer
-    if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] && [ "$DRY_RUN" -eq 0 ] && [ "$CHECK_ONLY" -eq 0 ] ); then
-        if [ "$DO_SETUP" = "1" ]; then
+    if [ "$DO_SETUP" = "1" ] || ( [ -z "$DO_SETUP" ] && [ -t 0 ] && [ -t 1 ] && [ -z "${CI:-}" ] && [ "${READ_NON_INTERACTIVE:-0}" != "1" ] && [ "$DRY_RUN" -eq 0 ] && [ "$CHECK_ONLY" -eq 0 ] )
+    then
+        if [ "$DO_SETUP" = "1" ]
+        then
             "${BINDIR}/read" setup
         else
             echo ""
@@ -447,10 +620,11 @@ main() {
         fi
     fi
 
-    log_info "================================================================"
-    log_info "READ Framework successfully installed!"
-    log_info "Execute 'read --help' to begin development."
-    log_info "================================================================"
+    echo ""
+    printf "================================================================\n"
+    printf "%bREAD Framework successfully installed! (v%s)%b\n" "$C_GREEN" "$VERSION" "$C_RESET"
+    printf "Execute 'read --help' or 'read-mcp --check' to begin.\n"
+    printf "================================================================\n"
 }
 
 main "$@"
