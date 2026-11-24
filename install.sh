@@ -607,7 +607,7 @@ main() {
     log_step "4/4" "Verification & Shell Setup"
     verify_installation
 
-    # Step 5: AI Agent Harness & Skill Configuration (skills.sh compatible)
+    # Step 5: AI Agent Harness Discovery & Autonomous Configuration
     if [ "$CHECK_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ]
     then
         log_step "5/5" "AI Agent Harness Discovery & Skill Setup"

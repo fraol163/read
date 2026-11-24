@@ -48,25 +48,35 @@ func isLoopback(ipStr string) bool {
 	return false
 }
 
-// extractClientIP extracts the remote client IP.
+// extractClientIP extracts the remote client IP securely.
+// Forwarded headers (X-Forwarded-For, X-Real-IP) are ONLY trusted if the
+// immediate peer connection (RemoteAddr) is a local loopback reverse proxy,
+// and forwarded headers can NEVER spoof a loopback address to bypass rate limits.
 func extractClientIP(r *http.Request) string {
-	// Respect X-Forwarded-For if set (e.g. for proxy simulation in chaos tests)
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		parts := strings.Split(xff, ",")
-		clientIP := strings.TrimSpace(parts[0])
-		if clientIP != "" {
-			return clientIP
-		}
-	}
-	if xrip := r.Header.Get("X-Real-IP"); xrip != "" {
-		return strings.TrimSpace(xrip)
+	remoteHost, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		remoteHost = r.RemoteAddr
 	}
 
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+	// If the connection is directly from a local reverse proxy on loopback, inspect forwarded headers
+	if isLoopback(remoteHost) {
+		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			parts := strings.Split(xff, ",")
+			clientIP := strings.TrimSpace(parts[0])
+			// Forwarded headers cannot claim loopback immunity
+			if clientIP != "" && !isLoopback(clientIP) {
+				return clientIP
+			}
+		}
+		if xrip := r.Header.Get("X-Real-IP"); xrip != "" {
+			clientIP := strings.TrimSpace(xrip)
+			if clientIP != "" && !isLoopback(clientIP) {
+				return clientIP
+			}
+		}
 	}
-	return host
+
+	return remoteHost
 }
 
 // Allow checks if the request from the client IP is allowed.

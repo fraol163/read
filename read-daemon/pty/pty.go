@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -20,7 +23,20 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow remote clients
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return true // Non-browser clients (terminal, curl, CLI) have no Origin header
+		}
+		u, err := url.Parse(origin)
+		if err != nil {
+			return false
+		}
+		host := u.Hostname()
+		reqHost, _, err := net.SplitHostPort(r.Host)
+		if err != nil {
+			reqHost = r.Host
+		}
+		return host == "localhost" || host == "127.0.0.1" || host == "::1" || host == reqHost || strings.HasPrefix(host, "127.")
 	},
 }
 
@@ -120,7 +136,11 @@ func (m *SessionManager) CloseAll() {
 
 // HandleTerminalWs handles bidirectional terminal streaming over WebSocket
 func HandleTerminalWs(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	var responseHeader http.Header
+	if proto := r.Header.Get("Sec-WebSocket-Protocol"); proto != "" {
+		responseHeader = http.Header{"Sec-WebSocket-Protocol": []string{proto}}
+	}
+	conn, err := upgrader.Upgrade(w, r, responseHeader)
 	if err != nil {
 		return
 	}

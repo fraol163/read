@@ -70,6 +70,7 @@ func NewGatewayServer(cfg ServerConfig) (*GatewayServer, error) {
 }
 
 // AuthMiddleware enforces constant-time Bearer token authentication.
+// Supports Authorization header, Sec-WebSocket-Protocol (token.<token>), and query parameter (?token=).
 // /api/v1/status is explicitly unauthenticated as a public health check.
 func (s *GatewayServer) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -78,18 +79,26 @@ func (s *GatewayServer) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		providedToken := ""
 		authHeader := r.Header.Get("Authorization")
-		if !strings.HasPrefix(authHeader, "Bearer ") {
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			providedToken = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		} else if qToken := r.URL.Query().Get("token"); qToken != "" {
+			providedToken = strings.TrimSpace(qToken)
+		} else if secProto := r.Header.Get("Sec-WebSocket-Protocol"); strings.HasPrefix(secProto, "token.") {
+			providedToken = strings.TrimSpace(strings.TrimPrefix(secProto, "token."))
+		}
+
+		if providedToken == "" {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="READ Daemon"`)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{
-				"error": "Unauthorized: Missing or malformed Bearer token",
+				"error": "Unauthorized: Missing Bearer token, ?token= param, or Sec-WebSocket-Protocol",
 			})
 			return
 		}
 
-		providedToken := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 		if subtle.ConstantTimeCompare([]byte(providedToken), []byte(s.config.AuthToken)) != 1 {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="READ Daemon"`)
 			w.Header().Set("Content-Type", "application/json")

@@ -251,7 +251,7 @@ func main() {
 	if *authToken != "" {
 		fmt.Printf("Auth:           TOKEN AUTH ENFORCED\n")
 	} else {
-		fmt.Printf("Auth:           OPEN (Loopback dev mode)\n")
+		fmt.Printf("Auth:           LOOPBACK DEV (Supply -auth-token in production)\n")
 	}
 	fmt.Println("Ready for remote controller connections...")
 	fmt.Println("────────────────────────────────────────────────────────────────")

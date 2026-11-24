@@ -26,7 +26,7 @@ Or install with `pipx` for isolated global execution:
 pipx install git+https://github.com/fraol163/read.git
 ```
 
-#### One-Step AI Agent Auto-Configuration (skills.sh compatible)
+#### One-Step Autonomous AI Agent Auto-Configuration
 Run the interactive setup wizard to scan your host and automatically wire READ MCP tools and skills into your detected AI coding assistants:
 ```bash
 read-mcp setup
