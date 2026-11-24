@@ -11,7 +11,7 @@ pub struct LearnEngine {
 
 impl LearnEngine {
     pub fn new<P: AsRef<Path>>(root: P) -> Self {
-        let root = root.as_ref().to_path_buf();
+        let root = root.as_ref().canonicalize().unwrap_or_else(|_| root.as_ref().to_path_buf());
         let learn_dir = root.join(".read-learn");
         Self {
             workspace_root: root,
