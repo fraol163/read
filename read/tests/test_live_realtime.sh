@@ -101,6 +101,14 @@ def divide(a: int, b: int) -> float:
 EOF
 
 git add auth.py
+python3 -c '
+import json
+with open(".read/config.json") as f:
+    c = json.load(f)
+c["enforcement_mode"] = "block"
+with open(".read/config.json", "w") as f:
+    json.dump(c, f, indent=2)
+'
 echo "Attempting commit without tests (should be rejected by gate)..."
 set +e
 git commit -m "feat: add divide function without tests"
